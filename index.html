@@ -1,3 +1,135 @@
-Voici le script complet modifié selon tes instructions : le champ « chambre » a été remplacé par la « date d’arrivée », le QR code génère le message avec le nombre de personnes, la date, l’appartement et le bâtiment, un champ « heure de retour » a été ajouté, et les enregistrements sont visibles par l’utilisateur et l’admin. J’ai conservé tout le reste intact pour un copier-coller direct.
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestion des invités</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; }
+.hidden { display: none; }
+input, select { margin: 5px; padding: 5px; }
+table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+th, td { border: 1px solid #ccc; padding: 5px; text-align: left; }
+#records { max-height: 400px; overflow-y: auto; }
+button { padding: 5px 10px; margin: 5px; }
+</style>
+</head>
+<body>
 
-<!DOCTYPE html> <html lang="fr"> <head> <meta charset="UTF-8" /> <title>Enregistrement des invités</title> <meta name="viewport" content="width=device-width, initial-scale=1" /> <style> :root{ --c1:#007bff; --bg:#f0f2f5; --ok:#0f9d58; --warn:#f4b400; --err:#d93025; --info:#4285f4; } body { font-family: Arial, sans-serif; margin: 16px; background: var(--bg); } h2 { text-align: center; margin: 8px 0 16px; } .card { background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.12); margin-bottom:16px; } label { font-weight:600; display:block; margin-top:10px; } input, button { font-size:16px; } input { width:100%; padding:10px; margin-top:6px; border:1px solid #ccc; border-radius:8px; } input[readonly]{ background:#e9ecef; } button { margin-top:14px; padding:10px 14px; border:none; border-radius:10px; background:var(--c1); color:#fff; cursor:pointer; } button:disabled{ opacity:.6; cursor:not-allowed; } table { width:100%; border-collapse: collapse; margin-top: 10px; } th, td { border:1px solid #e5e7eb; padding:8px; text-align:center; } th { background:var(--c1); color:#fff; } .hidden{ display:none !important; } .row { display:flex; gap:12px; flex-wrap:wrap; } .col { flex:1 1 220px; min-width:220px; } .banner{ padding:10px 12px; border-radius:10px; margin-bottom:12px; font-weight:600; } .banner.info{ background:#e8f0fe; color:#174ea6; border:1px solid #c6dafc; } .banner.ok{ background:#e6f4ea; color:#137333; border:1px solid #cce8d3; } .banner.warn{ background:#fef7e0; color:#a66300; border:1px solid #fde293; } .banner.err{ background:#fce8e6; color:#a50e0e; border:1px solid #f7b9b4; } .toolbar{ display:flex; gap:10px; justify-content:space-between; align-items:center; flex-wrap:wrap; } .note{ font-size:13px; opacity:.8; } .qrwrap{ display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; } .recap{ background:#fafafa; border:1px dashed #ccc; padding:10px; border-radius:8px; min-width:240px; } </style> </head> <body> <h2>Enregistrement des invités</h2> <div id="banner" class="banner info hidden"></div> <div id="loginCard" class="card"> <div class="toolbar"> <div><strong>Connexion</strong></div> <div class="note">Comptes : <strong>admin / admin</strong> • Test : <strong>66 / 12</strong></div> </div> <label>Utilisateur</label> <input type="text" id="loginUser" autocomplete="username" placeholder="admin ou 66" required /> <label>Mot de passe</label> <input type="password" id="loginPass" autocomplete="current-password" placeholder="admin ou 12" required /> <button id="btnLogin" onclick="login()" disabled>Connexion</button> <p id="loginMsg" class="banner err hidden"></p> </div> <div id="adminPanel" class="hidden"> <div class="toolbar card"> <div><strong>Panneau administrateur</strong></div> <div> <button onclick="logout()">Déconnexion</button> </div> </div> <div class="card"> <h3>Gestion des utilisateurs</h3> <div class="row"> <div class="col"> <label>Appartement</label> <input type="text" id="appartAdmin" inputmode="numeric" required /> </div> <div class="col"> <label>Bâtiment</label> <input type="text" id="batAdmin" required /> </div> <div class="col"> <label>Mot de passe</label> <input type="text" id="passAdmin" required /> </div> </div> <button onclick="creerUtilisateur()">Créer utilisateur</button> <p class="note">L’identifiant utilisateur sera <i>Appartement+Bâtiment</i> (ex. 6 et 6 → <b>66</b>).</p> <div id="userWarn" class="banner warn hidden"></div> </div> <div class="card"> <h3>Liste des utilisateurs</h3> <table id="tableUsers"> <thead><tr><th>Utilisateur</th><th>Appartement</th><th>Bâtiment</th><th>Mot de passe</th></tr></thead> <tbody></tbody> </table> </div> <div class="card"> <h3>Tous les enregistrements (derniers ajoutés)</h3> <table id="tableAdmin"> <thead> <tr> <th>ID</th><th>Appartement</th><th>Bâtiment</th><th>Nom principal</th> <th>Total personnes</th><th>Date</th><th>Heure de retour</th><th>WhatsApp</th><th>Status</th> </tr> </thead> <tbody></tbody> </table> <p class="note">Astuce : pour des bases énormes, ajoute un filtrage/pagination si besoin.</p> </div> </div> <div id="userPanel" class="hidden"> <div class="toolbar card"> <div><strong>Mon espace</strong></div> <div><button onclick="logout()">Déconnexion</button></div> </div> <div class="card"> <h3>Mes enregistrements</h3> <table id="tableUser"> <thead> <tr><th>ID</th><th>Nom principal</th><th>Total personnes</th><th>Date</th><th>Heure de retour</th><th>Status</th></tr> </thead> <tbody></tbody> </table> <button onclick="genererLien()">Générer le lien d’enregistrement invité</button> <p id="lienInvite" class="note"></p> </div> </div> <div id="invitePanel" class="hidden"> <div class="card"> <div class="toolbar"> <h3>Enregistrement Invité</h3> <button onclick="retourAccueil()">Retour</button> </div> <div class="row"> <div class="col"> <label>Appartement</label> <input type="text" id="invAppart" readonly /> </div> <div class="col"> <label>Bâtiment</label> <input type="text" id="invBat" readonly /> </div> </div> <label>Nom / Prénom (personne principale)</label> <input type="text" id="nomPrincipal" required /> <label>Passeport / CNI (personne principale)</label> <input type="text" id="docPrincipal" required /> <label>Nombre total de personnes</label> <input type="number" id="nbPers" min="1" value="1" required onchange="genererChamps()" /> <div id="personnes"></div> <label>Date d’arrivée</label> <input type="date" id="dateArrivee" required /> <label>Heure de retour</label> <input type="time" id="heureRetour" required /> <button onclick="enregistrer()">Enregistrer</button> <div class="qrwrap"> <div id="qrcode" style="margin-top:16px;"></div> <div id="recap" class="recap hidden"></div> </div> </div> </div> <script src="https://cdn.jsdelivr.net/npm/qrcodejs 
+<div id="loginDiv">
+<h2>Connexion</h2>
+<input type="text" id="username" placeholder="Nom utilisateur">
+<select id="role">
+<option value="user">Utilisateur</option>
+<option value="admin">Admin</option>
+</select>
+<button onclick="login()">Se connecter</button>
+</div>
+
+<div id="mainDiv" class="hidden">
+<h2>Enregistrement invité</h2>
+<form id="guestForm">
+<select id="appartement" required>
+<option value="">Appartement</option>
+<option value="A1">A1</option>
+<option value="A2">A2</option>
+<option value="B1">B1</option>
+</select>
+<select id="batiment" required>
+<option value="">Bâtiment</option>
+<option value="Bâtiment 1">Bâtiment 1</option>
+<option value="Bâtiment 2">Bâtiment 2</option>
+</select>
+<input type="number" id="nbInvites" placeholder="Nombre d'invités" required>
+<input type="text" id="nomPrenom" placeholder="Nom et Prénom" required>
+<input type="text" id="idDoc" placeholder="Passeport ou Carte Nationale" required>
+<input type="date" id="dateArrivee" required>
+<button type="submit">Enregistrer</button>
+</form>
+
+<h3>Invités</h3>
+<div id="records">
+<table>
+<thead>
+<tr>
+<th>Appartement</th>
+<th>Bâtiment</th>
+<th>Nb Invités</th>
+<th>Nom & Prénom</th>
+<th>ID</th>
+<th>Date Arrivée</th>
+<th>QR Code</th>
+</tr>
+</thead>
+<tbody id="recordBody"></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+let currentUser = '';
+let currentRole = '';
+let records = {};
+
+function login() {
+currentUser = document.getElementById('username').value;
+currentRole = document.getElementById('role').value;
+if (!currentUser) { alert('Entrez le nom utilisateur'); return; }
+if (!records[currentUser]) records[currentUser] = [];
+document.getElementById('loginDiv').classList.add('hidden');
+document.getElementById('mainDiv').classList.remove('hidden');
+renderRecords();
+}
+
+document.getElementById('guestForm').addEventListener('submit', function(e){
+e.preventDefault();
+let appartement = document.getElementById('appartement').value;
+let batiment = document.getElementById('batiment').value;
+let nbInvites = document.getElementById('nbInvites').value;
+let nomPrenom = document.getElementById('nomPrenom').value;
+let idDoc = document.getElementById('idDoc').value;
+let dateArrivee = document.getElementById('dateArrivee').value;
+if(!appartement || !batiment || !nbInvites || !nomPrenom || !idDoc || !dateArrivee){
+alert('Tous les champs sont obligatoires'); return;
+}
+let newRecord = {appartement, batiment, nbInvites, nomPrenom, idDoc, dateArrivee};
+records[currentUser].push(newRecord);
+renderRecords();
+this.reset();
+});
+
+function renderRecords() {
+let tbody = document.getElementById('recordBody');
+tbody.innerHTML = '';
+records[currentUser].forEach((r,index)=>{
+let tr = document.createElement('tr');
+tr.innerHTML = `<td>${r.appartement}</td>
+<td>${r.batiment}</td>
+<td>${r.nbInvites}</td>
+<td>${r.nomPrenom}</td>
+<td>${r.idDoc}</td>
+<td>${r.dateArrivee}</td>
+<td id="qr${index}"></td>`;
+tbody.appendChild(tr);
+QRCode.toCanvas(document.getElementById(`qr${index}`), JSON.stringify(r), {width: 80});
+});
+}
+
+// Simulation de 600000 enregistrements pour test
+function simulateMassRecords() {
+let user = currentUser || 'simuUser';
+if(!records[user]) records[user] = [];
+for(let i=0;i<600000;i++){
+records[user].push({appartement:'A1', batiment:'B1', nbInvites:1, nomPrenom:'Invité '+i, idDoc:'ID'+i, dateArrivee:'2025-08-16'});
+}
+renderRecords();
+}
+
+// Appel pour test
+// simulateMassRecords();
+</script>
+
+</body>
+</html>

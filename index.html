@@ -1,104 +1,122 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Interface utilisateur - Invités</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<title>Liste des utilisateurs</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen p-6">
+<body class="bg-gray-100 p-6">
 
-  <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-8">
-    <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Liste des invités</h1>
+<div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+  <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Liste des utilisateurs</h1>
 
-    <!-- Tableau des invités -->
-    <table class="w-full table-auto border border-gray-300 rounded-xl overflow-hidden">
-      <thead class="bg-blue-600 text-white">
-        <tr>
-          <th class="px-4 py-2">Nom & Prénom</th>
-          <th class="px-4 py-2">Appartement</th>
-          <th class="px-4 py-2">Bâtiment</th>
-          <th class="px-4 py-2">Date d'arrivée</th>
-          <th class="px-4 py-2">Nombre d'invités</th>
-          <th class="px-4 py-2">ID</th>
-          <th class="px-4 py-2">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="guestTable" class="text-center">
-        <!-- Les lignes seront insérées par JavaScript -->
-      </tbody>
-    </table>
+  <table class="w-full table-auto border border-gray-300 rounded-xl overflow-hidden">
+    <thead class="bg-blue-600 text-white">
+      <tr>
+        <th class="px-4 py-2">Nom Utilisateur</th>
+        <th class="px-4 py-2">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="userTable" class="text-center"></tbody>
+  </table>
+</div>
+
+<script>
+  // Exemple d'utilisateurs
+  const users = [
+    {name: "Admin1"},
+    {name: "Admin2"}
+  ];
+
+  function openGuestForm() {
+    // Préremplissage pour tester
+    const apartment = 6;
+    const building = 10;
+
+    // Création du formulaire du "premier code"
+    const guestFormHtml = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Formulaire Enregistrement Invité</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+<div class="max-w-2xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+<h1 class="text-2xl font-bold mb-6 text-center">Enregistrement Invité</h1>
+<form id="guestForm" class="space-y-4">
+  <div>
+    <label class="block font-semibold">Appartement</label>
+    <input type="text" value="${apartment}" disabled class="w-full border px-3 py-2 rounded">
   </div>
+  <div>
+    <label class="block font-semibold">Bâtiment</label>
+    <input type="text" value="${building}" disabled class="w-full border px-3 py-2 rounded">
+  </div>
+  <div>
+    <label class="block font-semibold">Nom & Prénom</label>
+    <input type="text" id="fullname" required class="w-full border px-3 py-2 rounded" placeholder="Yeye (Yeye)">
+  </div>
+  <div>
+    <label class="block font-semibold">Passeport / Carte Nationale</label>
+    <input type="text" id="idNumber" required class="w-full border px-3 py-2 rounded" placeholder="123456">
+  </div>
+  <div>
+    <label class="block font-semibold">Date d'arrivée</label>
+    <input type="date" id="arrivalDate" required class="w-full border px-3 py-2 rounded">
+  </div>
+  <div>
+    <label class="block font-semibold">Nombre de personnes</label>
+    <input type="number" id="guestCount" required min="1" class="w-full border px-3 py-2 rounded" value="1">
+  </div>
+  <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Enregistrer</button>
+</form>
+<div id="qrContainer" class="mt-6 text-center"></div>
 
-  <script>
-    // Exemple d'invités provenant du "premier code"
-    const guests = [
-      {
-        fullname: "Yeye (Yeye)",
-        apartment: "6",
-        building: "A6",
-        arrivalDate: "2025-08-15",
-        guestCount: 1,
-        idNumber: "123456",
-        sent: false
-      },
-      {
-        fullname: "Jean Dupont",
-        apartment: "A101",
-        building: "Bâtiment B",
-        arrivalDate: "2025-08-20",
-        guestCount: 2,
-        idNumber: "AB1234567",
-        sent: false
-      }
-    ];
+<script>
+document.getElementById('guestForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const fullname = document.getElementById('fullname').value;
+  const idNumber = document.getElementById('idNumber').value;
+  const arrivalDate = document.getElementById('arrivalDate').value;
+  const guestCount = document.getElementById('guestCount').value;
 
-    function formatMessage(guest) {
-      return `Salam :\nArrivée: ${guest.arrivalDate}\nAppartement: ${guest.apartment}\nImm: ${guest.building}\nNombre de personnes: ${guest.guestCount} personnes\nRéservation au nom de:\n${guest.fullname}\n\nAutres personnes:\n${guest.guestCount - 1}\n\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\nالوصول: ${guest.arrivalDate}\nالشقة: ${guest.apartment}\nرقم العمارة: ${guest.building}\nعدد الأشخاص: ${guest.guestCount} أشخاص\nالحجز باسم: ${guest.fullname}\n\nأشخاص آخرون:\n${guest.guestCount - 1}\n\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\nشكرًا.`;
-    }
+  const message = \`Seulement les voyageurs qui sont enregistrés dans la réservation et dans ce formulaire seront autorisés. Merci de présenter ce code aux agents de sécurité.\n
+Nom & Prénom: \${fullname}\nAppartement: ${apartment}\nBâtiment: ${building}\nDate d'arrivée: \${arrivalDate}\nNombre de personnes: \${guestCount}\nID: \${idNumber}\`;
 
-    function populateTable() {
-      const tbody = document.getElementById("guestTable");
-      tbody.innerHTML = "";
+  // Générer QR code
+  document.getElementById('qrContainer').innerHTML = '';
+  QRCode.toCanvas(document.getElementById('qrContainer'), message, {width: 200}, function (error) {
+    if (error) console.error(error);
+    else alert('Informations enregistrées avec succès !');
+  });
+});
+</script>
+</div>
+</body>
+</html>
+`;
 
-      guests.forEach((guest, index) => {
-        const tr = document.createElement("tr");
-        tr.classList.add("border-b");
+    const win = window.open("", "_blank", "width=600,height=700");
+    win.document.write(guestFormHtml);
+    win.document.close();
+  }
 
-        tr.innerHTML = `
-          <td class="px-4 py-2">${guest.fullname}</td>
-          <td class="px-4 py-2">${guest.apartment}</td>
-          <td class="px-4 py-2">${guest.building}</td>
-          <td class="px-4 py-2">${guest.arrivalDate}</td>
-          <td class="px-4 py-2">${guest.guestCount}</td>
-          <td class="px-4 py-2">${guest.idNumber}</td>
-          <td class="px-4 py-2">
-            <button class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition" 
-              onclick="sendWhatsApp(${index}, this)">
-              Envoyer WhatsApp
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function sendWhatsApp(index, btn) {
-      const guest = guests[index];
-      const message = encodeURIComponent(formatMessage(guest));
-      const phoneNumber = ""; // Optionnel: numéro WhatsApp si vous voulez l'envoyer à un numéro spécifique
-      const url = `https://wa.me/${phoneNumber}?text=${message}`;
-
-      // Ouvre WhatsApp Web ou mobile
-      window.open(url, "_blank");
-
-      // Marque comme envoyé et souligne le bouton
-      guest.sent = true;
-      btn.classList.add("line-through");
-      btn.textContent = "Envoyé";
-    }
-
-    populateTable();
-  </script>
+  const tbody = document.getElementById('userTable');
+  users.forEach((user, index) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="px-4 py-2">${user.name}</td>
+      <td class="px-4 py-2">
+        <button class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition" onclick="openGuestForm()">Générer lien invité</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+</script>
 
 </body>
 </html>

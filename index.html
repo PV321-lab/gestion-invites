@@ -1,212 +1,96 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Gestion des invités</title>
-<style>
-body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; }
-.hidden { display: none; }
-.container { max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px #aaa; }
-h2 { color: #333; }
-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-table, th, td { border: 1px solid #aaa; }
-th, td { padding: 8px; text-align: left; }
-button { padding: 5px 10px; margin: 5px; cursor: pointer; }
-input, select { padding: 5px; margin: 5px 0; width: 100%; }
-.qrcode { margin-top: 10px; }
-.status { font-size: 0.9em; color: green; }
-</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Enregistrement des invités</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
 </head>
-<body>
-<div class="container">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-6">
 
-<div id="loginDiv">
-  <h2>Login</h2>
-  <input type="text" id="username" placeholder="Nom d'utilisateur">
-  <input type="password" id="password" placeholder="Mot de passe">
-  <button onclick="login()">Se connecter</button>
-  <p id="loginMsg" style="color:red;"></p>
-</div>
+  <div class="bg-white shadow-xl rounded-2xl p-8 max-w-lg w-full">
+    <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">Formulaire d’enregistrement des invités</h1>
+    
+    <form id="guestForm" class="space-y-4">
+      <input type="text" id="apartment" placeholder="Appartement" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300" value="A101">
+      <input type="text" id="building" placeholder="Bâtiment" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300" value="Bâtiment B">
+      <input type="date" id="arrivalDate" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300" value="2025-08-20">
+      <input type="number" id="guestCount" placeholder="Nombre des invités" required min="1" class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300" value="2">
+      <input type="text" id="fullname" placeholder="Nom et Prénom" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300" value="Jean Dupont">
+      <input type="text" id="idNumber" placeholder="Passeport ou Carte Nationale" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300" value="AB1234567">
+      
+      <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition">Enregistrer</button>
+    </form>
 
-<div id="adminDiv" class="hidden">
-  <h2>Admin : Gestion des utilisateurs</h2>
-  <input type="text" id="newUser" placeholder="Nom utilisateur">
-  <input type="text" id="newApp" placeholder="Appartement">
-  <input type="text" id="newBat" placeholder="Bâtiment">
-  <button onclick="addUser()">Ajouter utilisateur</button>
-  
-  <h3>Liste des utilisateurs</h3>
-  <table id="userTable">
-    <tr><th>Nom</th><th>Appartement</th><th>Bâtiment</th></tr>
-  </table>
-  
-  <h3>Toutes les réservations</h3>
-  <table id="allReservations">
-    <tr><th>Utilisateur</th><th>Date</th><th>Nom Invité</th><th>Nombre</th><th>QR Code</th><th>WhatsApp</th></tr>
-  </table>
-</div>
+    <div id="successMessage" class="mt-6 hidden text-green-600 font-semibold text-center">
+      ✅ Informations enregistrées avec succès !
+    </div>
 
-<div id="userDiv" class="hidden">
-  <h2>Gestion utilisateur</h2>
-  <h3>Vos réservations</h3>
-  <table id="userReservations">
-    <tr><th>Date</th><th>Nom Invité</th><th>Nombre</th><th>QR Code</th><th>WhatsApp</th></tr>
-  </table>
+    <div id="qrcodeContainer" class="mt-8 text-center hidden">
+      <!-- Message au-dessus du QR code -->
+      <p class="mb-4 text-center text-sm text-gray-700 font-semibold border p-3 rounded-lg bg-gray-50">
+        ⚠️ Seules les voyageurs qui sont enregistrés dans la réservation et dans ce formulaire seront autorisés. 
+        En cas de demande de ce code, merci de le présenter aux agents de sécurité.
+      </p>
+      
+      <h2 class="text-lg font-semibold mb-4 text-gray-700">Votre QR Code</h2>
+      <div id="qrcode" class="flex justify-center"></div>
+      <button id="downloadBtn" class="mt-4 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition">Télécharger le QR Code</button>
+    </div>
+  </div>
 
-  <h3>Ajouter un invité</h3>
-  <p>Appartement: <span id="userApp"></span>, Bâtiment: <span id="userBat"></span></p>
-  <input type="date" id="arrivalDate">
-  <input type="number" id="guestNum" placeholder="Nombre d'invités">
-  <input type="text" id="guestName" placeholder="Nom et prénom">
-  <input type="text" id="guestID" placeholder="Passeport ou carte d'identité">
-  <button onclick="addReservation()">Enregistrer</button>
-</div>
-
-</div>
-
-<script>
-// Données simulées
-let users = [
-  {username: 'user1', apartment: '9', building: '10', reservations: []},
-  {username: 'user2', apartment: '9', building: '10', reservations: []}
-];
-let admin = {username:'Halloween', password:'admin'};
-let currentUser = null;
-
-// Pré-remplissage test
-users[0].reservations = [
-  {date:'2025-08-15', name:'Yeye', number:1, id:'AA111', sent:false},
-  {date:'2025-08-16', name:'Zaza', number:2, id:'BB222', sent:false}
-];
-users[1].reservations = [
-  {date:'2025-08-17', name:'Lili', number:1, id:'CC333', sent:false},
-  {date:'2025-08-18', name:'Momo', number:3, id:'DD444', sent:false}
-];
-
-// LOGIN
-function login() {
-  let user = document.getElementById('username').value;
-  let pass = document.getElementById('password').value;
-  if(user === admin.username && pass === admin.password){
-    currentUser = admin;
-    document.getElementById('loginDiv').classList.add('hidden');
-    document.getElementById('adminDiv').classList.remove('hidden');
-    refreshAdminTables();
-  } else {
-    let u = users.find(u=>u.username===user);
-    if(u){
-      currentUser = u;
-      document.getElementById('loginDiv').classList.add('hidden');
-      document.getElementById('userDiv').classList.remove('hidden');
-      document.getElementById('userApp').innerText = u.apartment;
-      document.getElementById('userBat').innerText = u.building;
-      refreshUserTable();
-    } else {
-      document.getElementById('loginMsg').innerText = "Utilisateur ou mot de passe invalide";
-    }
-  }
-}
-
-// ADMIN: ajouter utilisateur
-function addUser() {
-  let name = document.getElementById('newUser').value;
-  let app = document.getElementById('newApp').value;
-  let bat = document.getElementById('newBat').value;
-  if(name && app && bat){
-    users.push({username:name, apartment:app, building:bat, reservations:[]});
-    refreshAdminTables();
-    document.getElementById('newUser').value='';
-    document.getElementById('newApp').value='';
-    document.getElementById('newBat').value='';
-  }
-}
-
-// Rafraîchir tables admin
-function refreshAdminTables(){
-  let table = document.getElementById('userTable');
-  table.innerHTML='<tr><th>Nom</th><th>Appartement</th><th>Bâtiment</th></tr>';
-  users.forEach(u=>{
-    let tr = document.createElement('tr');
-    tr.innerHTML=`<td>${u.username}</td><td>${u.apartment}</td><td>${u.building}</td>`;
-    table.appendChild(tr);
-  });
-  let resTable = document.getElementById('allReservations');
-  resTable.innerHTML='<tr><th>Utilisateur</th><th>Date</th><th>Nom Invité</th><th>Nombre</th><th>QR Code</th><th>WhatsApp</th></tr>';
-  users.forEach(u=>{
-    u.reservations.forEach(r=>{
-      let tr = document.createElement('tr');
-      let qrDiv = document.createElement('div');
-      new QRCode(qrDiv, JSON.stringify({...r, user:u.username, apartment:u.apartment, building:u.building}));
-      let waLink = `<a href="https://wa.me/?text=${encodeURIComponent(generateMessage(r,u))}" target="_blank" onclick="r.sent=true; refreshAdminTables()">Envoyer</a>`;
-      tr.innerHTML=`<td>${u.username}</td><td>${r.date}</td><td>${r.name}</td><td>${r.number}</td><td></td><td>${r.sent ? 'Envoyé' : waLink}</td>`;
-      tr.children[4].appendChild(qrDiv);
-      resTable.appendChild(tr);
+  <script>
+    const qrCode = new QRCodeStyling({
+      width: 250,
+      height: 250,
+      margin: 10,
+      qrOptions: { typeNumber: 0, mode: "Byte", errorCorrectionLevel: "H" },
+      dotsOptions: { color: "#1E40AF", type: "rounded" },
+      backgroundOptions: { color: "#FFFFFF" },
+      cornersSquareOptions: { type: "extra-rounded", color: "#1E40AF" },
+      cornersDotOptions: { type: "dot", color: "#1E40AF" }
     });
-  });
-}
 
-// UTILISATEUR: ajouter réservation
-function addReservation(){
-  let date = document.getElementById('arrivalDate').value;
-  let num = document.getElementById('guestNum').value;
-  let name = document.getElementById('guestName').value;
-  let id = document.getElementById('guestID').value;
-  if(date && num && name && id){
-    currentUser.reservations.push({date:date, name:name, number:num, id:id, sent:false});
-    refreshUserTable();
-    document.getElementById('arrivalDate').value='';
-    document.getElementById('guestNum').value='';
-    document.getElementById('guestName').value='';
-    document.getElementById('guestID').value='';
-  }
-}
+    document.getElementById("guestForm").addEventListener("submit", function(e) {
+      e.preventDefault();
 
-function refreshUserTable(){
-  let table = document.getElementById('userReservations');
-  table.innerHTML='<tr><th>Date</th><th>Nom Invité</th><th>Nombre</th><th>QR Code</th><th>WhatsApp</th></tr>';
-  currentUser.reservations.forEach(r=>{
-    let tr = document.createElement('tr');
-    let qrDiv = document.createElement('div');
-    new QRCode(qrDiv, JSON.stringify({...r, apartment:currentUser.apartment, building:currentUser.building}));
-    let waLink = `<a href="https://wa.me/?text=${encodeURIComponent(generateMessage(r,currentUser))}" target="_blank" onclick="r.sent=true; refreshUserTable()">Envoyer</a>`;
-    tr.innerHTML=`<td>${r.date}</td><td>${r.name}</td><td>${r.number}</td><td></td><td>${r.sent ? 'Envoyé' : waLink}</td>`;
-    tr.children[3].appendChild(qrDiv);
-    table.appendChild(tr);
-  });
-}
+      // Vérification stricte de tous les champs
+      const apartment = document.getElementById("apartment").value.trim();
+      const building = document.getElementById("building").value.trim();
+      const arrivalDate = document.getElementById("arrivalDate").value;
+      const guestCount = document.getElementById("guestCount").value.trim();
+      const fullname = document.getElementById("fullname").value.trim();
+      const idNumber = document.getElementById("idNumber").value.trim();
 
-function generateMessage(r,user){
-  return `Salam :
-Arrivée: ${r.date}
-Appartement: ${user.apartment}
-Imm: ${user.building}
-Nombre de personnes: ${r.number} personnes
-Réservation au nom de:
-${r.name} (${r.name})
+      if (!apartment || !building || !arrivalDate || !guestCount || !fullname || !idNumber) {
+        alert("Veuillez remplir tous les champs obligatoires !");
+        return;
+      }
 
-Autres personnes:
-${r.number-1}
+      const message = `⚠️ Seules les voyageurs qui sont enregistrés dans la réservation et dans ce formulaire seront autorisés. 
+Merci de présenter ce QR Code aux agents de sécurité.\n\n` +
+        `📌 Appartement: ${apartment}\n` +
+        `🏢 Bâtiment: ${building}\n` +
+        `📅 Date d'arrivée: ${arrivalDate}\n` +
+        `👥 Nombre d'invités: ${guestCount}\n` +
+        `🙍 Nom & Prénom: ${fullname}\n` +
+        `🆔 Passeport/Carte: ${idNumber}`;
 
-NB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.
+      qrCode.update({ data: message });
 
-Merci
-------------------------------------------
-السلام عليكم:
-الوصول: ${r.date}
-الشقة: ${user.apartment}
-رقم العمارة: ${user.building}
-عدد الأشخاص: ${r.number} أشخاص
-الحجز باسم: ${r.name} (${r.name})
+      document.getElementById("qrcode").innerHTML = "";
+      qrCode.append(document.getElementById("qrcode"));
 
-أشخاص آخرون:
-${r.number-1}
+      document.getElementById("successMessage").classList.remove("hidden");
+      document.getElementById("qrcodeContainer").classList.remove("hidden");
 
-ملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.
+      document.getElementById("guestForm").reset();
+    });
 
-شكرًا.`;
-}
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      qrCode.download({ name: "Guest_QR_Code", extension: "png" });
+    });
+  </script>
 
-</script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-m<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -149,7 +149,7 @@ m<!DOCTYPE html>
     <input type="text" id="loginUser" autocomplete="username" placeholder="admin ou 66" required />
     <label>Mot de passe</label>
     <input type="password" id="loginPass" autocomplete="current-password" placeholder="admin ou 12" required />
-    <button id="btnLogin" onclick="login()" disabled>Connexion</button>
+    <button id="btnLogin" onclick="login()">Connexion</button>
     <p id="loginMsg" class="banner err hidden"></p>
   </div>
 
@@ -179,7 +179,7 @@ m<!DOCTYPE html>
         </div>
       </div>
       <button onclick="creerUtilisateur()">Créer utilisateur</button>
-      <p class="note">L’identifiant utilisateur sera <i>Appartement+Bâtiment</i> (ex. 6 et 6 → <b>66</b>).</p>
+      <p class="note">L'identifiant utilisateur sera <i>Appartement+Bâtiment</i> (ex. 6 et 6 → <b>66</b>).</p>
       <div id="userWarn" class="banner warn hidden"></div>
     </div>
 
@@ -221,12 +221,12 @@ m<!DOCTYPE html>
         </thead>
         <tbody></tbody>
       </table>
-      <button onclick="genererLien()">Générer le lien d’enregistrement invité</button>
+      <button onclick="genererLien()">Générer le lien d'enregistrement invité</button>
       <p id="lienInvite" class="note"></p>
     </div>
   </div>
 
-  <!-- NOUVEAU Formulaire d’invité (via lien) -->
+  <!-- NOUVEAU Formulaire d'invité (via lien) -->
   <div id="invitePanel" class="hidden">
     <div class="guest-form-container">
       <div class="toolbar" style="margin-bottom: 20px;">
@@ -246,7 +246,7 @@ m<!DOCTYPE html>
           </div>
         </div>
 
-        <label>Date d’arrivée</label>
+        <label>Date d'arrivée</label>
         <input type="date" id="dateArrivee" required class="guest-input" />
 
         <label>Nombre total de personnes</label>
@@ -412,7 +412,7 @@ m<!DOCTYPE html>
       const p = document.getElementById('loginPass').value.trim();
 
       if(!u || !p){
-        showInlineMsg('loginMsg','err',"Saisissez l’utilisateur et le mot de passe.");
+        showInlineMsg('loginMsg','err',"Saisissez l'utilisateur et le mot de passe.");
         return;
       }
 
@@ -420,7 +420,7 @@ m<!DOCTYPE html>
         currentUser = { role:'admin' };
         document.getElementById('loginCard').classList.add('hidden');
         document.getElementById('adminPanel').classList.remove('hidden');
-        showBanner('ok', "Connecté en tant qu’administrateur.");
+        showBanner('ok', "Connecté en tant qu'administrateur.");
         startSessionTimer();
         refreshAdmin();
         return;
@@ -441,7 +441,7 @@ m<!DOCTYPE html>
           showInlineMsg('loginMsg','err',"Identifiants incorrects.");
         }
       };
-      req.onerror = ()=> showInlineMsg('loginMsg','err',"Erreur d’accès à la base locale.");
+      req.onerror = ()=> showInlineMsg('loginMsg','err',"Erreur d'accès à la base locale.");
     }
 
     /* =======================
@@ -461,16 +461,16 @@ m<!DOCTYPE html>
       const get = st.get(userId);
       get.onsuccess = ()=>{
         if(get.result){
-          showInlineMsg('userWarn','warn',`L’utilisateur ${userId} existe déjà.`);
+          showInlineMsg('userWarn','warn',`L'utilisateur ${userId} existe déjà.`);
         } else {
           st.put({ user:userId, appart, bat, pass }).onsuccess = ()=>{
             showBanner('ok', `Utilisateur ${userId} créé.`);
             refreshAdmin();
           };
-          st.transaction.onerror = ()=> showInlineMsg('userWarn','err',"Erreur lors de la création de l’utilisateur.");
+          st.transaction.onerror = ()=> showInlineMsg('userWarn','err',"Erreur lors de la création de l'utilisateur.");
         }
       };
-      get.onerror = ()=> showInlineMsg('userWarn','err',"Erreur d’accès à la base locale.");
+      get.onerror = ()=> showInlineMsg('userWarn','err',"Erreur d'accès à la base locale.");
     }
 
     function refreshAdmin(){
@@ -495,7 +495,7 @@ m<!DOCTYPE html>
         const c = e.target.result;
         if(c){ all.push(c.value); c.continue(); }
         else {
-          const last = all.slice(-200); // limiter l’affichage
+          const last = all.slice(-200); // limiter l'affichage
           last.forEach(r=>{
             const id = r.id ?? '';
             const sendBtn = `<button onclick="envoyerWhatsApp(${id})">Envoyer</button>`;
@@ -593,7 +593,7 @@ m<!DOCTYPE html>
     }
 
     function genererChamps(){
-      const nb = Math.max(1, parseInt(document.getElementById('nbPers').value || '1', 10);
+      const nb = Math.max(1, parseInt(document.getElementById('nbPers').value || '1', 10));
       const cont = document.getElementById('personnes');
       cont.innerHTML = '';
       
@@ -705,7 +705,7 @@ ${autresAR}
         // Masquer le formulaire
         document.getElementById('guestForm').style.display = 'none';
       };
-      addReq.onerror = ()=> showBanner('err',"Erreur lors de l’enregistrement. Réessayez.");
+      addReq.onerror = ()=> showBanner('err',"Erreur lors de l'enregistrement. Réessayez.");
     }
 
     /* =======================
@@ -725,13 +725,14 @@ ${autresAR}
         r.sent = true;
         stw.put(r).onsuccess = ()=> refreshAdmin();
       };
-      get.onerror = ()=> showBanner('err',"Erreur de lecture de l’enregistrement.");
+      get.onerror = ()=> showBanner('err',"Erreur de lecture de l'enregistrement.");
     }
 
     /* =======================
        DÉMARRAGE
     ======================== */
-    // Rien à faire ici : l’init DB active le bouton de login et gère le mode ?invite=...
+    // Initialisation du bouton de connexion
+    document.getElementById('btnLogin').disabled = true;
   </script>
 </body>
 </html>

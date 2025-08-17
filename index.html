@@ -1,253 +1,522 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Enregistrement des invités</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root{
-      --c1:#007bff; --bg:#f0f2f5; --ok:#0f9d58; --warn:#f4b400;
-      --err:#d93025; --info:#4285f4;
-    }
-    body { font-family: Arial, sans-serif; margin: 16px; background: var(--bg); }
-    h2 { text-align: center; margin: 8px 0 16px; }
-    .card { background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.12); margin-bottom:16px; }
-    label { font-weight:600; display:block; margin-top:10px; }
-    input, button { font-size:16px; }
-    input { width:100%; padding:10px; margin-top:6px; border:1px solid #ccc; border-radius:8px; }
-    input[readonly]{ background:#e9ecef; }
-    button { margin-top:14px; padding:10px 14px; border:none; border-radius:10px; background:var(--c1); color:#fff; cursor:pointer; }
-    button:disabled{ opacity:.6; cursor:not-allowed; }
-    table { width:100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border:1px solid #e5e7eb; padding:8px; text-align:center; }
-    th { background:var(--c1); color:#fff; }
-    .hidden{ display:none !important; }
-    .row { display:flex; gap:12px; flex-wrap:wrap; }
-    .col { flex:1 1 220px; min-width:220px; }
-    .banner{ padding:10px 12px; border-radius:10px; margin-bottom:12px; font-weight:600; }
-    .banner.info{ background:#e8f0fe; color:#174ea6; border:1px solid #c6dafc; }
-    .banner.ok{ background:#e6f4ea; color:#137333; border:1px solid #cce8d3; }
-    .banner.warn{ background:#fef7e0; color:#a66300; border:1px solid #fde293; }
-    .banner.err{ background:#fce8e6; color:#a50e0e; border:1px solid #f7b9b4; }
-    .toolbar{ display:flex; gap:10px; justify-content:space-between; align-items:center; flex-wrap:wrap; }
-    .note{ font-size:13px; opacity:.8; }
-    .qrwrap{ display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; }
-    .recap{ background:#fafafa; border:1px dashed #ccc; padding:10px; border-radius:8px; min-width:240px; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Enregistrement des invités - Solo Guinée</title>
+<style>
+  :root{
+    --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#06b6d4; --accent-2:#7c3aed; --glass: rgba(255,255,255,0.03);
+    --success: #10b981;
+  }
+  *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,"Helvetica Neue",Arial;}
+  body{margin:0;background:linear-gradient(180deg,#071024 0%, #071529 60%);color:#e6eef6;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .container{width:1100px; max-width:100%; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px; box-shadow: 0 10px 30px rgba(2,6,23,0.7); overflow:hidden;}
+  header{padding:18px 22px; display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.03)}
+  h1{margin:0;font-size:18px;letter-spacing:0.2px}
+  .sub{color:var(--muted);font-size:13px}
+  .content{display:flex;gap:20px;padding:20px;flex-wrap:wrap}
+  .panel{background:linear-gradient(180deg,var(--card),rgba(7,14,28,0.6)); padding:16px;border-radius:10px;flex:1;min-width:300px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.02)}
+  .small{font-size:13px;color:var(--muted)}
+  label{display:block;font-size:13px;margin-bottom:6px}
+  input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;outline:none}
+  button{padding:10px 12px;border-radius:8px;border:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021323;font-weight:600;cursor:pointer}
+  .muted{color:var(--muted)}
+  .row{display:flex;gap:10px;align-items:center}
+  .col{flex:1}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.03);font-size:13px;text-align:left}
+  th{color:var(--muted);font-weight:600}
+  .tag{background:rgba(255,255,255,0.02);padding:6px 8px;border-radius:6px;font-size:12px}
+  .qr{width:120px;height:120px;border-radius:8px;background:#071028;padding:6px;display:flex;align-items:center;justify-content:center}
+  .right{display:flex;flex-direction:column;gap:8px;min-width:320px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .text-green{color:var(--success);font-weight:700}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted)}
+  .input-inline{display:flex;gap:8px}
+  .input-inline input{flex:1}
+  .note{font-size:12px;color:var(--muted);margin-top:6px}
+  .center{display:flex;align-items:center;justify-content:center}
+  .flex{display:flex;gap:8px}
+  @media (max-width:900px){.right{min-width:unset}}
+</style>
 </head>
 <body>
-  <h2>Enregistrement des invités</h2>
-  <div id="banner" class="banner info hidden"></div>
+<div class="container" id="app">
+  <header>
+    <div>
+      <h1>Enregistrement des invités — Solo Guinée</h1>
+      <div class="sub">Application locale (GitHub Pages) — stockage : localStorage</div>
+    </div>
+    <div id="userInfo" class="sub muted"></div>
+  </header>
 
-  <!-- Connexion -->
-  <div id="loginCard" class="card">
-    <div class="toolbar">
-      <div><strong>Connexion</strong></div>
-      <div class="note">Comptes : <strong>admin / admin</strong> • Test : <strong>66 / 12</strong></div>
-    </div>
-    <label>Utilisateur</label>
-    <input type="text" id="loginUser" autocomplete="username" placeholder="admin ou 66" required />
-    <label>Mot de passe</label>
-    <input type="password" id="loginPass" autocomplete="current-password" placeholder="admin ou 12" required />
-    <button id="btnLogin" onclick="login()" disabled>Connexion</button>
-    <p id="loginMsg" class="banner err hidden"></p>
-  </div>
-
-  <!-- Interface Admin -->
-  <div id="adminPanel" class="hidden">
-    <div class="toolbar card">
-      <div><strong>Panneau administrateur</strong></div>
-      <div><button onclick="logout()">Déconnexion</button></div>
-    </div>
-    <div class="card">
-      <h3>Gestion des utilisateurs</h3>
-      <div class="row">
-        <div class="col"><label>Appartement</label><input type="text" id="appartAdmin" required /></div>
-        <div class="col"><label>Bâtiment</label><input type="text" id="batAdmin" required /></div>
-        <div class="col"><label>Mot de passe</label><input type="text" id="passAdmin" required /></div>
-      </div>
-      <button onclick="creerUtilisateur()">Créer utilisateur</button>
-      <p class="note">L’identifiant utilisateur sera <i>Appartement+Bâtiment</i> (ex. 6 et 6 → <b>66</b>).</p>
-      <div id="userWarn" class="banner warn hidden"></div>
-    </div>
-    <div class="card">
-      <h3>Liste des utilisateurs</h3>
-      <table id="tableUsers">
-        <thead><tr><th>Utilisateur</th><th>Appartement</th><th>Bâtiment</th><th>Mot de passe</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <div class="card">
-      <h3>Tous les enregistrements (derniers ajoutés)</h3>
-      <table id="tableAdmin">
-        <thead><tr><th>ID</th><th>Appartement</th><th>Bâtiment</th><th>Nom principal</th><th>Total personnes</th><th>Date</th><th>WhatsApp</th><th>Status</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Interface Utilisateur -->
-  <div id="userPanel" class="hidden">
-    <div class="toolbar card">
-      <div><strong>Mon espace</strong></div>
-      <div><button onclick="logout()">Déconnexion</button></div>
-    </div>
-    <div class="card">
-      <h3>Mes enregistrements</h3>
-      <table id="tableUser">
-        <thead><tr><th>ID</th><th>Nom principal</th><th>Total personnes</th><th>Date</th><th>Status</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <button onclick="genererLien()">Générer le lien d’enregistrement invité</button>
-      <p id="lienInvite" class="note"></p>
-    </div>
-  </div>
-
-  <!-- Formulaire d’invité (via lien) -->
-  <div id="invitePanel" class="hidden">
-    <div class="card">
-      <div class="toolbar">
-        <h3>Enregistrement Invité</h3>
-        <button onclick="retourAccueil()">Retour</button>
-      </div>
-      <div class="row">
-        <div class="col"><label>Appartement</label><input type="text" id="invAppart" readonly /></div>
-        <div class="col"><label>Bâtiment</label><input type="text" id="invBat" readonly /></div>
-      </div>
-      <label>Nom et Prénom (personne principale)</label>
-      <input type="text" id="nomPrincipal" required />
-      <label>Passeport / CNI (personne principale)</label>
-      <input type="text" id="docPrincipal" required />
-      <label>Nombre total de personnes</label>
-      <input type="number" id="nbPers" min="1" value="1" required onchange="genererChamps()" />
-      <div id="personnes"></div>
-      <label>Date d’arrivée</label>
-      <input type="date" id="dateArrivee" required />
-      <button onclick="enregistrer()">Enregistrer</button>
-      <div class="qrwrap">
-        <div id="qrcode" style="margin-top:16px;"></div>
-        <div id="recap" class="recap hidden"></div>
+  <div class="content" id="mainContent">
+    <!-- Login panel -->
+    <div class="panel" id="loginPanel">
+      <h3>Connexion</h3>
+      <div class="small muted">Connecte-toi en tant qu'admin ou utilisateur</div>
+      <div style="margin-top:12px;">
+        <label>Identifiant</label>
+        <input id="loginUser" placeholder="admin ou username" />
+        <label style="margin-top:10px">Mot de passe</label>
+        <input id="loginPass" type="password" placeholder="mot de passe" />
+        <div style="margin-top:12px" class="row">
+          <button id="btnLogin">Se connecter</button>
+          <button id="btnDemo" class="btn-ghost">Se connecter comme exemple utilisateur</button>
+        </div>
+        <div class="note">Compte admin par défaut : <strong>admin / admin</strong><br>Compte utilisateur exemple : mot de passe <strong>12</strong>.</div>
       </div>
     </div>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
-  <script>
-    let db; let currentUser=null;
-    const openReq = indexedDB.open("enregistrementsDB_v3", 1);
-    openReq.onupgradeneeded = e=>{
-      const _db=e.target.result;
-      if(!_db.objectStoreNames.contains("users")){
-        _db.createObjectStore("users",{keyPath:"user"});
+    <!-- Dashboard -->
+    <div class="panel right" id="dashboard" style="display:none">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div>
+          <h3 id="dashTitle">Tableau de bord</h3>
+          <div class="small muted" id="dashRole">Rôle</div>
+        </div>
+        <div class="flex">
+          <button id="btnLogout" class="btn-ghost">Se déconnecter</button>
+        </div>
+      </div>
+
+      <!-- Admin controls -->
+      <div id="adminControls" style="display:none;margin-top:14px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div style="flex:1;min-width:260px">
+            <h4>Créer un utilisateur</h4>
+            <label>Nom de l'appartement</label>
+            <input id="u_nom" placeholder="Ex : Appartement A" />
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <div style="flex:1">
+                <label>N° appartement</label>
+                <input id="u_num" placeholder="66" />
+              </div>
+              <div style="flex:1">
+                <label>N° bâtiment</label>
+                <input id="u_bat" placeholder="1" />
+              </div>
+            </div>
+            <label style="margin-top:8px">Mot de passe</label>
+            <input id="u_pass" placeholder="12" />
+            <div style="margin-top:10px" class="row">
+              <button id="createUserBtn">Créer utilisateur</button>
+              <button id="resetSample" class="btn-ghost">Réinitialiser exemple</button>
+            </div>
+            <div class="note">L'identifiant de l'utilisateur sera généré automatiquement (format : app-<num>-b<bat>).</div>
+          </div>
+
+          <div style="flex:1;min-width:260px">
+            <h4>Utilisateurs existants</h4>
+            <div id="usersList" class="small muted">(chargement...)</div>
+            <div style="margin-top:10px">
+              <button id="exportAllCSV" class="btn-ghost">Exporter tous les enregistrements (CSV)</button>
+            </div>
+          </div>
+        </div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
+      </div>
+
+      <!-- Link generation & guest table -->
+      <div>
+        <h4>Générer lien d'enregistrement</h4>
+        <div class="small muted">Génère une URL que le propriétaire peut envoyer aux invités. Le formulaire sera pré-rempli pour l'appartement.</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="linkCount" type="number" min="1" max="6" value="1" />
+          <button id="genLinkBtn">Générer un lien</button>
+        </div>
+        <div id="generatedLink" style="margin-top:8px" class="small muted"></div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
+
+        <h4>Enregistrements</h4>
+        <div class="small muted">La liste ci-dessous montre les enregistrements. L'admin voit tout; un utilisateur ne voit que ses enregistrements.</div>
+        <table id="recordsTable" style="margin-top:10px">
+          <thead>
+            <tr><th>Appart.</th><th>Bât.</th><th>Date d'arrivée</th><th>Nb invités</th><th>Détails</th><th>QR</th><th>WhatsApp</th><th>Status</th></tr>
+          </thead>
+          <tbody id="recordsBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Registration page (via token) -->
+    <div class="panel" id="registerPanel" style="display:none">
+      <h3>Enregistrement invité</h3>
+      <div class="small muted">Formulaire public — le lien contient l'appartement pré-rempli.</div>
+      <div style="margin-top:10px" id="regFormArea">
+        <label>Appartement</label>
+        <input id="reg_app" disabled />
+        <label>Bâtiment</label>
+        <input id="reg_bat" disabled />
+        <label>Date d'arrivée</label>
+        <input id="reg_date" type="date" />
+        <label>Nombre de personnes à enregistrer (max 6)</label>
+        <input id="reg_n" type="number" min="1" max="6" value="1" />
+        <div id="guestRows" style="margin-top:10px"></div>
+        <div style="margin-top:10px" class="row">
+          <button id="regSubmit">Enregistrer</button>
+          <button id="regClear" class="btn-ghost">Réinitialiser</button>
+        </div>
+      </div>
+      <div id="regMsg" style="margin-top:10px"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/*
+  Simple single-file app:
+  - stockage local dans localStorage sous clefs : 'sg_users' et 'sg_records'
+  - users : { id, username, password, nom, numero, batiment, token }
+  - records : { id, userId, app, bat, date, nb, guests: [ {prenom, idType} ], timestamp, whatsappSent }
+*/
+
+(function(){
+  // util
+  const $ = sel => document.querySelector(sel);
+  const qs = sel => Array.from(document.querySelectorAll(sel));
+  const uid = (n=8) => Math.random().toString(36).slice(2,2+n);
+  const nowISO = () => new Date().toISOString();
+
+  // storage helpers
+  function load(key, def){ try{ return JSON.parse(localStorage.getItem(key)) || def }catch(e){return def} }
+  function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+  // keys
+  const K_USERS = 'sg_users_v1';
+  const K_RECORDS = 'sg_records_v1';
+  // initial seed: admin + sample user
+  function seed(){
+    let users = load(K_USERS, []);
+    if(!users.find(u=>u.username==='admin')){
+      users.push({
+        id: 'u_admin',
+        username: 'admin',
+        password: 'admin',
+        nom: 'Administrateur',
+        numero: '',
+        batiment: '',
+        token: uid(12) + '_admin'
+      });
+    }
+    if(!users.find(u=>u.username==='app-66-b1')){
+      users.push({
+        id: 'u_sample',
+        username: 'app-66-b1',
+        password: '12',
+        nom: 'Appartement 66',
+        numero: '66',
+        batiment: '1',
+        token: uid(12)
+      });
+    }
+    save(K_USERS, users);
+    if(!localStorage.getItem(K_RECORDS)) save(K_RECORDS, []);
+  }
+  seed();
+
+  // App state
+  let currentUser = null; // user object when logged in
+  let tokenUser = null; // if visiting registration link (token)
+
+  // UI refs
+  const loginPanel = $('#loginPanel');
+  const dashboard = $('#dashboard');
+  const adminControls = $('#adminControls');
+  const registerPanel = $('#registerPanel');
+  const userInfo = $('#userInfo');
+
+  // Login actions
+  $('#btnLogin').addEventListener('click', ()=>{
+    const u = $('#loginUser').value.trim();
+    const p = $('#loginPass').value;
+    const users = load(K_USERS, []);
+    const found = users.find(x => x.username === u && x.password === p);
+    if(!found){ alert('Identifiants incorrects.'); return; }
+    currentUser = found;
+    showDashboard();
+  });
+  $('#btnDemo').addEventListener('click', ()=>{
+    const users = load(K_USERS, []);
+    const demo = users.find(x=>x.username==='app-66-b1');
+    if(demo){ currentUser = demo; showDashboard(); } else alert('Compte exemple manquant.');
+  });
+
+  $('#btnLogout').addEventListener('click', ()=>{
+    currentUser = null;
+    tokenUser = null;
+    loginPanel.style.display = '';
+    dashboard.style.display = 'none';
+    registerPanel.style.display = 'none';
+    userInfo.textContent = '';
+    $('#loginUser').value = '';
+    $('#loginPass').value = '';
+  });
+
+  // Admin create user
+  $('#createUserBtn').addEventListener('click', ()=>{
+    const nom = $('#u_nom').value.trim() || 'Appartement';
+    const num = $('#u_num').value.trim() || '0';
+    const bat = $('#u_bat').value.trim() || '1';
+    const pass = $('#u_pass').value || '12';
+    const users = load(K_USERS, []);
+    const username = `app-${num}-b${bat}`;
+    if(users.find(u=>u.username===username)){ alert('Un utilisateur existe déjà pour ce numéro/bâtiment.'); return; }
+    const newu = { id: 'u_'+uid(8), username, password: pass, nom, numero: num, batiment: bat, token: uid(16) };
+    users.push(newu); save(K_USERS, users);
+    $('#u_nom').value='';$('#u_num').value='';$('#u_bat').value='';$('#u_pass').value='';
+    renderUsersList();
+    alert('Utilisateur créé : ' + username + '  (mot de passe : ' + pass + ')');
+  });
+
+  $('#resetSample').addEventListener('click', ()=>{
+    // recreate sample user with password 12
+    const users = load(K_USERS, []).filter(u=>u.username!=='app-66-b1');
+    users.push({
+      id: 'u_sample',
+      username: 'app-66-b1',
+      password: '12',
+      nom: 'Appartement 66',
+      numero: '66',
+      batiment: '1',
+      token: uid(12)
+    });
+    save(K_USERS, users);
+    renderUsersList();
+    alert('Compte exemple réinitialisé (username: app-66-b1, mot de passe: 12).');
+  });
+
+  // Generate link
+  $('#genLinkBtn').addEventListener('click', ()=>{
+    if(!currentUser){ alert('Connecte-toi d\'abord.'); return; }
+    const n = Math.max(1, Math.min(6, parseInt($('#linkCount').value || '1')));
+    // If admin, need to choose which user? For simplicity, if admin, pick selected or first user.
+    let actingUser = currentUser;
+    if(currentUser.username === 'admin'){
+      // choose first non-admin user for generation
+      const users = load(K_USERS, []);
+      const pick = users.find(u=>u.username !== 'admin') || users[0];
+      actingUser = pick;
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.set('register_token', actingUser.token);
+    url.searchParams.set('max', n);
+    const s = url.toString();
+    $('#generatedLink').innerHTML = `<div class="small muted">Lien (copie/partage) : <input style="width:70%" value="${s}" id="linkText" /></div>
+      <div style="margin-top:6px"><button id="copyLink">Copier le lien</button></div>`;
+    $('#copyLink').addEventListener('click', ()=>{ navigator.clipboard.writeText(s).then(()=>alert('Lien copié')); });
+  });
+
+  // Records rendering and data functions
+  function getAllRecords(){ return load(K_RECORDS, []); }
+  function saveRecord(rec){
+    const arr = getAllRecords();
+    arr.push(rec);
+    save(K_RECORDS, arr);
+  }
+  function renderRecords(){
+    const tbody = $('#recordsBody'); tbody.innerHTML = '';
+    const all = getAllRecords();
+    const users = load(K_USERS, []);
+    const viewAll = currentUser && currentUser.username === 'admin';
+    const visible = all.filter(r => viewAll ? true : r.userId === currentUser.id);
+    visible.sort((a,b)=> (b.timestamp||'') - (a.timestamp||''));
+    for(const r of visible){
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${r.app}</td>
+        <td>${r.bat}</td>
+        <td>${r.date}</td>
+        <td>${r.nb}</td>
+        <td style="max-width:260px"><div>${r.guests.map(g=>`${g.prenom} (${g.idType})`).join('<br>')}</div></td>
+        <td class="center"><div class="qr"><img style="max-width:100%;max-height:100%" src="${qrSrcForRecord(r)}" alt="QR"/></div></td>
+        <td><button data-id="${r.id}" class="whBtn">WhatsApp</button></td>
+        <td id="status-${r.id}">${r.whatsappSent ? '<span class="text-green">Envoyé</span>' : '<span class="muted">Non envoyé</span>'}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+    // attach whatsapp events
+    qs('.whBtn').forEach(btn => btn.addEventListener('click', e=>{
+      const id = btn.dataset.id;
+      const rec = getAllRecords().find(x=>x.id===id);
+      if(!rec) return;
+      const text = whatsappMessageForRecord(rec);
+      // open whatsapp web
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(waUrl,'_blank');
+      // mark as sent
+      markWhatsappSent(id);
+    }));
+  }
+
+  function markWhatsappSent(id){
+    const all = getAllRecords();
+    const idx = all.findIndex(x=>x.id===id);
+    if(idx>=0){
+      all[idx].whatsappSent = true; save(K_RECORDS, all);
+      const el = $(`#status-${id}`);
+      if(el) el.innerHTML = '<span class="text-green">Envoyé</span>';
+    }
+  }
+
+  function renderUsersList(){
+    const users = load(K_USERS, []).filter(u=>u.username!=='admin');
+    const node = $('#usersList');
+    if(users.length===0) node.innerHTML = '<div class="muted small">Aucun utilisateur</div>';
+    else {
+      node.innerHTML = users.map(u=>`<div class="tag">${u.username} — ${u.nom} (app ${u.numero}, bat ${u.batiment})</div>`).join(' ');
+    }
+  }
+
+  // CSV export
+  $('#exportAllCSV').addEventListener('click', ()=>{
+    const records = getAllRecords();
+    if(records.length===0){ alert('Aucun enregistrement.'); return; }
+    const rows = [['appartement','batiment','date','nb','prenom','idType','timestamp','user']];
+    for(const r of records){
+      for(const g of r.guests){
+        rows.push([r.app, r.bat, r.date, r.nb, g.prenom, g.idType, r.timestamp, r.userId]);
       }
-      if(!_db.objectStoreNames.contains("records")){
-        const st=_db.createObjectStore("records",{keyPath:"id",autoIncrement:true});
-        st.createIndex("byUnit",["appart","bat"]);
-      }
+    }
+    const csv = rows.map(r => r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download = 'enregistrements.csv'; a.click(); URL.revokeObjectURL(url);
+  });
+
+  // QR code source: using public API to generate image (data encoded)
+  function qrSrcForRecord(rec){
+    const info = {
+      titre: "Présentez ceci aux agents de sécurité",
+      note: "Seules les personnes mentionnées sont autorisées.",
+      record: rec
     };
-    openReq.onsuccess=e=>{
-      db=e.target.result;
-      document.getElementById('btnLogin').disabled=false;
-      const params=new URLSearchParams(location.search);
-      if(params.has("invite")) enterInviteMode(params.get("invite"));
+    const data = encodeURIComponent(JSON.stringify(info));
+    // using qrserver public API (simple, no key). Size 200x200.
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${data}`;
+  }
+
+  function whatsappMessageForRecord(rec){
+    // Compose a friendly message summarizing the booking and include a short link to the page (optional)
+    let body = `Réservation pour Appartement ${rec.app} / Bâtiment ${rec.bat}\nDate: ${rec.date}\nInvités (${rec.nb}):\n`;
+    rec.guests.forEach((g,i)=> body += `${i+1}. ${g.prenom} — ID: ${g.idType}\n`);
+    body += `\nPrésentez ce QR code aux agents de sécurité si demandé.`;
+    return body;
+  }
+
+  // Registration flow (link with token)
+  function checkURLForToken(){
+    const params = new URLSearchParams(window.location.search);
+    const tok = params.get('register_token');
+    const max = parseInt(params.get('max') || '1');
+    if(tok){
+      const users = load(K_USERS, []);
+      const u = users.find(x=>x.token === tok);
+      if(!u){ alert('Token invalide'); return; }
+      tokenUser = u;
+      showRegisterForm(u, Math.max(1, Math.min(6, isNaN(max)?1:max)));
+    }
+  }
+
+  function showRegisterForm(u, maxGuests){
+    loginPanel.style.display = 'none';
+    dashboard.style.display = 'none';
+    registerPanel.style.display = '';
+    $('#reg_app').value = u.nom || u.username;
+    $('#reg_bat').value = u.batiment || '';
+    $('#reg_n').max = maxGuests; $('#reg_n').value = Math.min(1,maxGuests);
+    buildGuestRows(1);
+    // handle change n
+    $('#reg_n').addEventListener('change', ()=> buildGuestRows(parseInt($('#reg_n').value || '1')));
+    $('#regSubmit').onclick = handleRegistrationSubmit;
+    $('#regClear').onclick = ()=>{ $('#reg_date').value=''; $('#reg_n').value='1'; buildGuestRows(1); $('#regMsg').innerHTML=''; };
+  }
+
+  function buildGuestRows(n){
+    const container = $('#guestRows'); container.innerHTML = '';
+    for(let i=0;i<n;i++){
+      const div = document.createElement('div');
+      div.style.marginTop='8px';
+      div.innerHTML = `
+        <div style="display:flex;gap:8px">
+          <input placeholder="Prénom invité ${i+1}" data-guest="prenom" data-index="${i}" />
+          <input placeholder="Passeport / ID ${i+1}" data-guest="idType" data-index="${i}" />
+        </div>
+      `;
+      container.appendChild(div);
+    }
+  }
+
+  function handleRegistrationSubmit(){
+    if(!tokenUser){ alert('Utilisateur non déterminé.'); return; }
+    const date = $('#reg_date').value;
+    const nb = parseInt($('#reg_n').value || '1');
+    if(!date){ alert('Choisissez la date d\'arrivée.'); return; }
+    const guests = [];
+    const inputs = Array.from($('#guestRows').querySelectorAll('input'));
+    const grouped = {};
+    inputs.forEach(inp=>{
+      const k = inp.dataset.guest; const idx=inp.dataset.index;
+      grouped[idx] = grouped[idx] || {}; grouped[idx][k] = inp.value.trim();
+    });
+    for(const k in grouped){
+      const g = grouped[k];
+      if(!g.prenom){ alert('Remplir le prénom pour tous les invités.'); return; }
+      guests.push({ prenom: g.prenom, idType: g.idType || '' });
+    }
+    if(guests.length===0){ alert('Ajoutez au moins un invité.'); return; }
+    const rec = {
+      id: 'r_' + uid(8),
+      userId: tokenUser.id,
+      app: tokenUser.numero || tokenUser.nom || tokenUser.username,
+      bat: tokenUser.batiment || '',
+      date,
+      nb,
+      guests,
+      timestamp: Date.now(),
+      whatsappSent: false
     };
+    saveRecord(rec);
+    $('#regMsg').innerHTML = `<div class="text-green">Enregistrement réussi ✅ — Le QR code est généré ci-dessous.</div>
+      <div style="margin-top:8px" class="qr"><img style="max-width:100%" src="${qrSrcForRecord(rec)}" /></div>`;
+    // if current user is logged and is the same user, refresh their list
+    if(currentUser && currentUser.id === tokenUser.id){
+      renderRecords();
+    }
+  }
 
-    function tx(store,mode="readonly"){return db.transaction(store,mode).objectStore(store);}
-    function showBanner(type,text){const b=document.getElementById('banner');b.className='banner '+type;b.textContent=text;b.classList.remove('hidden');}
-    function hideBanner(){document.getElementById('banner').classList.add('hidden');}
-    function showInlineMsg(id,type,text){const el=document.getElementById(id);el.textContent=text;el.className='banner '+type;el.classList.remove('hidden');}
-    function hideInlineMsg(id){document.getElementById(id).classList.add('hidden');}
+  // show dashboard
+  function showDashboard(){
+    loginPanel.style.display = 'none';
+    registerPanel.style.display = 'none';
+    dashboard.style.display = '';
+    $('#dashTitle').textContent = `Bienvenue — ${currentUser.nom || currentUser.username}`;
+    $('#dashRole').textContent = currentUser.username === 'admin' ? 'Administrateur' : `Propriétaire: ${currentUser.nom} (app ${currentUser.numero}, bat ${currentUser.batiment})`;
+    userInfo.textContent = `${currentUser.username} • ${currentUser.username==='admin' ? 'admin' : 'utilisateur'}`;
+    adminControls.style.display = currentUser.username==='admin' ? '' : 'none';
+    renderUsersList();
+    renderRecords();
+  }
 
-    function login(){
-      hideInlineMsg('loginMsg');
-      const u=document.getElementById('loginUser').value.trim();
-      const p=document.getElementById('loginPass').value.trim();
-      if(!u||!p){showInlineMsg('loginMsg','err',"Champs obligatoires.");return;}
-      if(u==="admin"&&p==="admin"){
-        currentUser={role:"admin"};document.getElementById('loginCard').classList.add('hidden');
-        document.getElementById('adminPanel').classList.remove('hidden');showBanner('ok',"Connecté admin");refreshAdmin();return;
-      }
-      const st=tx('users');const req=st.get(u);
-      req.onsuccess=()=>{const user=req.result;
-        if(user&&user.pass===p){
-          currentUser={role:"user",id:user.user,appart:user.appart,bat:user.bat};
-          document.getElementById('loginCard').classList.add('hidden');
-          document.getElementById('userPanel').classList.remove('hidden');
-          showBanner('ok',`Connecté ${user.appart}/${user.bat}`);refreshUser();
-        }else showInlineMsg('loginMsg','err',"Identifiants incorrects.");};
-    }
-    function logout(){currentUser=null;document.getElementById('adminPanel').classList.add('hidden');document.getElementById('userPanel').classList.add('hidden');document.getElementById('invitePanel').classList.add('hidden');document.getElementById('loginCard').classList.remove('hidden');}
-    function retourAccueil(){window.history.replaceState({},document.title,location.pathname);logout();}
+  // when page loads, check URL token
+  checkURLForToken();
 
-    function creerUtilisateur(){
-      const appart=document.getElementById('appartAdmin').value.trim();
-      const bat=document.getElementById('batAdmin').value.trim();
-      const pass=document.getElementById('passAdmin').value.trim();
-      if(!appart||!bat||!pass){showInlineMsg('userWarn','warn',"Tous obligatoires.");return;}
-      const id=appart+bat;const st=tx('users','readwrite');st.get(id).onsuccess=e=>{
-        if(e.target.result){showInlineMsg('userWarn','warn',"Existe déjà");}
-        else{st.put({user:id,appart,bat,pass}).onsuccess=()=>{showBanner('ok',"Utilisateur créé");refreshAdmin();};}};
-    }
+  // if user already logged? (no persistent session) — not needed.
+  // initial render
+  renderUsersList();
 
-    function refreshAdmin(){
-      const tbody=document.querySelector('#tableUsers tbody');tbody.innerHTML='';
-      tx('users').openCursor().onsuccess=e=>{const c=e.target.result;if(c){const u=c.value;tbody.insertAdjacentHTML('beforeend',`<tr><td>${u.user}</td><td>${u.appart}</td><td>${u.bat}</td><td>${u.pass}</td></tr>`);c.continue();}};
-      const tbody2=document.querySelector('#tableAdmin tbody');tbody2.innerHTML='';
-      tx('records').openCursor().onsuccess=e=>{const c=e.target.result;if(c){const r=c.value;tbody2.insertAdjacentHTML('beforeend',`<tr><td>${r.id}</td><td>${r.appart}</td><td>${r.bat}</td><td>${r.nom}</td><td>${r.personnes.length}</td><td>${r.date}</td><td>—</td><td>${r.sent?"Envoyé":"Non"}</td></tr>`);c.continue();}};
-    }
-    function refreshUser(){
-      const tbody=document.querySelector('#tableUser tbody');tbody.innerHTML='';
-      const idx=tx('records').index('byUnit');idx.getAll([currentUser.appart,currentUser.bat]).onsuccess=e=>{
-        (e.target.result||[]).forEach(r=>{tbody.insertAdjacentHTML('beforeend',`<tr><td>${r.id}</td><td>${r.nom}</td><td>${r.personnes.length}</td><td>${r.date}</td><td>${r.sent?"Envoyé":"Non"}</td></tr>`);});
-      };
-    }
-    function genererLien(){const base=location.href.split('?')[0];const lien=`${base}?invite=${encodeURIComponent(currentUser.id)}`;document.getElementById('lienInvite').innerHTML=`Lien: <a href="${lien}" target="_blank">${lien}</a>`;showBanner('info',"Copiez ce lien.");}
+  // if visiting root and no token, show login
+  // small UX: pressing Enter on password triggers login
+  $('#loginPass').addEventListener('keydown', e=>{ if(e.key === 'Enter') $('#btnLogin').click(); });
 
-    function enterInviteMode(userId){
-      tx('users').get(userId).onsuccess=e=>{
-        const user=e.target.result;if(!user){showBanner('err',"Lien invalide");return;}
-        document.getElementById('loginCard').classList.add('hidden');
-        document.getElementById('invitePanel').classList.remove('hidden');
-        document.getElementById('invAppart').value=user.appart;
-        document.getElementById('invBat').value=user.bat;
-        genererChamps();
-      };
-    }
-    function genererChamps(){
-      const nb=Math.max(1,parseInt(document.getElementById('nbPers').value||'1',10));
-      const cont=document.getElementById('personnes');cont.innerHTML='';
-      for(let i=1;i<=nb;i++){const lab=document.createElement('label');lab.textContent=`Personne ${i} - Nom & Prénom`;const inp=document.createElement('input');inp.id=`pers${i}`;inp.required=true;cont.appendChild(lab);cont.appendChild(inp);}
-    }
-    function enregistrer(){
-      const nom=document.getElementById('nomPrincipal').value.trim();
-      const doc=document.getElementById('docPrincipal').value.trim();
-      const nb=parseInt(document.getElementById('nbPers').value||'0',10);
-      const date=document.getElementById('dateArrivee').value;
-      if(!nom||!doc||!date||nb<1){showBanner('warn',"Tous les champs obligatoires.");return;}
-      const personnes=[];for(let i=1;i<=nb;i++){const v=document.getElementById(`pers${i}`).value.trim();if(!v){showBanner('warn',`Renseignez personne ${i}`);return;}personnes.push(v);}
-      const appart=document.getElementById('invAppart').value;
-      const bat=document.getElementById('invBat').value;
-      const rec={appart,bat,nom,doc,personnes,date,sent:false};
-      const msg=`Arrivée: ${date}\nAppartement: ${appart}\nBâtiment: ${bat}\nNom principal: ${nom}\nDocument: ${doc}\nNombre de personnes: ${personnes.length}\nListe: ${personnes.join(", ")}\n\n⚠️ Seules les personnes enregistrées sont autorisées.`;
-      const st=tx('records','readwrite');st.add(rec).onsuccess=e=>{
-        const id=e.target.result;rec.id=id;showBanner('ok',"Enregistrement effectué.");
-        document.getElementById('qrcode').innerHTML='';
-        new QRCode(document.getElementById('qrcode'),{text:msg,width:200,height:200});
-        const recap=document.getElementById('recap');
-        recap.innerHTML=`<strong>Récapitulatif</strong><br>
-          ID: ${id}<br>
-          Appartement: ${appart} | Bâtiment: ${bat}<br>
-          Nom principal: ${nom}<br>
-          Document: ${doc}<br>
-          Date d’arrivée: ${date}<br>
-          Total personnes: <strong>${personnes.length}</strong><br>
-          <div class="note" style="margin-top:8px;">
-            Veuillez présenter ce QR code aux agents de sécurité en cas de besoin.<br>
-            ⚠️ Seules les personnes enregistrées dans ce formulaire sont autorisées à entrer.
-          </div>`;
-        recap.classList.remove('hidden');
-      };
-    }
-  </script>
+  // If user is admin and open dashboard, also allow selecting which user to generate link for (not requested exactly) — omitted for simplicity.
+
+})();
+</script>
 </body>
 </html>

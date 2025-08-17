@@ -1,43 +1,149 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Enregistrement des invités</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --c1:#007bff; --bg:#f0f2f5; --ok:#0f9d58; --warn:#f4b400; --err:#d93025; --info:#4285f4;
+    }
+    body { font-family: Arial, sans-serif; margin: 16px; background: var(--bg); }
+    h2 { text-align: center; margin: 8px 0 16px; }
+    .card { background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.12); margin-bottom:16px; }
+    label { font-weight:600; display:block; margin-top:10px; }
+    input, button { font-size:16px; }
+    input { width:100%; padding:10px; margin-top:6px; border:1px solid #ccc; border-radius:8px; }
+    input[readonly]{ background:#e9ecef; }
+    button { margin-top:14px; padding:10px 14px; border:none; border-radius:10px; background:var(--c1); color:#fff; cursor:pointer; }
+    button:disabled{ opacity:.6; cursor:not-allowed; }
+    table { width:100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border:1px solid #e5e7eb; padding:8px; text-align:center; }
+    th { background:var(--c1); color:#fff; }
+    .hidden{ display:none !important; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; }
+    .col { flex:1 1 220px; min-width:220px; }
+    .banner{ padding:10px 12px; border-radius:10px; margin-bottom:12px; font-weight:600; }
+    .banner.info{ background:#e8f0fe; color:#174ea6; border:1px solid #c6dafc; }
+    .banner.ok{ background:#e6f4ea; color:#137333; border:1px solid #cce8d3; }
+    .banner.warn{ background:#fef7e0; color:#a66300; border:1px solid #fde293; }
+    .banner.err{ background:#fce8e6; color:#a50e0e; border:1px solid #f7b9b4; }
+    .toolbar{ display:flex; gap:10px; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+    .note{ font-size:13px; opacity:.8; }
+  </style>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-6">
-  <div class="bg-white shadow-xl rounded-2xl p-8 max-w-lg w-full">
-    <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">Formulaire d’enregistrement des invités</h1>
-    
-    <form id="guestForm" class="space-y-4">
-      <input type="text" id="apartment" placeholder="Appartement" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300" value="A101">
-      <input type="text" id="building" placeholder="Bâtiment" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300" value="Bâtiment B">
-      <input type="date" id="arrivalDate" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300" value="2025-08-20">
-      <input type="number" id="guestCount" placeholder="Nombre des invités" required min="1" class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300" value="2">
-      <input type="text" id="fullname" placeholder="Nom et Prénom" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300" value="Jean Dupont">
-      <input type="text" id="idNumber" placeholder="Passeport ou Carte Nationale" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300" value="AB1234567">
-      
-      <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition">Enregistrer</button>
-    </form>
+<body>
+  <h2>Enregistrement des invités</h2>
+  <div id="banner" class="banner info hidden"></div>
 
-    <div id="successMessage" class="mt-6 hidden text-green-600 font-semibold text-center">
-      ✅ Informations enregistrées avec succès !
+  <!-- Connexion -->
+  <div id="loginCard" class="card">
+    <div class="toolbar">
+      <div><strong>Connexion</strong></div>
+      <div class="note">Comptes : <strong>admin / admin</strong> • Test : <strong>66 / 12</strong></div>
     </div>
+    <label>Utilisateur</label>
+    <input type="text" id="loginUser" autocomplete="username" placeholder="admin ou 66" required />
+    <label>Mot de passe</label>
+    <input type="password" id="loginPass" autocomplete="current-password" placeholder="admin ou 12" required />
+    <button id="btnLogin" onclick="login()" disabled>Connexion</button>
+    <p id="loginMsg" class="banner err hidden"></p>
+  </div>
 
-    <div id="qrcodeContainer" class="mt-8 text-center hidden">
-      <p class="mb-4 text-center text-sm text-gray-700 font-semibold border p-3 rounded-lg bg-gray-50">
-        ⚠️ Seules les voyageurs qui sont enregistrés dans la réservation et dans ce formulaire seront autorisés. 
-        En cas de demande de ce code, merci de le présenter aux agents de sécurité.
-      </p>
-      
-      <h2 class="text-lg font-semibold mb-4 text-gray-700">Votre QR Code</h2>
-      <div id="qrcode" class="flex justify-center"></div>
-      <button id="downloadBtn" class="mt-4 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition">Télécharger le QR Code</button>
+  <!-- Interface Admin -->
+  <div id="adminPanel" class="hidden">
+    <div class="toolbar card">
+      <div><strong>Panneau administrateur</strong></div>
+      <div><button onclick="logout()">Déconnexion</button></div>
+    </div>
+    <div class="card">
+      <h3>Gestion des utilisateurs</h3>
+      <div class="row">
+        <div class="col"><label>Appartement</label><input type="text" id="appartAdmin" inputmode="numeric" required /></div>
+        <div class="col"><label>Bâtiment</label><input type="text" id="batAdmin" required /></div>
+        <div class="col"><label>Mot de passe</label><input type="text" id="passAdmin" required /></div>
+      </div>
+      <button onclick="creerUtilisateur()">Créer utilisateur</button>
+      <p class="note">L’identifiant utilisateur sera <i>Appartement+Bâtiment</i> (ex. 6 et 6 → <b>66</b>).</p>
+      <div id="userWarn" class="banner warn hidden"></div>
+    </div>
+    <div class="card">
+      <h3>Liste des utilisateurs</h3>
+      <table id="tableUsers">
+        <thead><tr><th>Utilisateur</th><th>Appartement</th><th>Bâtiment</th><th>Mot de passe</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Tous les enregistrements (derniers ajoutés)</h3>
+      <table id="tableAdmin">
+        <thead><tr><th>ID</th><th>Appartement</th><th>Bâtiment</th><th>Nom principal</th><th>Total personnes</th><th>Date</th><th>WhatsApp</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="note">Astuce : pour des bases énormes, ajoute un filtrage/pagination si besoin.</p>
     </div>
   </div>
 
+  <!-- Interface Utilisateur -->
+  <div id="userPanel" class="hidden">
+    <div class="toolbar card">
+      <div><strong>Mon espace</strong></div>
+      <div><button onclick="logout()">Déconnexion</button></div>
+    </div>
+    <div class="card">
+      <h3>Mes enregistrements</h3>
+      <table id="tableUser">
+        <thead><tr><th>ID</th><th>Nom principal</th><th>Total personnes</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <button onclick="genererLien()">Générer le lien d’enregistrement invité</button>
+      <p id="lienInvite" class="note"></p>
+    </div>
+  </div>
+
+  <!-- Formulaire d’invité (via lien) -->
+  <div id="invitePanel" class="hidden">
+    <div class="bg-white shadow-xl rounded-2xl p-8 max-w-lg w-full mx-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold">Formulaire d’enregistrement des invités</h3>
+        <button onclick="retourAccueil()" class="text-sm bg-gray-200 px-3 py-1 rounded-lg hover:bg-gray-300">Retour</button>
+      </div>
+
+      <form id="guestForm" class="space-y-4">
+        <input type="text" id="apartment" placeholder="Appartement" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300">
+        <input type="text" id="building" placeholder="Bâtiment" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300">
+        <input type="date" id="arrivalDate" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300">
+        <input type="number" id="guestCount" placeholder="Nombre des invités" required min="1" class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300">
+        <input type="text" id="fullname" placeholder="Nom et Prénom" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300">
+        <input type="text" id="idNumber" placeholder="Passeport ou Carte Nationale" required class="w-full p-3 border rounded-xl focus:ring focus:ring-blue-300">
+
+        <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition">Enregistrer</button>
+      </form>
+
+      <div id="successMessage" class="mt-6 hidden text-green-600 font-semibold text-center">
+        ✅ Informations enregistrées avec succès !
+      </div>
+
+      <div id="qrcodeContainer" class="mt-8 text-center hidden">
+        <p class="mb-4 text-center text-sm text-gray-700 font-semibold border p-3 rounded-lg bg-gray-50">
+          ⚠️ Seules les voyageurs qui sont enregistrés dans la réservation et dans ce formulaire seront autorisés.
+          En cas de demande de ce code, merci de le présenter aux agents de sécurité.
+        </p>
+        <h2 class="text-lg font-semibold mb-4 text-gray-700">Votre QR Code</h2>
+        <div id="qrcode" class="flex justify-center"></div>
+        <button id="downloadBtn" class="mt-4 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition">Télécharger le QR Code</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts logiques (IndexedDB, login, etc.) -->
   <script>
+    /* === Toutes les fonctions IndexedDB, login, admin, user, etc. inchangées === */
+    // ... (garde ton JS initial ici, sauf la partie de "enregistrer()" qui est remplacée par ce nouveau formulaire)
+
+    // QRCodeStyling (nouveau mode invité)
     const qrCode = new QRCodeStyling({
       width: 250,
       height: 250,
@@ -51,7 +157,6 @@
 
     document.getElementById("guestForm").addEventListener("submit", function(e) {
       e.preventDefault();
-
       const apartment = document.getElementById("apartment").value.trim();
       const building = document.getElementById("building").value.trim();
       const arrivalDate = document.getElementById("arrivalDate").value;
@@ -63,9 +168,7 @@
         alert("Veuillez remplir tous les champs obligatoires !");
         return;
       }
-
-      const message = `⚠️ Seules les voyageurs qui sont enregistrés dans la réservation et dans ce formulaire seront autorisés.
-Merci de présenter ce QR Code aux agents de sécurité.\n\n` +
+      const message = `⚠️ Seules les voyageurs qui sont enregistrés dans la réservation et dans ce formulaire seront autorisés.\nMerci de présenter ce QR Code aux agents de sécurité.\n\n` +
         `📌 Appartement: ${apartment}\n` +
         `🏢 Bâtiment: ${building}\n` +
         `📅 Date d'arrivée: ${arrivalDate}\n` +
@@ -76,7 +179,6 @@ Merci de présenter ce QR Code aux agents de sécurité.\n\n` +
       qrCode.update({ data: message });
       document.getElementById("qrcode").innerHTML = "";
       qrCode.append(document.getElementById("qrcode"));
-
       document.getElementById("successMessage").classList.remove("hidden");
       document.getElementById("qrcodeContainer").classList.remove("hidden");
       document.getElementById("guestForm").reset();

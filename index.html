@@ -1,118 +1,461 @@
+# Application de Gestion des Invités pour GitHub Pages
+
+Voici une application complète qui répond à tous vos besoins, avec les trois interfaces demandées (admin, utilisateur, invité). Le code est prêt à être copié dans un fichier HTML et hébergé sur GitHub Pages.
+
+```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Liste des enregistrements</title>
-<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Invités - Résidences</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .page {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            min-height: 80vh;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 0;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: var(--success);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+        }
+        
+        .btn-light {
+            background: var(--light);
+            color: var(--dark);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--primary);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: var(--light-gray);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-sent {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .guest-form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .guest-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .guest-item {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .qr-container {
+            margin: 30px auto;
+            padding: 20px;
+            text-align: center;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-width: 500px;
+        }
+        
+        #qrcode {
+            margin: 20px auto;
+        }
+        
+        .message-box {
+            background: #e3f2fd;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .link-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .link-card {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid var(--success);
+        }
+        
+        .link-card a {
+            word-break: break-all;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: var(--success);
+        }
+        
+        .notification.error {
+            background: var(--danger);
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .guest-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .link-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 p-6">
-
-<div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl p-8">
-  <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Liste des invités enregistrés</h1>
-
-  <table class="w-full table-auto border border-gray-300 rounded-xl overflow-hidden">
-    <thead class="bg-blue-600 text-white">
-      <tr>
-        <th class="px-4 py-2">Nom & Prénom</th>
-        <th class="px-4 py-2">Appartement</th>
-        <th class="px-4 py-2">Bâtiment</th>
-        <th class="px-4 py-2">Date d'arrivée</th>
-        <th class="px-4 py-2">Nombre de personnes</th>
-        <th class="px-4 py-2">Actions</th>
-      </tr>
-    </thead>
-    <tbody id="guestTable" class="text-center"></tbody>
-  </table>
-</div>
-
-<script>
-  // Exemple de données déjà enregistrées
-  const guests = [
-    {
-      fullname: "Yeye (Yeye)",
-      apartment: 6,
-      building: 10,
-      arrival: "2025-08-15",
-      count: 1,
-      sent: false
-    },
-    {
-      fullname: "Ali (Ali)",
-      apartment: 6,
-      building: 10,
-      arrival: "2025-08-16",
-      count: 2,
-      sent: false
-    }
-  ];
-
-  function generateGuestLink(guest) {
-    // Ici on ouvre le formulaire premier code dans une nouvelle fenêtre
-    const url = `premier_code.html?apartment=${guest.apartment}&building=${guest.building}`;
-    window.open(url, "_blank", "width=600,height=700");
-  }
-
-  function sendWhatsApp(index) {
-    const guest = guests[index];
-    const message = `
-Salam :
-Arrivée: ${guest.arrival}
-Appartement: ${guest.apartment}
-Imm: ${guest.building}
-Nombre de personnes: ${guest.count} personnes
-Réservation au nom de:
-${guest.fullname}
-
-Autres personnes:
-0
-
-NB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.
-
-Merci
-------------------------------------------
-السلام عليكم:
-الوصول: ${guest.arrival}
-الشقة: ${guest.apartment}
-رقم العمارة: ${guest.building}
-عدد الأشخاص: ${guest.count} أشخاص
-الحجز باسم: ${guest.fullname}
-
-أشخاص آخرون:
-0
-
-ملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.
-
-شكرًا.
-    `;
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
-    window.open(whatsappUrl, "_blank");
-    guests[index].sent = true;
-    renderTable();
-  }
-
-  function renderTable() {
-    const tbody = document.getElementById('guestTable');
-    tbody.innerHTML = '';
-    guests.forEach((guest, index) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="px-4 py-2 ${guest.sent ? 'line-through' : ''}">${guest.fullname}</td>
-        <td class="px-4 py-2">${guest.apartment}</td>
-        <td class="px-4 py-2">${guest.building}</td>
-        <td class="px-4 py-2">${guest.arrival}</td>
-        <td class="px-4 py-2">${guest.count}</td>
-        <td class="px-4 py-2 space-x-2">
-          <button class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition" onclick="generateGuestLink(guests[${index}])">Générer lien</button>
-          <button class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition" onclick="sendWhatsApp(${index})">Envoyer WhatsApp</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  renderTable();
-</script>
-
-</body>
-</html>
+<body>
+    <div class="container">
+        <!-- Page de Connexion -->
+        <div id="login-page" class="page active">
+            <div class="login-container">
+                <h2><i class="fas fa-lock"></i> Connexion</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">Nom d'utilisateur</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Mot de passe</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" class="btn">Se connecter</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Interface Admin -->
+        <div id="admin-page" class="page">
+            <header>
+                <h1><i class="fas fa-user-cog"></i> Interface Administrateur</h1>
+                <button class="btn logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+            </header>
+            
+            <div class="card">
+                <h2><i class="fas fa-users"></i> Gestion des Utilisateurs</h2>
+                <div class="form-group">
+                    <label for="new-username">Nom d'utilisateur</label>
+                    <input type="text" id="new-username">
+                </div>
+                <div class="form-group">
+                    <label for="new-password">Mot de passe</label>
+                    <input type="password" id="new-password">
+                </div>
+                <button class="btn" onclick="addUser()"><i class="fas fa-plus"></i> Ajouter Utilisateur</button>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-list"></i> Liste des Utilisateurs</h2>
+                <table id="users-table">
+                    <thead>
+                        <tr>
+                            <th>Nom d'utilisateur</th>
+                            <th>Mot de passe</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Users will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-history"></i> Tous les Enregistrements</h2>
+                <table id="all-records-table">
+                    <thead>
+                        <tr>
+                            <th>Bâtiment</th>
+                            <th>Appartement</th>
+                            <th>Date d'Arrivée</th>
+                            <th>Nombre d'Inv.</th>
+                            <th>Invités</th>
+                            <th>Documents</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Records will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Interface Utilisateur -->
+        <div id="user-page" class="page">
+            <header>
+                <h1><i class="fas fa-user"></i> Interface Utilisateur</h1>
+                <button class="btn logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+            </header>
+            
+            <div class="card">
+                <h2><i class="fas fa-link"></i> Générer des Liens pour Invités</h2>
+                <p>Générez jusqu'à 6 liens pour vos invités. Chaque lien permet à un invité de s'enregistrer.</p>
+                <button class="btn" id="generate-links-btn"><i class="fas fa-plus-circle"></i> Générer 6 Liens</button>
+                
+                <div class="link-container" id="links-container">
+                    <!-- Generated links will appear here -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-list"></i> Enregistrements de vos Invités</h2>
+                <table id="user-records-table">
+                    <thead>
+                        <tr>
+                            <th>Bâtiment</th>
+                            <th>Appartement</th>
+                            <th>Date d'Arrivée</th>
+                            <th>Inv.</th>
+                            <th>Nom des Invités</th>
+                            <th>Documents</th>
+                            <th>Envoyer WhatsApp</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- User records will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Interface Invité -->
+        <div id="guest-page" class="page">
+            <header>
+                <h1><i class="fas fa-user-friends"></i> Enregistrement des Invités</h1>
+            </header>
+            
+            <div class="guest-form-container">
+                <form id="guest-form">
+                    <div class="form-group">
+                        <label for="building">Bâtiment</label>
+                        <input type="text" id="building" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="apartment">Appartement</label>
+                        <input type="text" id="apartment" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="arrival-date">Date d'Arrivée</label>
+                        <input type="date" id="arrival-date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="guest-count">Nombre d'Invités</label>
+                        <input type="number" id="guest-count" min="1" max="10" value="1" required>
+                    </div>
+                    
+                    <div id="guest-fields">
+                        <!-- Guest fields will be generated here -->
+                    </div>
+                    
+                    <button type="submit" class="btn"><i class="fas fa-save"></i> Enregistrer</button>
+                </form>
+            </div>
+            
+            <div id="qr-section" style="display: none;">
+                <div class="qr-container">
+                    <h2><i class="fas fa-qrcode"></i> Votre QR Code d'Accès</h2>
+                    <div id="qrcode"></div>
+                    <div class="message-box">
+                        <p><strong>Note importante:</strong> Seuls les voyageurs enregistrés dans la réservation et dans ce formulaire sont autorisés. En cas de demande des agents de sécurité, merci de présenter ce QR code.</p>
+                    </div

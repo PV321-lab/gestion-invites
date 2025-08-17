@@ -1,443 +1,104 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guest Registration</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1, h2, h3 {
-            color: #0056b3;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        #login-page, #admin-page, #user-page, #guest-page {
-            display: none;
-        }
-        #qr-code-container {
-            text-align: center;
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 8px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Interface utilisateur - Invités</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen p-6">
 
-<div class="container">
-    <div id="login-page">
-        <h2>Connexion</h2>
-        <form id="login-form">
-            <div class="form-group">
-                <label for="username">Nom d'utilisateur</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Mot de passe</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit">Se connecter</button>
-        </form>
-    </div>
+  <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+    <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Liste des invités</h1>
 
-    <div id="admin-page">
-        <h2>Interface Admin</h2>
-        <h3>Gestion des utilisateurs (Simulée)</h3>
-        <p>Fonctionnalité non implémentée dans cette démo.</p>
-        <h3>Enregistrements des invités (Simulés)</h3>
-        <table id="admin-table">
-            <thead>
-                <tr>
-                    <th>Bâtiment</th>
-                    <th>Appartement</th>
-                    <th>Date d'arrivée</th>
-                    <th>Invité(s)</th>
-                </tr>
-            </thead>
-            <tbody>
-                </tbody>
-        </table>
-        <button onclick="logout()">Déconnexion</button>
-    </div>
+    <!-- Tableau des invités -->
+    <table class="w-full table-auto border border-gray-300 rounded-xl overflow-hidden">
+      <thead class="bg-blue-600 text-white">
+        <tr>
+          <th class="px-4 py-2">Nom & Prénom</th>
+          <th class="px-4 py-2">Appartement</th>
+          <th class="px-4 py-2">Bâtiment</th>
+          <th class="px-4 py-2">Date d'arrivée</th>
+          <th class="px-4 py-2">Nombre d'invités</th>
+          <th class="px-4 py-2">ID</th>
+          <th class="px-4 py-2">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="guestTable" class="text-center">
+        <!-- Les lignes seront insérées par JavaScript -->
+      </tbody>
+    </table>
+  </div>
 
-    <div id="user-page">
-        <h2>Interface Utilisateur</h2>
-        <h3>Génération de liens d'invités</h3>
-        <p>Fonctionnalité non implémentée dans cette démo. Le formulaire ci-dessous sert à l'enregistrement direct.</p>
-        <h3>Enregistrement des invités</h3>
-        <form id="user-registration-form">
-            <div class="form-group">
-                <label for="user-building">Bâtiment</label>
-                <input type="text" id="user-building" name="building" value="A6" required>
-            </div>
-            <div class="form-group">
-                <label for="user-apartment">Appartement</label>
-                <input type="text" id="user-apartment" name="apartment" value="6" required>
-            </div>
-            <div class="form-group">
-                <label for="user-arrival-date">Date d'arrivée</label>
-                <input type="date" id="user-arrival-date" name="arrival_date" required>
-            </div>
-            <div class="form-group">
-                <label for="user-number-of-guests">Nombre d'invités</label>
-                <input type="number" id="user-number-of-guests" name="number_of_guests" value="1" required min="1">
-            </div>
-            <div id="guest-fields">
-                </div>
-            <button type="button" id="add-guest-button">Ajouter un invité</button>
-            <button type="submit">Enregistrer</button>
-        </form>
+  <script>
+    // Exemple d'invités provenant du "premier code"
+    const guests = [
+      {
+        fullname: "Yeye (Yeye)",
+        apartment: "6",
+        building: "A6",
+        arrivalDate: "2025-08-15",
+        guestCount: 1,
+        idNumber: "123456",
+        sent: false
+      },
+      {
+        fullname: "Jean Dupont",
+        apartment: "A101",
+        building: "Bâtiment B",
+        arrivalDate: "2025-08-20",
+        guestCount: 2,
+        idNumber: "AB1234567",
+        sent: false
+      }
+    ];
 
-        <h3>Tableau des enregistrements</h3>
-        <table id="user-table">
-            <thead>
-                <tr>
-                    <th>Bâtiment</th>
-                    <th>Appartement</th>
-                    <th>Date d'arrivée</th>
-                    <th>Nombre d'invités</th>
-                    <th>Invité(s)</th>
-                    <th>Pièce d'identité</th>
-                    <th>WhatsApp</th>
-                    <th>Statut</th>
-                </tr>
-            </thead>
-            <tbody>
-                </tbody>
-        </table>
-        <button onclick="logout()">Déconnexion</button>
-    </div>
-
-    <div id="guest-page">
-        <h2>Enregistrement des invités</h2>
-        <form id="guest-form">
-            <div class="form-group">
-                <label for="guest-building">Bâtiment</label>
-                <input type="text" id="guest-building" name="building" required>
-            </div>
-            <div class="form-group">
-                <label for="guest-apartment">Appartement</label>
-                <input type="text" id="guest-apartment" name="apartment" required>
-            </div>
-            <div class="form-group">
-                <label for="guest-arrival-date">Date d'arrivée</label>
-                <input type="date" id="guest-arrival-date" name="arrival_date" required>
-            </div>
-            <div class="form-group">
-                <label for="guest-number-of-guests">Nombre d'invités</label>
-                <input type="number" id="guest-number-of-guests" name="number_of_guests" required min="1">
-            </div>
-            <div id="guest-fields-guest">
-                </div>
-            <button type="submit">Enregistrer</button>
-        </form>
-        <div id="qr-code-container">
-            <h3>QR Code de votre réservation</h3>
-            <p>Seuls les voyageurs enregistrés dans la réservation et dans ce formulaire sont autorisés. En cas de demande des agents de sécurité, merci de présenter ce QR code.</p>
-            <div id="qrcode"></div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
-<script>
-    const loginForm = document.getElementById('login-form');
-    const userRegistrationForm = document.getElementById('user-registration-form');
-    const guestForm = document.getElementById('guest-form');
-    const loginPage = document.getElementById('login-page');
-    const adminPage = document.getElementById('admin-page');
-    const userPage = document.getElementById('user-page');
-    const guestPage = document.getElementById('guest-page');
-    const userTable = document.getElementById('user-table').getElementsByTagName('tbody')[0];
-    const adminTable = document.getElementById('admin-table').getElementsByTagName('tbody')[0];
-    const qrCodeContainer = document.getElementById('qr-code-container');
-    
-    // Simulating a database and user accounts
-    const USERS = {
-        'admin': { password: 'admin', role: 'admin' },
-        '11': { password: '12', role: 'user', building: 'A6', apartment: '6' }
-    };
-
-    // Simulating a global database for guests
-    let guestRegistrations = [];
-
-    // Initial state
-    showPage('login');
-
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const username = e.target.username.value;
-        const password = e.target.password.value;
-
-        if (USERS[username] && USERS[username].password === password) {
-            if (USERS[username].role === 'admin') {
-                showPage('admin');
-                updateAdminTable();
-            } else if (USERS[username].role === 'user') {
-                showPage('user');
-                updateUserTable();
-            }
-        } else {
-            alert('Nom d\'utilisateur ou mot de passe incorrect.');
-        }
-    });
-
-    userRegistrationForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
-
-        // Collect all guests
-        const guests = [];
-        const guestFields = document.querySelectorAll('#guest-fields .guest-input-group');
-        guestFields.forEach(field => {
-            const name = field.querySelector('.guest-name-input').value;
-            const passport = field.querySelector('.guest-passport-input').value;
-            guests.push({ name, passport });
-        });
-        data.guests = guests;
-
-        // Store the data (in a real app, this would be a database call)
-        guestRegistrations.push(data);
-        alert('Enregistrement de l\'invité réussi !');
-        updateUserTable();
-        updateAdminTable();
-        userRegistrationForm.reset();
-        document.getElementById('guest-fields').innerHTML = '';
-        addGuestFields(1); // Reset to 1 guest field
-    });
-
-    guestForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
-
-        const guestFields = document.querySelectorAll('#guest-fields-guest .guest-input-group');
-        const guests = [];
-        guestFields.forEach(field => {
-            const name = field.querySelector('.guest-name-input').value;
-            const passport = field.querySelector('.guest-passport-input').value;
-            guests.push({ name, passport });
-        });
-        data.guests = guests;
-
-        // Simulate storing data and generating QR code
-        const qrCodeData = JSON.stringify(data);
-        generateQRCode(qrCodeData);
-        alert('Enregistrement de l\'invité réussi ! Un QR code a été généré.');
-    });
-
-    function showPage(page) {
-        loginPage.style.display = 'none';
-        adminPage.style.display = 'none';
-        userPage.style.display = 'none';
-        guestPage.style.display = 'none';
-        qrCodeContainer.style.display = 'none';
-        
-        if (page === 'login') {
-            loginPage.style.display = 'block';
-        } else if (page === 'admin') {
-            adminPage.style.display = 'block';
-        } else if (page === 'user') {
-            userPage.style.display = 'block';
-        } else if (page === 'guest') {
-            guestPage.style.display = 'block';
-            qrCodeContainer.style.display = 'block';
-        }
+    function formatMessage(guest) {
+      return `Salam :\nArrivée: ${guest.arrivalDate}\nAppartement: ${guest.apartment}\nImm: ${guest.building}\nNombre de personnes: ${guest.guestCount} personnes\nRéservation au nom de:\n${guest.fullname}\n\nAutres personnes:\n${guest.guestCount - 1}\n\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\nالوصول: ${guest.arrivalDate}\nالشقة: ${guest.apartment}\nرقم العمارة: ${guest.building}\nعدد الأشخاص: ${guest.guestCount} أشخاص\nالحجز باسم: ${guest.fullname}\n\nأشخاص آخرون:\n${guest.guestCount - 1}\n\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\nشكرًا.`;
     }
 
-    function logout() {
-        showPage('login');
-        loginForm.reset();
-    }
-    
-    // Dynamically add guest fields
-    document.getElementById('user-number-of-guests').addEventListener('change', (e) => {
-        const numGuests = parseInt(e.target.value, 10);
-        addGuestFields(numGuests, 'user');
-    });
+    function populateTable() {
+      const tbody = document.getElementById("guestTable");
+      tbody.innerHTML = "";
 
-    document.getElementById('guest-number-of-guests').addEventListener('change', (e) => {
-        const numGuests = parseInt(e.target.value, 10);
-        addGuestFields(numGuests, 'guest');
-    });
+      guests.forEach((guest, index) => {
+        const tr = document.createElement("tr");
+        tr.classList.add("border-b");
 
-    function addGuestFields(num, type) {
-        const container = type === 'user' ? document.getElementById('guest-fields') : document.getElementById('guest-fields-guest');
-        container.innerHTML = '';
-        for (let i = 0; i < num; i++) {
-            const group = document.createElement('div');
-            group.classList.add('guest-input-group');
-            group.innerHTML = `
-                <div class="form-group">
-                    <label>Nom & Prénom de l'invité ${i + 1}</label>
-                    <input type="text" class="guest-name-input" required>
-                </div>
-                <div class="form-group">
-                    <label>Passeport / Carte Nationale ${i + 1}</label>
-                    <input type="text" class="guest-passport-input" required>
-                </div>
-            `;
-            container.appendChild(group);
-        }
+        tr.innerHTML = `
+          <td class="px-4 py-2">${guest.fullname}</td>
+          <td class="px-4 py-2">${guest.apartment}</td>
+          <td class="px-4 py-2">${guest.building}</td>
+          <td class="px-4 py-2">${guest.arrivalDate}</td>
+          <td class="px-4 py-2">${guest.guestCount}</td>
+          <td class="px-4 py-2">${guest.idNumber}</td>
+          <td class="px-4 py-2">
+            <button class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition" 
+              onclick="sendWhatsApp(${index}, this)">
+              Envoyer WhatsApp
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
-    addGuestFields(1, 'user');
-    addGuestFields(1, 'guest');
+    function sendWhatsApp(index, btn) {
+      const guest = guests[index];
+      const message = encodeURIComponent(formatMessage(guest));
+      const phoneNumber = ""; // Optionnel: numéro WhatsApp si vous voulez l'envoyer à un numéro spécifique
+      const url = `https://wa.me/${phoneNumber}?text=${message}`;
 
+      // Ouvre WhatsApp Web ou mobile
+      window.open(url, "_blank");
 
-    function updateAdminTable() {
-        adminTable.innerHTML = '';
-        guestRegistrations.forEach(data => {
-            const row = adminTable.insertRow();
-            row.insertCell(0).textContent = data.building;
-            row.insertCell(1).textContent = data.apartment;
-            row.insertCell(2).textContent = data.arrival_date;
-            const guestsText = data.guests.map(g => `${g.name} (${g.passport})`).join(', ');
-            row.insertCell(3).textContent = guestsText;
-        });
+      // Marque comme envoyé et souligne le bouton
+      guest.sent = true;
+      btn.classList.add("line-through");
+      btn.textContent = "Envoyé";
     }
 
-    function updateUserTable() {
-        userTable.innerHTML = '';
-        const currentUser = USERS[document.getElementById('username').value];
-        const userRegistrations = guestRegistrations.filter(r => 
-            r.building === currentUser.building && r.apartment === currentUser.apartment
-        );
+    populateTable();
+  </script>
 
-        userRegistrations.forEach(data => {
-            const row = userTable.insertRow();
-            row.insertCell(0).textContent = data.building;
-            row.insertCell(1).textContent = data.apartment;
-            row.insertCell(2).textContent = data.arrival_date;
-            row.insertCell(3).textContent = data.number_of_guests;
-            
-            const guestsText = data.guests.map(g => g.name).join(', ');
-            row.insertCell(4).textContent = guestsText;
-
-            const passportsText = data.guests.map(g => g.passport).join(', ');
-            row.insertCell(5).textContent = passportsText;
-
-            // WhatsApp link and status
-            const whatsappCell = row.insertCell(6);
-            const statusCell = row.insertCell(7);
-
-            const message = `
-                Salam :
-                Arrivée: ${data.arrival_date}
-                Appartement: ${data.apartment}
-                Imm: ${data.building}
-                Nombre de personnes: ${data.number_of_guests} personnes
-                Réservation au nom de: ${data.guests[0].name} (${data.guests[0].passport})
-                
-                Autres personnes:
-                ${data.guests.slice(1).map(g => `${g.name} (${g.passport})`).join('\n')}
-
-                NB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.
-                
-                Merci
-                
-                السلام عليكم:
-                الوصول: ${data.arrival_date}
-                الشقة: ${data.apartment}
-                رقم العمارة: ${data.building}
-                عدد الأشخاص: ${data.number_of_guests} أشخاص
-                الحجز باسم: ${data.guests[0].name} (${data.guests[0].passport})
-
-                أشخاص آخرون:
-                ${data.guests.slice(1).map(g => `${g.name} (${g.passport})`).join('\n')}
-
-                ملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.
-
-                شكرًا.
-            `;
-            const whatsappLink = document.createElement('a');
-            whatsappLink.href = `https://wa.me/?text=${encodeURIComponent(message)}`;
-            whatsappLink.textContent = 'Envoyer par WhatsApp';
-            whatsappLink.target = '_blank';
-            whatsappCell.appendChild(whatsappLink);
-
-            statusCell.textContent = 'Non envoyé';
-            statusCell.style.color = 'red';
-            whatsappLink.onclick = () => {
-                statusCell.textContent = 'Envoyé';
-                statusCell.style.color = 'green';
-            };
-        });
-    }
-
-    function generateQRCode(data) {
-        document.getElementById('qrcode').innerHTML = ''; // Clear previous QR code
-        const qrcode = new QRCode(document.getElementById('qrcode'), {
-            text: data,
-            width: 128,
-            height: 128,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
-        qrCodeContainer.style.display = 'block';
-    }
-
-</script>
 </body>
 </html>

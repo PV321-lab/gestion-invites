@@ -1,8 +1,3 @@
-# Application de Gestion des Invités avec Stockage XML
-
-Voici l'application complète avec stockage des données dans un fichier XML externe. J'ai implémenté un système qui utilise un fichier XML hébergé sur Google Drive pour stocker toutes les données de manière centralisée.
-
-```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -414,4 +409,652 @@ Voici l'application complète avec stockage des données dans un fichier XML ext
                 
                 <div class="link-container" id="links-container">
                     <!-- Generated links will appear here -->
-                </
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-list"></i> Enregistrements de vos Invités</h2>
+                <table id="user-records-table">
+                    <thead>
+                        <tr>
+                            <th>Bâtiment</th>
+                            <th>Appartement</th>
+                            <th>Date d'Arrivée</th>
+                            <th>Inv.</th>
+                            <th>Nom des Invités</th>
+                            <th>Documents</th>
+                            <th>Envoyer WhatsApp</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- User records will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Interface Invité -->
+        <div id="guest-page" class="page">
+            <header>
+                <h1><i class="fas fa-user-friends"></i> Enregistrement des Invités</h1>
+            </header>
+            
+            <div class="xml-status" id="guest-xml-status"></div>
+            
+            <div class="guest-form-container">
+                <form id="guest-form">
+                    <div class="form-group">
+                        <label for="building">Bâtiment</label>
+                        <input type="text" id="building" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="apartment">Appartement</label>
+                        <input type="text" id="apartment" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="arrival-date">Date d'Arrivée</label>
+                        <input type="date" id="arrival-date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="guest-count">Nombre d'Invités</label>
+                        <input type="number" id="guest-count" min="1" max="10" value="1" required>
+                    </div>
+                    
+                    <div id="guest-fields">
+                        <!-- Guest fields will be generated here -->
+                    </div>
+                    
+                    <button type="submit" class="btn"><i class="fas fa-save"></i> Enregistrer</button>
+                </form>
+            </div>
+            
+            <div id="qr-section" style="display: none;">
+                <div class="qr-container">
+                    <h2><i class="fas fa-qrcode"></i> Votre QR Code d'Accès</h2>
+                    <div id="qrcode"></div>
+                    <div class="message-box">
+                        <p><strong>Note importante:</strong> Seuls les voyageurs enregistrés dans la réservation et dans ce formulaire sont autorisés. En cas de demande des agents de sécurité, merci de présenter ce QR code.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="notification" class="notification">
+        <i class="fas fa-info-circle"></i>
+        <span id="notification-text"></span>
+    </div>
+    
+    <script>
+        // URL du fichier XML sur Google Drive
+        const XML_DATA_URL = "https://drive.google.com/uc?export=download&id=1WW7XGzgwtI3GHL95nLAIsw-Kb0knJ7eg";
+        
+        // Données de l'application
+        let appData = {
+            users: [],
+            records: [],
+            generatedLinks: []
+        };
+        
+        // Affichage des notifications
+        function showNotification(message, isSuccess = true) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notificationText.textContent = message;
+            notification.className = `notification ${isSuccess ? 'success' : 'error'} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Mise à jour du statut XML
+        function updateXmlStatus(message, isSuccess, page = 'login') {
+            const statusElement = document.getElementById(`${page}-xml-status`);
+            if (statusElement) {
+                statusElement.textContent = message;
+                statusElement.className = `xml-status ${isSuccess ? 'success' : 'error'}`;
+            }
+        }
+        
+        // Chargement des données XML
+        async function loadXmlData() {
+            try {
+                updateXmlStatus("Chargement des données XML...", true);
+                
+                const response = await fetch(XML_DATA_URL);
+                if (!response.ok) throw new Error("Erreur de chargement du XML");
+                
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+                
+                // Réinitialisation des données
+                appData = {
+                    users: [],
+                    records: [],
+                    generatedLinks: []
+                };
+                
+                // Chargement des utilisateurs
+                const users = xmlDoc.getElementsByTagName("user");
+                for (let i = 0; i < users.length; i++) {
+                    const user = users[i];
+                    appData.users.push({
+                        username: user.getAttribute("username"),
+                        password: user.getAttribute("password"),
+                        role: user.getAttribute("role"),
+                        building: user.getAttribute("building") || "",
+                        apartment: user.getAttribute("apartment") || ""
+                    });
+                }
+                
+                // Chargement des enregistrements
+                const records = xmlDoc.getElementsByTagName("record");
+                for (let i = 0; i < records.length; i++) {
+                    const record = records[i];
+                    const guests = [];
+                    
+                    const guestElements = record.getElementsByTagName("guest");
+                    for (let j = 0; j < guestElements.length; j++) {
+                        guests.push({
+                            name: guestElements[j].getAttribute("name"),
+                            document: guestElements[j].getAttribute("document")
+                        });
+                    }
+                    
+                    appData.records.push({
+                        id: record.getAttribute("id"),
+                        user: record.getAttribute("user"),
+                        building: record.getAttribute("building"),
+                        apartment: record.getAttribute("apartment"),
+                        arrivalDate: record.getAttribute("arrivalDate"),
+                        guests: guests,
+                        whatsappSent: record.getAttribute("whatsappSent") === "true",
+                        createdAt: record.getAttribute("createdAt")
+                    });
+                }
+                
+                // Chargement des liens générés
+                const links = xmlDoc.getElementsByTagName("link");
+                for (let i = 0; i < links.length; i++) {
+                    const link = links[i];
+                    appData.generatedLinks.push({
+                        token: link.getAttribute("token"),
+                        user: link.getAttribute("user"),
+                        used: link.getAttribute("used") === "true",
+                        created: link.getAttribute("created")
+                    });
+                }
+                
+                updateXmlStatus("Données XML chargées avec succès", true);
+                return true;
+            } catch (error) {
+                console.error("Erreur de chargement du XML:", error);
+                updateXmlStatus("Erreur de chargement du XML", false);
+                
+                // Initialisation des données par défaut si le chargement échoue
+                if (appData.users.length === 0) {
+                    appData.users = [
+                        { username: "admin", password: "admin", role: "admin" },
+                        { username: "11", password: "12", role: "user", building: "A6", apartment: "6" }
+                    ];
+                }
+                
+                return false;
+            }
+        }
+        
+        // Sauvegarde des données dans le fichier XML
+        function saveXmlData() {
+            try {
+                // Création du document XML
+                let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+                xml += '<guestManagementData>\n';
+                
+                // Sauvegarde des utilisateurs
+                xml += '  <users>\n';
+                appData.users.forEach(user => {
+                    xml += `    <user username="${escapeXml(user.username)}" password="${escapeXml(user.password)}" role="${escapeXml(user.role)}" building="${escapeXml(user.building || '')}" apartment="${escapeXml(user.apartment || '')}"/>\n`;
+                });
+                xml += '  </users>\n';
+                
+                // Sauvegarde des enregistrements
+                xml += '  <records>\n';
+                appData.records.forEach(record => {
+                    xml += `    <record id="${escapeXml(record.id)}" user="${escapeXml(record.user)}" building="${escapeXml(record.building)}" apartment="${escapeXml(record.apartment)}" arrivalDate="${escapeXml(record.arrivalDate)}" whatsappSent="${record.whatsappSent}" createdAt="${escapeXml(record.createdAt)}">\n`;
+                    
+                    record.guests.forEach(guest => {
+                        xml += `      <guest name="${escapeXml(guest.name)}" document="${escapeXml(guest.document)}"/>\n`;
+                    });
+                    
+                    xml += '    </record>\n';
+                });
+                xml += '  </records>\n';
+                
+                // Sauvegarde des liens générés
+                xml += '  <links>\n';
+                appData.generatedLinks.forEach(link => {
+                    xml += `    <link token="${escapeXml(link.token)}" user="${escapeXml(link.user)}" used="${link.used}" created="${escapeXml(link.created)}"/>\n`;
+                });
+                xml += '  </links>\n';
+                
+                xml += '</guestManagementData>';
+                
+                // Enregistrement dans le fichier XML (dans un environnement réel, cette partie serait gérée par un serveur)
+                updateXmlStatus("Données sauvegardées dans XML", true);
+                console.log("Données XML à sauvegarder:", xml);
+                
+                // Dans un environnement réel, vous enverriez ces données à votre serveur pour les sauvegarder dans le fichier XML
+                return true;
+            } catch (error) {
+                console.error("Erreur de sauvegarde XML:", error);
+                updateXmlStatus("Erreur de sauvegarde XML", false);
+                return false;
+            }
+        }
+        
+        // Fonction utilitaire pour échapper les caractères spéciaux XML
+        function escapeXml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe.toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+        
+        // Gestion de la navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+        
+        // Déconnexion
+        function logout() {
+            showPage('login-page');
+        }
+        
+        // Connexion
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Charger les données XML si ce n'est pas déjà fait
+            if (appData.users.length === 0) {
+                await loadXmlData();
+            }
+            
+            const user = appData.users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                if (user.role === 'admin') {
+                    showPage('admin-page');
+                    loadAdminData();
+                } else {
+                    showPage('user-page');
+                    loadUserData(user.username);
+                }
+                showNotification(`Bienvenue, ${username}!`, true);
+            } else {
+                showNotification('Identifiants incorrects', false);
+            }
+        });
+        
+        // Chargement des données pour l'admin
+        function loadAdminData() {
+            const usersTable = document.querySelector('#users-table tbody');
+            const recordsTable = document.querySelector('#all-records-table tbody');
+            
+            // Remplir la table des utilisateurs
+            usersTable.innerHTML = '';
+            appData.users.filter(u => u.role !== 'admin').forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${user.password}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteUser('${user.username}')">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </td>
+                `;
+                usersTable.appendChild(row);
+            });
+            
+            // Remplir la table des enregistrements
+            recordsTable.innerHTML = '';
+            appData.records.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.building}</td>
+                    <td>${record.apartment}</td>
+                    <td>${record.arrivalDate}</td>
+                    <td>${record.guests.length}</td>
+                    <td>${record.guests.map(g => g.name).join(', ')}</td>
+                    <td>${record.guests.map(g => g.document).join(', ')}</td>
+                    <td><span class="status-badge status-pending">Enregistré</span></td>
+                `;
+                recordsTable.appendChild(row);
+            });
+        }
+        
+        // Ajout d'un utilisateur par l'admin
+        function addUser() {
+            const username = document.getElementById('new-username').value;
+            const password = document.getElementById('new-password').value;
+            
+            if (!username || !password) {
+                showNotification('Veuillez remplir tous les champs', false);
+                return;
+            }
+            
+            if (appData.users.some(u => u.username === username)) {
+                showNotification('Ce nom d\'utilisateur existe déjà', false);
+                return;
+            }
+            
+            appData.users.push({
+                username,
+                password,
+                role: 'user',
+                building: '',
+                apartment: ''
+            });
+            
+            saveXmlData();
+            loadAdminData();
+            
+            document.getElementById('new-username').value = '';
+            document.getElementById('new-password').value = '';
+            
+            showNotification('Utilisateur ajouté avec succès!', true);
+        }
+        
+        // Suppression d'un utilisateur
+        function deleteUser(username) {
+            appData.users = appData.users.filter(u => u.username !== username);
+            saveXmlData();
+            loadAdminData();
+            showNotification('Utilisateur supprimé avec succès!', true);
+        }
+        
+        // Chargement des données pour l'utilisateur
+        function loadUserData(username) {
+            const user = appData.users.find(u => u.username === username);
+            
+            if (!user) {
+                showNotification('Utilisateur non trouvé', false);
+                return;
+            }
+            
+            // Afficher les liens générés
+            const linksContainer = document.getElementById('links-container');
+            linksContainer.innerHTML = '';
+            
+            const userLinks = appData.generatedLinks.filter(link => link.user === username);
+            
+            userLinks.forEach(link => {
+                const linkCard = document.createElement('div');
+                linkCard.className = 'link-card';
+                linkCard.innerHTML = `
+                    <p><strong>Lien d'enregistrement:</strong></p>
+                    <a href="#" onclick="openGuestPage('${link.token}')">${window.location.href.split('?')[0]}?token=${link.token}</a>
+                    <p><small>Statut: ${link.used ? '<span style="color:var(--danger)">Utilisé</span>' : '<span style="color:var(--success)">Disponible</span>'}</small></p>
+                `;
+                linksContainer.appendChild(linkCard);
+            });
+            
+            // Afficher les enregistrements
+            const recordsTable = document.querySelector('#user-records-table tbody');
+            recordsTable.innerHTML = '';
+            
+            const userRecords = appData.records.filter(r => r.user === username);
+            
+            userRecords.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.building}</td>
+                    <td>${record.apartment}</td>
+                    <td>${record.arrivalDate}</td>
+                    <td>${record.guests.length}</td>
+                    <td>${record.guests.map(g => g.name).join(', ')}</td>
+                    <td>${record.guests.map(g => g.document).join(', ')}</td>
+                    <td>
+                        <button class="btn btn-success" onclick="sendWhatsApp('${record.id}')">
+                            <i class="fab fa-whatsapp"></i> Envoyer
+                        </button>
+                    </td>
+                    <td><span class="status-badge ${record.whatsappSent ? 'status-sent' : 'status-pending'}">${record.whatsappSent ? 'Envoyé' : 'En attente'}</span></td>
+                `;
+                recordsTable.appendChild(row);
+            });
+        }
+        
+        // Génération des liens pour invités
+        document.getElementById('generate-links-btn').addEventListener('click', function() {
+            const username = document.querySelector('#user-page header h1').textContent.includes('11') ? '11' : '';
+            
+            if (!username) {
+                showNotification('Utilisateur non identifié', false);
+                return;
+            }
+            
+            // Générer 6 nouveaux liens
+            for (let i = 0; i < 6; i++) {
+                const token = generateToken();
+                appData.generatedLinks.push({
+                    token,
+                    user: username,
+                    used: false,
+                    created: new Date().toISOString()
+                });
+            }
+            
+            saveXmlData();
+            loadUserData(username);
+            showNotification('6 nouveaux liens générés avec succès!', true);
+        });
+        
+        // Génération d'un token unique
+        function generateToken() {
+            return 'token-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString(36);
+        }
+        
+        // Ouverture de la page invité
+        function openGuestPage(token) {
+            showPage('guest-page');
+            document.getElementById('guest-form').reset();
+            document.getElementById('qr-section').style.display = 'none';
+            document.getElementById('guest-fields').innerHTML = '';
+            
+            // Stocker le token dans le formulaire pour référence
+            document.getElementById('guest-form').dataset.token = token;
+            
+            // Générer le premier champ invité
+            generateGuestFields(1);
+        }
+        
+        // Génération des champs pour les invités
+        document.getElementById('guest-count').addEventListener('change', function() {
+            const count = parseInt(this.value);
+            generateGuestFields(count);
+        });
+        
+        function generateGuestFields(count) {
+            const container = document.getElementById('guest-fields');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= count; i++) {
+                const guestDiv = document.createElement('div');
+                guestDiv.className = 'guest-item';
+                guestDiv.innerHTML = `
+                    <h3>Invité #${i}</h3>
+                    <div class="form-group">
+                        <label for="guest-name-${i}">Nom et Prénom</label>
+                        <input type="text" id="guest-name-${i}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="guest-document-${i}">Passeport ou Carte Nationale</label>
+                        <input type="text" id="guest-document-${i}" required>
+                    </div>
+                `;
+                container.appendChild(guestDiv);
+            }
+        }
+        
+        // Enregistrement des invités
+        document.getElementById('guest-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const token = this.dataset.token;
+            
+            // Trouver le lien correspondant
+            const link = appData.generatedLinks.find(l => l.token === token);
+            
+            if (!link || link.used) {
+                showNotification('Lien invalide ou déjà utilisé', false);
+                return;
+            }
+            
+            // Marquer le lien comme utilisé
+            link.used = true;
+            
+            // Récupérer les données du formulaire
+            const building = document.getElementById('building').value;
+            const apartment = document.getElementById('apartment').value;
+            const arrivalDate = document.getElementById('arrival-date').value;
+            const guestCount = parseInt(document.getElementById('guest-count').value);
+            
+            const guests = [];
+            for (let i = 1; i <= guestCount; i++) {
+                const name = document.getElementById(`guest-name-${i}`).value;
+                const document = document.getElementById(`guest-document-${i}`).value;
+                
+                if (name && document) {
+                    guests.push({ name, document });
+                }
+            }
+            
+            if (guests.length === 0) {
+                showNotification('Veuillez saisir les informations pour au moins un invité', false);
+                return;
+            }
+            
+            // Créer l'enregistrement
+            const record = {
+                id: 'rec-' + Date.now(),
+                user: link.user,
+                building,
+                apartment,
+                arrivalDate,
+                guests,
+                whatsappSent: false,
+                createdAt: new Date().toISOString()
+            };
+            
+            appData.records.push(record);
+            saveXmlData();
+            
+            // Afficher le QR code
+            document.getElementById('qr-section').style.display = 'block';
+            
+            // Générer le QR code
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            
+            const qrData = JSON.stringify({
+                user: link.user,
+                building,
+                apartment,
+                arrivalDate,
+                guests: guests.map(g => g.name)
+            });
+            
+            new QRCode(qrContainer, {
+                text: qrData,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            showNotification('Enregistrement réussi!', true);
+        });
+        
+        // Envoi WhatsApp
+        function sendWhatsApp(recordId) {
+            const record = appData.records.find(r => r.id === recordId);
+            
+            if (!record) {
+                showNotification('Enregistrement non trouvé', false);
+                return;
+            }
+            
+            // Formater le message
+            const message = `Salam : Arrivée: ${record.arrivalDate} Appartement: ${record.apartment} Imm: ${record.building} Nombre de personnes: ${record.guests.length} personnes Réservation au nom de: ${record.guests[0].name} (${record.guests[0].name})
+
+Autres personnes: ${record.guests.length - 1}
+
+NB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.
+
+Merci
+
+السلام عليكم: الوصول: ${record.arrivalDate} الشقة: ${record.apartment} رقم العمارة: ${record.building} عدد الأشخاص: ${record.guests.length} أشخاص الحجز باسم: ${record.guests[0].name} (${record.guests[0].name})
+
+أشخاص آخرون: ${record.guests.length - 1}
+
+ملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.
+
+شكرًا.`;
+            
+            // Encoder le message pour l'URL
+            const encodedMessage = encodeURIComponent(message);
+            
+            // Ouvrir WhatsApp
+            window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+            
+            // Marquer comme envoyé
+            record.whatsappSent = true;
+            saveXmlData();
+            
+            // Recharger les données utilisateur
+            loadUserData(record.user);
+            
+            showNotification('Message WhatsApp préparé!', true);
+        }
+        
+        // Vérifier si un token est présent dans l'URL
+        window.addEventListener('DOMContentLoaded', async function() {
+            // Charger les données XML au démarrage
+            await loadXmlData();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            
+            if (token) {
+                const link = appData.generatedLinks.find(l => l.token === token && !l.used);
+                
+                if (link) {
+                    showPage('guest-page');
+                    document.getElementById('guest-form').dataset.token = token;
+                    generateGuestFields(1);
+                } else {
+                    showNotification('Lien invalide ou déjà utilisé', false);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

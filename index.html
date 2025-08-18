@@ -1,1 +1,653 @@
-j'ai une erreur quand j'essaie d'enregistrer un invité ça change que sur Google Drive j'ai bien mentionné que tout le monde peut éditer c'est dispose de ce lien sur Google ldrie de ce fichier
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enregistrement des Invités - Google Drive</title>
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+  <style>
+    :root {
+      --primary: #4285f4;
+      --secondary: #34a853;
+      --accent: #fbbc05;
+      --danger: #ea4335;
+      --light: #f8f9fa;
+      --dark: #202124;
+      --gray: #5f6368;
+      --border: #dadce0;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Roboto', 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f1f3f4 0%, #e8eaed 100%);
+      color: var(--dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid var(--border);
+    }
+    
+    h1 {
+      color: var(--primary);
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: var(--gray);
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+    }
+    
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 25px;
+      border: 1px solid var(--border);
+    }
+    
+    h2 {
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+      color: var(--primary);
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+    }
+    
+    label {
+      display: block;
+      margin: 15px 0 8px;
+      font-weight: 500;
+      color: var(--gray);
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px;
+      background: var(--light);
+      transition: all 0.3s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+      background: white;
+    }
+    
+    input[readonly] {
+      background-color: #f1f3f4;
+    }
+    
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--primary);
+      color: white;
+    }
+    
+    button:hover {
+      background: #3367d6;
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background: var(--gray);
+    }
+    
+    .btn-secondary:hover {
+      background: #3c4043;
+    }
+    
+    .btn-success {
+      background: var(--secondary);
+    }
+    
+    .btn-success:hover {
+      background: #2d924c;
+    }
+    
+    .banner {
+      padding: 15px;
+      border-radius: 10px;
+      margin: 15px 0;
+      font-weight: 500;
+    }
+    
+    .banner-info {
+      background: #e8f0fe;
+      color: #174ea6;
+      border: 1px solid #c6dafc;
+    }
+    
+    .banner-success {
+      background: #e6f4ea;
+      color: #137333;
+      border: 1px solid #cce8d3;
+    }
+    
+    .banner-warning {
+      background: #fef7e0;
+      color: #a66300;
+      border: 1px solid #fde293;
+    }
+    
+    .banner-error {
+      background: #fce8e6;
+      color: #a50e0e;
+      border: 1px solid #f7b9b4;
+    }
+    
+    .person-group {
+      background: #f8fafc;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 15px 0;
+      border: 1px solid var(--border);
+    }
+    
+    .qr-container {
+      text-align: center;
+      margin: 25px 0;
+    }
+    
+    .qr-placeholder {
+      width: 250px;
+      height: 250px;
+      background: #f0f4f8;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray);
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .col {
+      flex: 1;
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      padding: 15px;
+      color: var(--gray);
+    }
+    
+    @media (max-width: 600px) {
+      .row {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Enregistrement des Invités</h1>
+      <p class="subtitle">Système de gestion avec stockage sur Google Drive</p>
+    </header>
+
+    <!-- Écran de connexion -->
+    <div id="loginCard" class="card">
+      <h2>Connexion</h2>
+      
+      <div class="row">
+        <div class="col">
+          <label for="loginUser">Identifiant</label>
+          <input type="text" id="loginUser" placeholder="Votre identifiant" value="66">
+        </div>
+        <div class="col">
+          <label for="loginPass">Mot de passe</label>
+          <input type="password" id="loginPass" placeholder="Votre mot de passe" value="15">
+        </div>
+      </div>
+      
+      <button id="btnLogin">Connexion</button>
+      
+      <div id="loginMsg" class="banner banner-warning hidden">
+        Message d'erreur de connexion
+      </div>
+    </div>
+
+    <!-- Panneau administrateur -->
+    <div id="adminPanel" class="hidden">
+      <div class="card">
+        <h2>Panneau Administrateur</h2>
+        <p>Bienvenue dans le panneau d'administration</p>
+        
+        <button class="btn-secondary" id="logoutBtn">
+          Déconnexion
+        </button>
+      </div>
+      
+      <div class="card">
+        <h3>Gestion des utilisateurs</h3>
+        <div class="row">
+          <div class="col">
+            <label>Appartement</label>
+            <input type="text" id="appartAdmin" inputmode="numeric">
+          </div>
+          <div class="col">
+            <label>Bâtiment</label>
+            <input type="text" id="batAdmin">
+          </div>
+          <div class="col">
+            <label>Mot de passe</label>
+            <input type="text" id="passAdmin">
+          </div>
+        </div>
+        <button id="createUserBtn" class="btn-success">Créer utilisateur</button>
+        <div id="userMsg" class="banner banner-warning hidden"></div>
+      </div>
+    </div>
+
+    <!-- Panneau utilisateur -->
+    <div id="userPanel" class="hidden">
+      <div class="card">
+        <h2>Espace Personnel</h2>
+        <p>Bienvenue dans votre espace personnel</p>
+        
+        <button class="btn-secondary" id="userLogoutBtn">
+          Déconnexion
+        </button>
+      </div>
+      
+      <div class="card">
+        <h3>Générer un lien d'enregistrement</h3>
+        <button id="generateLinkBtn" class="btn-success">Générer le lien d'enregistrement</button>
+        <div id="linkContainer" class="banner banner-info hidden"></div>
+      </div>
+    </div>
+
+    <!-- Formulaire d'invitation -->
+    <div id="invitePanel" class="hidden">
+      <div class="card">
+        <h2>Enregistrement d'Invitation</h2>
+        
+        <div class="row">
+          <div class="col">
+            <label>Appartement</label>
+            <input type="text" id="invAppart" readonly>
+          </div>
+          <div class="col">
+            <label>Bâtiment</label>
+            <input type="text" id="invBat" readonly>
+          </div>
+        </div>
+
+        <label>Date d'arrivée</label>
+        <input type="date" id="dateArrivee" required>
+
+        <label>Nombre total de personnes</label>
+        <input type="number" id="nbPers" min="1" value="1" required>
+
+        <div class="person-group">
+          <h3>Personne principale</h3>
+          <label>Nom & Prénom</label>
+          <input type="text" id="nomPrincipal" required placeholder="Nom complet">
+          
+          <label>Passeport / CNI</label>
+          <input type="text" id="docPrincipal" required placeholder="Numéro de document">
+        </div>
+
+        <div id="personnesContainer"></div>
+
+        <button id="registerGuestBtn">Enregistrer les invités</button>
+        <button class="btn-secondary" id="backBtn">Retour</button>
+        
+        <div id="registerMsg" class="banner banner-info hidden"></div>
+      </div>
+      
+      <div class="card">
+        <div class="qr-container">
+          <h3>QR Code d'accès</h3>
+          <div id="qrcode" class="qr-placeholder">
+            Le QR code apparaîtra après l'enregistrement
+          </div>
+          <button id="downloadQRBtn" class="btn-success hidden">Télécharger le QR Code</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Système d'Enregistrement des Invités &copy; 2023 - Stockage sécurisé sur Google Drive</p>
+    </footer>
+  </div>
+
+  <script>
+    // URL du script Google pour accéder à Google Drive
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxK1YdQb6BzT4Rw9Qr1rS0N0s7dKQ2hVj0X1wT4Jw4/exec";
+    
+    // Structure de données par défaut
+    const DEFAULT_DATA = {
+      users: [
+        { id: "66", appart: "6", batiment: "6", password: "15" }
+      ],
+      registrations: []
+    };
+    
+    // État global de l'application
+    let appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    let qrCode = null;
+    
+    // Initialiser le QR code
+    function initQRCode() {
+      qrCode = new QRCodeStyling({
+        width: 250,
+        height: 250,
+        margin: 10,
+        qrOptions: { typeNumber: 0, mode: "Byte", errorCorrectionLevel: "H" },
+        dotsOptions: { color: "#1E40AF", type: "rounded" },
+        backgroundOptions: { color: "#FFFFFF" },
+        cornersSquareOptions: { type: "extra-rounded", color: "#1E40AF" },
+        cornersDotOptions: { type: "dot", color: "#1E40AF" }
+      });
+    }
+    
+    // Fonctions pour interagir avec Google Drive
+    async function saveToGoogleDrive() {
+      try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'save',
+            data: JSON.stringify(appData)
+          })
+        });
+        
+        const result = await response.json();
+        return result.success;
+      } catch (error) {
+        console.error("Erreur de sauvegarde:", error);
+        return false;
+      }
+    }
+    
+    async function loadFromGoogleDrive() {
+      try {
+        const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=load`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          return JSON.parse(result.data);
+        }
+        return JSON.parse(JSON.stringify(DEFAULT_DATA));
+      } catch (error) {
+        console.error("Erreur de chargement:", error);
+        return JSON.parse(JSON.stringify(DEFAULT_DATA));
+      }
+    }
+    
+    // Fonctions d'interface
+    function showBanner(elementId, type, message) {
+      const banner = document.getElementById(elementId);
+      banner.className = `banner banner-${type}`;
+      banner.textContent = message;
+      banner.classList.remove('hidden');
+    }
+    
+    function hideBanner(elementId) {
+      const banner = document.getElementById(elementId);
+      banner.classList.add('hidden');
+    }
+    
+    function showPanel(panelId) {
+      // Masquer tous les panneaux
+      document.getElementById('loginCard').classList.add('hidden');
+      document.getElementById('adminPanel').classList.add('hidden');
+      document.getElementById('userPanel').classList.add('hidden');
+      document.getElementById('invitePanel').classList.add('hidden');
+      
+      // Afficher le panneau demandé
+      document.getElementById(panelId).classList.remove('hidden');
+    }
+    
+    // Fonction pour générer des champs pour les personnes supplémentaires
+    function generatePersonFields() {
+      const nbPers = parseInt(document.getElementById('nbPers').value) || 1;
+      const container = document.getElementById('personnesContainer');
+      container.innerHTML = '';
+      
+      for (let i = 2; i <= nbPers; i++) {
+        const personGroup = document.createElement('div');
+        personGroup.className = 'person-group';
+        personGroup.innerHTML = `
+          <h3>Personne ${i}</h3>
+          <label>Nom & Prénom</label>
+          <input type="text" id="pers${i}Nom" required placeholder="Nom complet">
+          
+          <label>Passeport / CNI</label>
+          <input type="text" id="pers${i}Doc" required placeholder="Numéro de document">
+        `;
+        container.appendChild(personGroup);
+      }
+    }
+    
+    // Fonction d'enregistrement d'un invité
+    async function registerGuest() {
+      const appart = document.getElementById('invAppart').value;
+      const batiment = document.getElementById('invBat').value;
+      const date = document.getElementById('dateArrivee').value;
+      const nomPrincipal = document.getElementById('nomPrincipal').value;
+      const docPrincipal = document.getElementById('docPrincipal').value;
+      const nbPers = parseInt(document.getElementById('nbPers').value) || 1;
+      
+      // Validation des données
+      if (!appart || !batiment || !date || !nomPrincipal || !docPrincipal) {
+        showBanner('registerMsg', 'error', 'Veuillez remplir tous les champs obligatoires');
+        return;
+      }
+      
+      // Préparer les données des personnes
+      const personnes = [{
+        nom: nomPrincipal,
+        doc: docPrincipal
+      }];
+      
+      for (let i = 2; i <= nbPers; i++) {
+        const nom = document.getElementById(`pers${i}Nom`)?.value || '';
+        const doc = document.getElementById(`pers${i}Doc`)?.value || '';
+        
+        if (nom && doc) {
+          personnes.push({ nom, doc });
+        }
+      }
+      
+      // Créer l'objet d'enregistrement
+      const registration = {
+        id: Date.now(),
+        appart,
+        batiment,
+        date,
+        personnes,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Ajouter aux données
+      appData.registrations.push(registration);
+      
+      // Sauvegarder sur Google Drive
+      const success = await saveToGoogleDrive();
+      
+      if (success) {
+        // Afficher le QR code
+        const qrData = JSON.stringify({
+          appart,
+          batiment,
+          date,
+          personnes
+        });
+        
+        qrCode.update({ data: qrData });
+        document.getElementById('qrcode').innerHTML = '';
+        qrCode.append(document.getElementById('qrcode'));
+        document.getElementById('downloadQRBtn').classList.remove('hidden');
+        
+        showBanner('registerMsg', 'success', 'Enregistrement réussi! Les données ont été sauvegardées sur Google Drive.');
+      } else {
+        showBanner('registerMsg', 'error', "Erreur lors de la sauvegarde sur Google Drive. Veuillez réessayer.");
+      }
+    }
+    
+    // Fonction de connexion
+    function login() {
+      const username = document.getElementById('loginUser').value.trim();
+      const password = document.getElementById('loginPass').value.trim();
+      
+      // Recherche de l'utilisateur
+      const user = appData.users.find(u => u.id === username && u.password === password);
+      
+      if (user) {
+        // Cacher le formulaire de connexion
+        hideBanner('loginMsg');
+        
+        // Afficher le bon panneau
+        if (username === 'admin' && password === 'admin') {
+          showPanel('adminPanel');
+        } else {
+          showPanel('userPanel');
+        }
+      } else {
+        showBanner('loginMsg', 'error', 'Identifiants incorrects. Veuillez réessayer.');
+      }
+    }
+    
+    // Fonction de déconnexion
+    function logout() {
+      document.getElementById('loginUser').value = '';
+      document.getElementById('loginPass').value = '';
+      showPanel('loginCard');
+    }
+    
+    // Fonction pour générer un lien d'enregistrement
+    function generateLink() {
+      const baseUrl = window.location.href.split('?')[0];
+      const inviteLink = `${baseUrl}?invite=66`; // Utilisateur fixe pour le test
+      
+      const linkContainer = document.getElementById('linkContainer');
+      linkContainer.innerHTML = `
+        Lien d'enregistrement pour vos invités:<br>
+        <a href="${inviteLink}" target="_blank">${inviteLink}</a>
+      `;
+      linkContainer.classList.remove('hidden');
+    }
+    
+    // Fonction pour entrer en mode invité
+    function enterInviteMode() {
+      // Définir les valeurs fixes pour le test
+      document.getElementById('invAppart').value = '6';
+      document.getElementById('invBat').value = '6';
+      
+      // Définir la date d'aujourd'hui comme valeur par défaut
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('dateArrivee').value = today;
+      
+      // Générer les champs initiaux
+      generatePersonFields();
+      
+      // Afficher le panneau d'invitation
+      showPanel('invitePanel');
+    }
+    
+    // Vérifier si on doit entrer en mode invité
+    function checkInviteMode() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('invite')) {
+        enterInviteMode();
+      }
+    }
+    
+    // Initialiser l'application au chargement
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Initialiser le QR code
+      initQRCode();
+      
+      // Charger les données depuis Google Drive
+      try {
+        const driveData = await loadFromGoogleDrive();
+        if (driveData) {
+          appData = driveData;
+        }
+      } catch (error) {
+        console.error('Erreur de chargement des données:', error);
+      }
+      
+      // Configurer les événements
+      document.getElementById('btnLogin').addEventListener('click', login);
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+      document.getElementById('userLogoutBtn').addEventListener('click', logout);
+      document.getElementById('createUserBtn').addEventListener('click', async () => {
+        // Pour simplifier, nous allons juste afficher un message
+        showBanner('userMsg', 'success', 'Fonctionnalité administrateur désactivée pour cette démo');
+      });
+      document.getElementById('generateLinkBtn').addEventListener('click', generateLink);
+      document.getElementById('registerGuestBtn').addEventListener('click', registerGuest);
+      document.getElementById('backBtn').addEventListener('click', () => showPanel('loginCard'));
+      document.getElementById('nbPers').addEventListener('change', generatePersonFields);
+      document.getElementById('downloadQRBtn').addEventListener('click', () => {
+        if (qrCode) {
+          qrCode.download({ name: "Guest_QR_Code", extension: "png" });
+        }
+      });
+      
+      // Vérifier le mode invitation
+      checkInviteMode();
+    });
+  </script>
+</body>
+</html>

@@ -131,6 +131,13 @@
       margin-top: 20px;
       display: block;
     }
+    .person-group {
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border: 1px solid #e5e7eb;
+    }
   </style>
 </head>
 <body>
@@ -143,12 +150,12 @@
   <div id="loginCard" class="card">
     <div class="toolbar">
       <div><strong>Connexion</strong></div>
-      <div class="note">Comptes : <strong>admin / admin</strong> • Test : <strong>66 / 12</strong></div>
+      <div class="note">Veuillez entrer vos identifiants</div>
     </div>
     <label>Utilisateur</label>
-    <input type="text" id="loginUser" autocomplete="username" placeholder="admin ou 66" required />
+    <input type="text" id="loginUser" autocomplete="username" placeholder="Identifiant" required />
     <label>Mot de passe</label>
-    <input type="password" id="loginPass" autocomplete="current-password" placeholder="admin ou 12" required />
+    <input type="password" id="loginPass" autocomplete="current-password" placeholder="Mot de passe" required />
     <button id="btnLogin" onclick="login()">Connexion</button>
     <p id="loginMsg" class="banner err hidden"></p>
   </div>
@@ -192,12 +199,12 @@
     </div>
 
     <div class="card">
-      <h3>Tous les enregistrements (derniers ajoutés)</h3>
+      <h3>Tous les enregistrements</h3>
       <table id="tableAdmin">
         <thead>
           <tr>
             <th>ID</th><th>Appartement</th><th>Bâtiment</th><th>Nom principal</th>
-            <th>Total personnes</th><th>Date</th><th>WhatsApp</th><th>Status</th>
+            <th>Document</th><th>Total personnes</th><th>Liste personnes</th><th>Date</th><th>WhatsApp</th><th>Status</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -217,7 +224,10 @@
       <h3>Mes enregistrements</h3>
       <table id="tableUser">
         <thead>
-          <tr><th>ID</th><th>Nom principal</th><th>Total personnes</th><th>Date</th><th>Status</th></tr>
+          <tr>
+            <th>ID</th><th>Nom principal</th><th>Document</th><th>Total personnes</th>
+            <th>Liste personnes</th><th>Date</th><th>Status</th><th>Action</th>
+          </tr>
         </thead>
         <tbody></tbody>
       </table>
@@ -252,11 +262,14 @@
         <label>Nombre total de personnes</label>
         <input type="number" id="nbPers" min="1" value="1" required class="guest-input" onchange="genererChamps()" />
 
-        <label>Nom / Prénom (personne principale)</label>
-        <input type="text" id="nomPrincipal" required class="guest-input" />
-
-        <label>Passeport / CNI (personne principale)</label>
-        <input type="text" id="docPrincipal" required class="guest-input" />
+        <!-- Personne principale -->
+        <div class="person-group">
+          <label>Personne principale - Nom & Prénom</label>
+          <input type="text" id="nomPrincipal" required class="guest-input" />
+          
+          <label>Personne principale - Passeport / CNI</label>
+          <input type="text" id="docPrincipal" required class="guest-input" />
+        </div>
 
         <div id="personnes"></div>
 
@@ -499,13 +512,17 @@
           last.forEach(r=>{
             const id = r.id ?? '';
             const sendBtn = `<button onclick="envoyerWhatsApp(${id})">Envoyer</button>`;
+            const personnesList = r.personnes.join(', ');
+            
             tbody.insertAdjacentHTML('beforeend',
               `<tr>
                 <td>${id}</td>
                 <td>${r.appart}</td>
                 <td>${r.bat}</td>
                 <td>${r.nom}</td>
+                <td>${r.doc}</td>
                 <td>${r.personnes.length}</td>
+                <td>${personnesList}</td>
                 <td>${r.date}</td>
                 <td>${sendBtn}</td>
                 <td>${r.sent ? "Envoyé" : "Non envoyé"}</td>
@@ -526,13 +543,19 @@
       req.onsuccess = ()=>{
         const arr = req.result || [];
         arr.slice(-200).forEach(r=>{
+          const personnesList = r.personnes.join(', ');
+          const sendBtn = `<button onclick="envoyerWhatsApp(${r.id})">Envoyer</button>`;
+          
           tbody.insertAdjacentHTML('beforeend',
             `<tr>
               <td>${r.id ?? ''}</td>
               <td>${r.nom}</td>
+              <td>${r.doc}</td>
               <td>${r.personnes.length}</td>
+              <td>${personnesList}</td>
               <td>${r.date}</td>
               <td>${r.sent ? "Envoyé" : "Non envoyé"}</td>
+              <td>${sendBtn}</td>
             </tr>`);
         });
       };
@@ -597,35 +620,52 @@
       const cont = document.getElementById('personnes');
       cont.innerHTML = '';
       
-      for(let i=1; i<=nb; i++){
-        if(i === 1) continue; // On saute la personne principale
+      for(let i=2; i<=nb; i++){
+        const group = document.createElement('div');
+        group.className = 'person-group';
         
-        const wrap = document.createElement('div');
-        wrap.className = 'person-field';
+        const title = document.createElement('h4');
+        title.textContent = `Personne ${i}`;
+        title.style.marginBottom = '10px';
+        title.style.fontWeight = 'bold';
+        group.appendChild(title);
         
-        const lab = document.createElement('label');
-        lab.className = 'person-label';
-        lab.textContent = `Personne ${i} - Nom & Prénom`;
+        const nomLab = document.createElement('label');
+        nomLab.textContent = 'Nom & Prénom';
+        group.appendChild(nomLab);
         
-        const inp = document.createElement('input');
-        inp.type = 'text';
-        inp.id = `pers${i}`;
-        inp.required = true;
-        inp.className = 'guest-input';
-        inp.placeholder = `Nom complet personne ${i}`;
+        const nomInp = document.createElement('input');
+        nomInp.type = 'text';
+        nomInp.id = `pers${i}Nom`;
+        nomInp.required = true;
+        nomInp.className = 'guest-input';
+        nomInp.placeholder = `Nom complet personne ${i}`;
+        group.appendChild(nomInp);
         
-        wrap.appendChild(lab);
-        wrap.appendChild(inp);
-        cont.appendChild(wrap);
+        const docLab = document.createElement('label');
+        docLab.textContent = 'Passeport / CNI';
+        docLab.style.marginTop = '10px';
+        group.appendChild(docLab);
+        
+        const docInp = document.createElement('input');
+        docInp.type = 'text';
+        docInp.id = `pers${i}Doc`;
+        docInp.required = true;
+        docInp.className = 'guest-input';
+        docInp.placeholder = `Document personne ${i}`;
+        group.appendChild(docInp);
+        
+        cont.appendChild(group);
       }
     }
 
     function buildMessage(rec){
       const nb = rec.personnes.length;
       const nomPrincipal = rec.nom;
-      const autres = rec.personnes.slice(1);
-      const autresFR = (autres.length? autres.join(", ") : "—");
-      const autresAR = (autres.length? autres.join(", ") : "—");
+      const docPrincipal = rec.doc;
+      const autres = rec.personnes.map(p => `${p.nom} (${p.doc})`);
+      const autresFR = autres.length ? autres.join(", ") : "0";
+      const autresAR = autres.length ? autres.join(", ") : "0";
 
       return `Salam :
 Arrivée: ${rec.date}
@@ -633,7 +673,7 @@ Appartement: ${rec.appart}
 Imm: ${rec.bat}
 Nombre de personnes: ${nb} personnes
 Réservation au nom de:
-${nomPrincipal} (${rec.doc})
+${nomPrincipal} (${docPrincipal})
 
 Autres personnes:
 ${autresFR}
@@ -647,7 +687,7 @@ Merci
 الشقة: ${rec.appart}
 رقم العمارة: ${rec.bat}
 عدد الأشخاص: ${nb} أشخاص
-الحجز باسم: ${nomPrincipal} (${rec.doc})
+الحجز باسم: ${nomPrincipal} (${docPrincipal})
 
 أشخاص آخرون:
 ${autresAR}
@@ -669,20 +709,32 @@ ${autresAR}
         return;
       }
 
-      const personnes = [nom]; // La personne principale
+      const personnes = [];
       for(let i=2; i<=nb; i++){
-        const v = (document.getElementById(`pers${i}`)?.value || '').trim();
-        if(!v){
-          showBanner('warn',`Merci de renseigner la personne ${i}.`);
+        const nomVal = (document.getElementById(`pers${i}Nom`)?.value || '').trim();
+        const docVal = (document.getElementById(`pers${i}Doc`)?.value || '').trim();
+        
+        if(!nomVal || !docVal){
+          showBanner('warn',`Merci de renseigner tous les champs pour la personne ${i}.`);
           return;
         }
-        personnes.push(v);
+        
+        personnes.push({ nom: nomVal, doc: docVal });
       }
 
       const appart = document.getElementById('invAppart').value;
       const bat = document.getElementById('invBat').value;
 
-      const rec = { appart, bat, nom, doc, personnes, date, sent:false };
+      const rec = { 
+        appart, 
+        bat, 
+        nom, 
+        doc, 
+        personnes, 
+        date, 
+        sent:false 
+      };
+      
       const msg = buildMessage(rec);
 
       const st = tx('records','readwrite');
@@ -723,7 +775,10 @@ ${autresAR}
         // marquer envoyé
         const stw = tx('records','readwrite');
         r.sent = true;
-        stw.put(r).onsuccess = ()=> refreshAdmin();
+        stw.put(r).onsuccess = ()=> {
+          if(currentUser.role === 'admin') refreshAdmin();
+          else refreshUser();
+        };
       };
       get.onerror = ()=> showBanner('err',"Erreur de lecture de l'enregistrement.");
     }
@@ -732,7 +787,7 @@ ${autresAR}
        DÉMARRAGE
     ======================== */
     // Initialisation du bouton de connexion
-    document.getElementById('btnLogin').disabled = true;
+    document.getElementById('btnLogin').disabled = false;
   </script>
 </body>
 </html>

@@ -40,6 +40,7 @@
     .person-group h4 { margin: 0 0 10px 0; color: #1E40AF; }
     .consent-container { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6; }
     .consent-text { max-height: 150px; overflow-y: auto; padding: 10px; background: white; border-radius: 5px; border: 1px solid #ced4da; margin: 10px 0; }
+    .btn-delete { background: var(--err) !important; margin-left: 5px; }
   </style>
 </head>
 <body>
@@ -440,6 +441,7 @@
           .forEach(([id, r]) => {
             const personnesList = r.personnes ? Object.values(r.personnes).map(p => `${p.nom} - ${p.doc}`).join(', ') : '';
             const sendBtn = `<button onclick="envoyerWhatsApp('${id}')">Envoyer</button>`;
+            const deleteBtn = `<button class="btn-delete" onclick="supprimerEnregistrement('${id}')">Supprimer</button>`;
             
             tbody.insertAdjacentHTML('beforeend',
               `<tr>
@@ -450,11 +452,26 @@
                 <td>${personnesList}</td>
                 <td>${r.date}</td>
                 <td>${r.sent ? "Envoyé" : "Non envoyé"}</td>
-                <td>${sendBtn}</td>
+                <td>${sendBtn}${deleteBtn}</td>
               </tr>`);
           });
       } catch (error) {
         showBanner('err', "Erreur de lecture des enregistrements.");
+      }
+    }
+
+    // Fonction pour supprimer un enregistrement
+    async function supprimerEnregistrement(id) {
+      if (!confirm("Êtes-vous sûr de vouloir supprimer cet enregistrement ?")) {
+        return;
+      }
+      
+      try {
+        await database.ref('records/' + id).remove();
+        showBanner('ok', "Enregistrement supprimé avec succès.");
+        refreshUser();
+      } catch (error) {
+        showBanner('err', "Erreur lors de la suppression de l'enregistrement.");
       }
     }
 
@@ -615,6 +632,39 @@ Merci
       return message;
     }
 
+    // Fonction pour générer le contenu du QR Code avec les informations de l'invité
+    function buildQRContent(rec) {
+      const nb = rec.personnes ? Object.keys(rec.personnes).length + 1 : 1;
+      const nomPrincipal = rec.nom;
+      const docPrincipal = rec.doc;
+      const autres = rec.personnes ? Object.values(rec.personnes).map(p => `${p.nom} - ${p.doc}`) : [];
+      
+      let qrContent = `INFORMATIONS INVITÉ
+      
+Date d'arrivée: ${rec.date}
+Appartement: ${rec.appart}
+Immeuble: ${rec.bat}
+Nombre de personnes: ${nb}
+
+Personne principale:
+Nom: ${nomPrincipal}
+Document: ${docPrincipal}
+`;
+
+      if (autres.length > 0) {
+        qrContent += "\nPersonnes accompagnantes:\n";
+        autres.forEach((personne, index) => {
+          qrContent += `${index + 1}. ${personne}\n`;
+        });
+      }
+
+      qrContent += `
+ID: ${rec.id}
+`;
+
+      return qrContent;
+    }
+
     async function enregistrer(){
       // Vérifier la case d'acceptation
       if(!document.getElementById('consentCheckbox').checked){
@@ -674,9 +724,10 @@ Merci
         document.getElementById('successMessage').classList.remove('hidden');
         document.getElementById('qrcodeContainer').classList.remove('hidden');
         
-        // Générer le QR Code
+        // Générer le QR Code avec les informations de l'invité
+        const qrContent = buildQRContent(rec);
         if(qrCode) {
-          qrCode.update({ data: msg });
+          qrCode.update({ data: qrContent });
           document.getElementById('qrcode').innerHTML = '';
           qrCode.append(document.getElementById('qrcode'));
         }

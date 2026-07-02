@@ -892,7 +892,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
       
-      await downloadRecordPDF(record, recordId);
+      await downloadAndDeleteRecord(record, recordId);
       
     } catch (error) {
       console.error(error);
@@ -923,11 +923,24 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
       
-      await downloadRecordPDF(record, recordId);
+      await downloadAndDeleteRecord(record, recordId);
       
     } catch (error) {
       console.error(error);
       alert("Erreur lors de l'envoi WhatsApp");
+    }
+  }
+
+  async function downloadAndDeleteRecord(record, recordId) {
+    await downloadRecordPDF(record, recordId);
+    
+    await database.ref('records/' + recordId).remove();
+    await database.ref('documents/' + recordId).remove();
+    
+    if(currentUser && currentUser.role === 'admin') {
+      await refreshAdmin();
+    } else if(currentUser && currentUser.role === 'user') {
+      await refreshUser();
     }
   }
 
@@ -1675,7 +1688,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
     
-    downloadRecordPDF(currentDocumentData, currentDocumentData.id);
+    downloadAndDeleteRecord(currentDocumentData, currentDocumentData.id);
   }
 
   document.getElementById('btnLogin').disabled = false;

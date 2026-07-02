@@ -1,4 +1,5 @@
-
+```html
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -427,9 +428,11 @@
             </div>
 
             <div class="accept-signature-container">
-              <label style="display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
-                <input type="checkbox" id="acceptCheckbox" required style="margin-right: 10px; width: auto;">
-                <span style="font-size: 16px; font-weight: bold;">Je confirme avoir lu et j'accepte le règlement intérieur ainsi queJe déclare accepter, conformément à la loi marocaine, la protection et la confidentialité de mes données personnelles..</span>
+              <label style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px;">
+                <input type="checkbox" id="acceptCheckbox" required style="margin-top: 3px; width: auto; flex-shrink: 0;">
+                <span style="font-size: 14px; line-height: 1.5;">
+                  En utilisant cette application, vous acceptez que les informations fournies lors de votre première inscription soient traitées conformément à la réglementation marocaine sur la protection des données personnelles. Ces données sont exclusivement utilisées pour le processus initial et ne sont pas conservées. De plus, vous vous engagez à respecter l'ensemble du règlement intérieur de l'appartement et à valider votre acceptation par votre signature.
+                </span>
               </label>
               <div class="error-message" id="acceptCheckboxError" style="text-align: center;">Veuillez accepter les conditions</div>
               <div style="text-align: center;">
@@ -888,6 +891,9 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       const message = `Salam :\n\nArrivée: ${record.date}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
       
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+      
+      await downloadRecordPDF(record, recordId);
+      
     } catch (error) {
       console.error(error);
       alert("Erreur lors de l'envoi WhatsApp");
@@ -916,10 +922,140 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       const message = `Salam :\n\nArrivée: ${record.date}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
       
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+      
+      await downloadRecordPDF(record, recordId);
+      
     } catch (error) {
       console.error(error);
       alert("Erreur lors de l'envoi WhatsApp");
     }
+  }
+
+  async function downloadRecordPDF(record, recordId) {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    let yPos = 20;
+    
+    pdf.setFontSize(20);
+    pdf.setTextColor(44, 62, 80);
+    pdf.text('Enregistrement des invités', 105, yPos, { align: 'center' });
+    yPos += 8;
+    pdf.setFontSize(16);
+    pdf.text('Guest Registration', 105, yPos, { align: 'center' });
+    yPos += 12;
+    
+    pdf.setFontSize(16);
+    pdf.text('RÈGLEMENT INTÉRIEUR ET INFORMATIONS DE RÉSERVATION', 105, yPos, { align: 'center' });
+    yPos += 15;
+    
+    pdf.setDrawColor(44, 62, 80);
+    pdf.setLineWidth(1);
+    pdf.line(20, yPos, 190, yPos);
+    yPos += 15;
+    
+    const totalPersons = record.personnes ? Object.keys(record.personnes).length + 1 : 1;
+    const now = new Date();
+    
+    pdf.setFontSize(12);
+    pdf.setTextColor(0, 0, 0);
+    
+    pdf.text(`Date de réservation : ${now.toLocaleDateString('fr-FR')}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Appartement : ${record.appart} - Immeuble : ${record.bat}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Nom du réservateur : ${record.nom}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Type de document : ${record.typeDoc}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Numéro de document : ${record.doc}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Nombre de personnes : ${totalPersons}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Date d'arrivée : ${record.date}`, 20, yPos);
+    yPos += 15;
+    
+    pdf.setFontSize(14);
+    pdf.setTextColor(44, 62, 80);
+    pdf.text('RÈGLEMENT INTÉRIEUR ACCEPTÉ :', 20, yPos);
+    yPos += 10;
+    
+    pdf.setFontSize(12);
+    const rules = [
+      '1. Si vous êtes des Couples marocains:',
+      'selon la loi marocaine ce logement autorise que les couples mariés.',
+      '',
+      '2. Tranquillité et bruit',
+      'Silence total obligatoire après 23h00. Pas de musique forte, cris ou',
+      'nuisances sonores à toute heure.',
+      '',
+      '3. Tabagisme',
+      'Fumer est strictement interdit à l\'intérieur. Autorisé uniquement en',
+      'extérieur (terrasse ou jardin), avec obligation de nettoyer les mégots',
+      'et cendres.',
+      '',
+      '4. Nombre de personnes',
+      'Maximum 5 personnes autorisées dans l\'appartement.',
+      '',
+      '5. Piscine',
+      'Douche obligatoire avant la baignade.',
+      'Pas de verre ni objets fragiles autour de la piscine.',
+      'Surveillance permanente des enfants par un adulte.',
+      'Horaires : fermeture à 20h00.',
+      'Pas de courses ni plongeons.',
+      '',
+      '6. Propreté et entretien',
+      'Maintenir les lieux propres en permanence.',
+      'Vider régulièrement les poubelles.',
+      'Respecter les sols et surfaces (pas de traces, pas de nourriture hors cuisine).'
+    ];
+
+    rules.forEach(line => {
+      if (yPos > 250) {
+        pdf.addPage();
+        yPos = 20;
+      }
+      pdf.text(line, 20, yPos);
+      yPos += line === '' ? 5 : 7;
+    });
+    
+    yPos += 10;
+    
+    pdf.text(`${record.nom}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Date : ${now.toLocaleDateString('fr-FR')}`, 20, yPos);
+    yPos += 15;
+    
+    try {
+      const imgWidth = 80;
+      const imgHeight = 40;
+      if (record.signature && record.signature.startsWith('data:image')) {
+        pdf.addImage(record.signature, 'PNG', 20, yPos, imgWidth, imgHeight);
+        pdf.setDrawColor(0, 0, 0);
+        pdf.setLineWidth(2);
+        pdf.rect(20, yPos, imgWidth, imgHeight);
+      }
+    } catch (e) {
+      console.log('Erreur avec la signature:', e);
+    }
+    
+    const pdfBlob = pdf.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    
+    const fileName = `${record.appart}_${record.bat}_${record.nom}_${record.date}.pdf`;
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setTimeout(() => URL.revokeObjectURL(pdfUrl), 100);
   }
 
   async function supprimerEnregistrement(id){
@@ -1521,7 +1657,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
 
   function downloadCurrentDocument() {
     if (!currentDocumentData) return;
-    generateAndOpenPDF(currentDocumentData);
+    downloadRecordPDF(currentDocumentData, currentDocumentData.id);
   }
 
   function partagerWhatsApp() {
@@ -1538,6 +1674,8 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     const message = `Salam :\n\nArrivée: ${currentDocumentData.date}\nAppartement: ${currentDocumentData.appart}\nImm: ${currentDocumentData.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${currentDocumentData.nom}\nNuméro de ${currentDocumentData.typeDoc}: ${currentDocumentData.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${currentDocumentData.date}\nالشقة: ${currentDocumentData.appart}\nرقم العمارة: ${currentDocumentData.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${currentDocumentData.nom}\nرقم ${currentDocumentData.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${currentDocumentData.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
     
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+    
+    downloadRecordPDF(currentDocumentData, currentDocumentData.id);
   }
 
   document.getElementById('btnLogin').disabled = false;

@@ -1109,7 +1109,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     const msg = `La ligne pour ${nom} a été supprimée avec succès.`;
     showBanner('ok', msg);
     setTimeout(() => hideBanner(), 5000);
-    if(currentUser.role === 'admin') refreshAdmin(); else refreshUser();
+    if(currentUser && currentUser.role === 'admin') refreshAdmin(); else if(currentUser) refreshUser();
   }
 
   async function envoyerWhatsAppAdmin(recordId) {

@@ -1113,7 +1113,6 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
         return;
       }
       
-      // Télécharger le PDF avec le bon nom
       generatePDFAndDownload(record, false);
       
       const totalPersons = record.personnes ? Object.keys(record.personnes).length + 1 : 1;
@@ -1147,7 +1146,6 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
         return;
       }
       
-      // Télécharger le PDF avec le bon nom
       generatePDFAndDownload(record, false);
       
       const totalPersons = record.personnes ? Object.keys(record.personnes).length + 1 : 1;
@@ -1680,7 +1678,6 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
   function partagerWhatsApp() {
     if (!currentDocumentData) return;
     
-    // Télécharger le PDF avec le bon nom
     generatePDFAndDownload(currentDocumentData, false);
     
     const totalPersons = currentDocumentData.personnes ? Object.keys(currentDocumentData.personnes).length + 1 : 1;

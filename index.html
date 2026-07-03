@@ -956,6 +956,153 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     }
   }
 
+  function generatePDFBlob(rec) {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    let yPos = 20;
+    
+    const displayResidence = rec.residenceName || residenceName || '';
+    const titleText = displayResidence || 'Enregistrement des invités';
+    
+    pdf.setFontSize(20);
+    pdf.setTextColor(44, 62, 80);
+    pdf.text(titleText, 105, yPos, { align: 'center' });
+    yPos += 8;
+    pdf.setFontSize(16);
+    pdf.text('Guest Registration', 105, yPos, { align: 'center' });
+    yPos += 12;
+    
+    pdf.setFontSize(16);
+    pdf.text('RÈGLEMENT INTÉRIEUR ET INFORMATIONS DE RÉSERVATION', 105, yPos, { align: 'center' });
+    yPos += 15;
+    
+    pdf.setDrawColor(44, 62, 80);
+    pdf.setLineWidth(1);
+    pdf.line(20, yPos, 190, yPos);
+    yPos += 15;
+    
+    const totalPersons = rec.personnes ? Object.keys(rec.personnes).length + 1 : 1;
+    const now = new Date();
+    
+    pdf.setFontSize(12);
+    pdf.setTextColor(0, 0, 0);
+    
+    pdf.text(`Date de réservation : ${now.toLocaleDateString('fr-FR')}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Résidence : ${displayResidence || 'Non spécifiée'}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Appartement : ${rec.appart} - Immeuble : ${rec.bat}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Nom du réservateur : ${rec.nom}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Type de document : ${rec.typeDoc}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Numéro de document : ${rec.doc}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Nombre de personnes : ${totalPersons}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Date d'arrivée : ${rec.date}`, 20, yPos);
+    yPos += 15;
+    
+    pdf.setFontSize(14);
+    pdf.setTextColor(44, 62, 80);
+    pdf.text('RÈGLEMENT INTÉRIEUR ACCEPTÉ :', 20, yPos);
+    yPos += 10;
+    
+    pdf.setFontSize(12);
+    const rules = [
+      '1. Si vous êtes des Couples marocains:',
+      'selon la loi marocaine ce logement autorise que les couples mariés.',
+      '',
+      '2. Tranquillité et bruit',
+      'Silence total obligatoire après 23h00. Pas de musique forte, cris ou',
+      'nuisances sonores à toute heure.',
+      '',
+      '3. Tabagisme',
+      'Fumer est strictement interdit à l\'intérieur. Autorisé uniquement en',
+      'extérieur (terrasse ou jardin), avec obligation de nettoyer les mégots',
+      'et cendres.',
+      '',
+      '4. Nombre de personnes',
+      'Maximum 5 personnes autorisées dans l\'appartement.',
+      '',
+      '5. Piscine',
+      'Douche obligatoire avant la baignade.',
+      'Pas de verre ni objets fragiles autour de la piscine.',
+      'Surveillance permanente des enfants par un adulte.',
+      'Horaires : fermeture à 20h00.',
+      'Pas de courses ni plongeons.',
+      '',
+      '6. Propreté et entretien',
+      'Maintenir les lieux propres en permanence.',
+      'Vider régulièrement les poubelles.',
+      'Respecter les sols et surfaces (pas de traces, pas de nourriture hors cuisine).'
+    ];
+
+    rules.forEach(line => {
+      if (yPos > 250) {
+        pdf.addPage();
+        yPos = 20;
+      }
+      pdf.text(line, 20, yPos);
+      yPos += line === '' ? 5 : 7;
+    });
+    
+    yPos += 10;
+    
+    pdf.text(`${rec.nom}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Date : ${now.toLocaleDateString('fr-FR')}`, 20, yPos);
+    yPos += 15;
+    
+    try {
+      const imgWidth = 80;
+      const imgHeight = 40;
+      if (rec.signature && rec.signature.startsWith('data:image')) {
+        pdf.addImage(rec.signature, 'PNG', 20, yPos, imgWidth, imgHeight);
+        pdf.setDrawColor(0, 0, 0);
+        pdf.setLineWidth(2);
+        pdf.rect(20, yPos, imgWidth, imgHeight);
+      }
+    } catch (e) {
+      console.log('Erreur avec la signature:', e);
+    }
+    
+    return pdf.output('blob');
+  }
+
+  function generatePDFAndDownload(rec, openInNewTab = true) {
+    const pdfBlob = generatePDFBlob(rec);
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    
+    const displayResidence = rec.residenceName || residenceName || '';
+    const safeResidence = (displayResidence || 'residence').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
+    const safeAppart = (rec.appart || '').replace(/[^a-zA-Z0-9]/g, '_');
+    const safeBat = (rec.bat || '').replace(/[^a-zA-Z0-9]/g, '_');
+    const safeNom = (rec.nom || 'invite').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
+    const safeDate = (rec.date || '').replace(/[^0-9-]/g, '');
+    
+    const fileName = `${safeResidence}_${safeAppart}_${safeBat}_${safeNom}_${safeDate}.pdf`;
+    
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    if (openInNewTab) {
+      window.open(pdfUrl, '_blank');
+    }
+  }
+
   async function envoyerWhatsAppAdmin(recordId) {
     try {
       const snapshot = await database.ref('records/' + recordId).once('value');
@@ -965,6 +1112,9 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
         alert("Enregistrement non trouvé");
         return;
       }
+      
+      // Télécharger le PDF avec le bon nom
+      generatePDFAndDownload(record, false);
       
       const totalPersons = record.personnes ? Object.keys(record.personnes).length + 1 : 1;
       let autresPersonnes = '';
@@ -977,7 +1127,10 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       
       const message = `Salam :\n\nArrivée: ${record.date}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
       
-      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+      setTimeout(() => {
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+      }, 500);
+      
     } catch (error) {
       console.error(error);
       alert("Erreur lors de l'envoi WhatsApp");
@@ -994,6 +1147,9 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
         return;
       }
       
+      // Télécharger le PDF avec le bon nom
+      generatePDFAndDownload(record, false);
+      
       const totalPersons = record.personnes ? Object.keys(record.personnes).length + 1 : 1;
       let autresPersonnes = '';
       
@@ -1005,7 +1161,10 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       
       const message = `Salam :\n\nArrivée: ${record.date}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
       
-      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+      setTimeout(() => {
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+      }, 500);
+      
     } catch (error) {
       console.error(error);
       alert("Erreur lors de l'envoi WhatsApp");
@@ -1293,7 +1452,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       successDiv.classList.remove('hidden');
       document.getElementById('guestForm').style.display = 'none';
 
-      generateAndOpenPDF(rec);
+      generatePDFAndDownload(rec, true);
       
       registerBtn.textContent = 'Enregistrer et valider';
       registerBtn.disabled = false;
@@ -1491,146 +1650,6 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
 `;
   }
 
-  function generateAndOpenPDF(rec) {
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    let yPos = 20;
-    
-    const displayResidence = rec.residenceName || residenceName || '';
-    const titleText = displayResidence || 'Enregistrement des invités';
-    
-    pdf.setFontSize(20);
-    pdf.setTextColor(44, 62, 80);
-    pdf.text(titleText, 105, yPos, { align: 'center' });
-    yPos += 8;
-    pdf.setFontSize(16);
-    pdf.text('Guest Registration', 105, yPos, { align: 'center' });
-    yPos += 12;
-    
-    pdf.setFontSize(16);
-    pdf.text('RÈGLEMENT INTÉRIEUR ET INFORMATIONS DE RÉSERVATION', 105, yPos, { align: 'center' });
-    yPos += 15;
-    
-    pdf.setDrawColor(44, 62, 80);
-    pdf.setLineWidth(1);
-    pdf.line(20, yPos, 190, yPos);
-    yPos += 15;
-    
-    const totalPersons = rec.personnes ? Object.keys(rec.personnes).length + 1 : 1;
-    const now = new Date();
-    
-    pdf.setFontSize(12);
-    pdf.setTextColor(0, 0, 0);
-    
-    pdf.text(`Date de réservation : ${now.toLocaleDateString('fr-FR')}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Résidence : ${displayResidence || 'Non spécifiée'}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Appartement : ${rec.appart} - Immeuble : ${rec.bat}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Nom du réservateur : ${rec.nom}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Type de document : ${rec.typeDoc}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Numéro de document : ${rec.doc}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Nombre de personnes : ${totalPersons}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Date d'arrivée : ${rec.date}`, 20, yPos);
-    yPos += 15;
-    
-    pdf.setFontSize(14);
-    pdf.setTextColor(44, 62, 80);
-    pdf.text('RÈGLEMENT INTÉRIEUR ACCEPTÉ :', 20, yPos);
-    yPos += 10;
-    
-    pdf.setFontSize(12);
-    const rules = [
-      '1. Si vous êtes des Couples marocains:',
-      'selon la loi marocaine ce logement autorise que les couples mariés.',
-      '',
-      '2. Tranquillité et bruit',
-      'Silence total obligatoire après 23h00. Pas de musique forte, cris ou',
-      'nuisances sonores à toute heure.',
-      '',
-      '3. Tabagisme',
-      'Fumer est strictement interdit à l\'intérieur. Autorisé uniquement en',
-      'extérieur (terrasse ou jardin), avec obligation de nettoyer les mégots',
-      'et cendres.',
-      '',
-      '4. Nombre de personnes',
-      'Maximum 5 personnes autorisées dans l\'appartement.',
-      '',
-      '5. Piscine',
-      'Douche obligatoire avant la baignade.',
-      'Pas de verre ni objets fragiles autour de la piscine.',
-      'Surveillance permanente des enfants par un adulte.',
-      'Horaires : fermeture à 20h00.',
-      'Pas de courses ni plongeons.',
-      '',
-      '6. Propreté et entretien',
-      'Maintenir les lieux propres en permanence.',
-      'Vider régulièrement les poubelles.',
-      'Respecter les sols et surfaces (pas de traces, pas de nourriture hors cuisine).'
-    ];
-
-    rules.forEach(line => {
-      if (yPos > 250) {
-        pdf.addPage();
-        yPos = 20;
-      }
-      pdf.text(line, 20, yPos);
-      yPos += line === '' ? 5 : 7;
-    });
-    
-    yPos += 10;
-    
-    pdf.text(`${rec.nom}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Date : ${now.toLocaleDateString('fr-FR')}`, 20, yPos);
-    yPos += 15;
-    
-    try {
-      const imgWidth = 80;
-      const imgHeight = 40;
-      if (rec.signature && rec.signature.startsWith('data:image')) {
-        pdf.addImage(rec.signature, 'PNG', 20, yPos, imgWidth, imgHeight);
-        pdf.setDrawColor(0, 0, 0);
-        pdf.setLineWidth(2);
-        pdf.rect(20, yPos, imgWidth, imgHeight);
-      }
-    } catch (e) {
-      console.log('Erreur avec la signature:', e);
-    }
-    
-    const pdfBlob = pdf.output('blob');
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-    
-    const safeResidence = (displayResidence || 'residence').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
-    const safeAppart = (rec.appart || '').replace(/[^a-zA-Z0-9]/g, '_');
-    const safeBat = (rec.bat || '').replace(/[^a-zA-Z0-9]/g, '_');
-    const safeNom = (rec.nom || 'invite').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
-    const safeDate = (rec.date || '').replace(/[^0-9-]/g, '');
-    
-    const fileName = `${safeResidence}_${safeAppart}_${safeBat}_${safeNom}_${safeDate}.pdf`;
-    
-    const link = document.createElement('a');
-    link.href = pdfUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    window.open(pdfUrl, '_blank');
-  }
-
   async function afficherDocument(id) {
     try {
       const recordSnapshot = await database.ref('records/' + id).once('value');
@@ -1655,11 +1674,15 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
 
   function downloadCurrentDocument() {
     if (!currentDocumentData) return;
-    generateAndOpenPDF(currentDocumentData);
+    generatePDFAndDownload(currentDocumentData, true);
   }
 
   function partagerWhatsApp() {
     if (!currentDocumentData) return;
+    
+    // Télécharger le PDF avec le bon nom
+    generatePDFAndDownload(currentDocumentData, false);
+    
     const totalPersons = currentDocumentData.personnes ? Object.keys(currentDocumentData.personnes).length + 1 : 1;
     let autresPersonnes = '';
     
@@ -1671,7 +1694,9 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     
     const message = `Salam :\n\nArrivée: ${currentDocumentData.date}\nAppartement: ${currentDocumentData.appart}\nImm: ${currentDocumentData.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${currentDocumentData.nom}\nNuméro de ${currentDocumentData.typeDoc}: ${currentDocumentData.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${currentDocumentData.date}\nالشقة: ${currentDocumentData.appart}\nرقم العمارة: ${currentDocumentData.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${currentDocumentData.nom}\nرقم ${currentDocumentData.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${currentDocumentData.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
     
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+    setTimeout(() => {
+      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+    }, 500);
   }
 
   document.getElementById('btnLogin').disabled = false;

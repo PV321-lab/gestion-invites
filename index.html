@@ -1103,6 +1103,15 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     }
   }
 
+  async function supprimerEnregistrementAvecMessage(id, nom) {
+    await database.ref('records/' + id).remove();
+    await database.ref('documents/' + id).remove();
+    const msg = `La ligne pour ${nom} a été supprimée avec succès.`;
+    showBanner('ok', msg);
+    setTimeout(() => hideBanner(), 5000);
+    if(currentUser.role === 'admin') refreshAdmin(); else refreshUser();
+  }
+
   async function envoyerWhatsAppAdmin(recordId) {
     try {
       const snapshot = await database.ref('records/' + recordId).once('value');
@@ -1129,6 +1138,10 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       setTimeout(() => {
         window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
       }, 500);
+      
+      setTimeout(async () => {
+        await supprimerEnregistrementAvecMessage(recordId, record.nom);
+      }, 1000);
       
     } catch (error) {
       console.error(error);
@@ -1162,6 +1175,10 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       setTimeout(() => {
         window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
       }, 500);
+      
+      setTimeout(async () => {
+        await supprimerEnregistrementAvecMessage(recordId, record.nom);
+      }, 1000);
       
     } catch (error) {
       console.error(error);
@@ -1678,22 +1695,32 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
   function partagerWhatsApp() {
     if (!currentDocumentData) return;
     
-    generatePDFAndDownload(currentDocumentData, false);
+    const record = currentDocumentData;
+    const recordId = record.id;
     
-    const totalPersons = currentDocumentData.personnes ? Object.keys(currentDocumentData.personnes).length + 1 : 1;
+    generatePDFAndDownload(record, false);
+    
+    const totalPersons = record.personnes ? Object.keys(record.personnes).length + 1 : 1;
     let autresPersonnes = '';
     
-    if (currentDocumentData.personnes) {
-      Object.values(currentDocumentData.personnes).forEach((p, index) => {
+    if (record.personnes) {
+      Object.values(record.personnes).forEach((p, index) => {
         autresPersonnes += `${index + 1}. ${p.nom} - ${p.doc}\n`;
       });
     }
     
-    const message = `Salam :\n\nArrivée: ${currentDocumentData.date}\nAppartement: ${currentDocumentData.appart}\nImm: ${currentDocumentData.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${currentDocumentData.nom}\nNuméro de ${currentDocumentData.typeDoc}: ${currentDocumentData.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${currentDocumentData.date}\nالشقة: ${currentDocumentData.appart}\nرقم العمارة: ${currentDocumentData.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${currentDocumentData.nom}\nرقم ${currentDocumentData.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${currentDocumentData.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
+    const message = `Salam :\n\nArrivée: ${record.date}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
     
     setTimeout(() => {
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
     }, 500);
+    
+    setTimeout(async () => {
+      await supprimerEnregistrementAvecMessage(recordId, record.nom);
+      document.getElementById('docActions').classList.add('hidden');
+      document.getElementById('documentPreview').innerHTML = '<p style="text-align: center; color: #666;">Cet enregistrement a été supprimé.</p>';
+      currentDocumentData = null;
+    }, 1000);
   }
 
   document.getElementById('btnLogin').disabled = false;

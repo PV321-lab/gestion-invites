@@ -1,5 +1,4 @@
 ```html
-<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -190,6 +189,26 @@
       font-size: 13px;
       border-left: 4px solid #007bff;
     }
+    .custom-message-area {
+      margin-top: 20px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #fff3e0;
+      border-radius: 8px;
+      border: 1px solid #ffcc80;
+    }
+    .custom-message-area label {
+      margin-top: 0;
+      color: #e67e22;
+    }
+    .custom-message-area textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ffcc80;
+      border-radius: 8px;
+      font-family: Arial, sans-serif;
+      resize: vertical;
+    }
   </style>
 </head>
 <body>
@@ -230,15 +249,19 @@
         </div>
         <div class="row">
           <div class="col">
-            <label>Appartement</label>
+            <label>Nom de résidence *</label>
+            <input type="text" id="residenceAdmin" placeholder="Ex: Premium Village" />
+          </div>
+          <div class="col">
+            <label>Appartement *</label>
             <input type="text" id="appartAdmin" placeholder="Ex: 12" />
           </div>
           <div class="col">
-            <label>Immeuble</label>
+            <label>Immeuble *</label>
             <input type="text" id="batAdmin" placeholder="Ex: A" />
           </div>
           <div class="col">
-            <label>Mot de passe</label>
+            <label>Mot de passe *</label>
             <input type="text" id="passAdmin" placeholder="Choisir un mot de passe" />
           </div>
         </div>
@@ -252,7 +275,7 @@
         </div>
         <table id="tableUsers">
           <thead>
-            <tr><th>N°</th><th>Appartement</th><th>Immeuble</th><th>Mot de passe</th><th>Action</th></tr>
+            <tr><th>N°</th><th>Résidence</th><th>Appartement</th><th>Immeuble</th><th>Mot de passe</th><th>Action</th></tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -265,7 +288,7 @@
         <table id="tableAdmin">
           <thead>
             <tr>
-              <th>N°</th><th>Appart.</th><th>Immeuble</th><th>Nom</th><th>Document</th><th>Type Doc</th><th>Nationalité</th>
+              <th>N°</th><th>Résidence</th><th>Appart.</th><th>Immeuble</th><th>Nom</th><th>Document</th><th>Type Doc</th><th>Nationalité</th>
               <th>Nb Pers.</th><th>Personnes</th><th>Date</th><th>Document</th><th>Action</th><th>Statut</th>
             </tr>
           </thead>
@@ -324,6 +347,13 @@
           </div>
           <p id="emailMsg" class="banner hidden"></p>
         </div>
+
+        <div class="custom-message-area">
+          <label>Message personnalisé pour les invités (affiché après enregistrement)</label>
+          <textarea id="customSuccessMessage" rows="3" placeholder="Saisissez votre message personnalisé ici... Par exemple : Merci de votre confiance, n'oubliez pas de présenter ce document à l'entrée."></textarea>
+          <button onclick="saveCustomMessage()" style="margin-top: 10px; background: var(--info);">Enregistrer le message</button>
+          <p id="customMsgStatus" class="banner hidden" style="margin-top: 10px;"></p>
+        </div>
       </div>
 
       <div class="card">
@@ -351,6 +381,10 @@
         <div class="card">
           <form id="guestForm">
             <div class="row">
+              <div class="col">
+                <label>Résidence</label>
+                <input type="text" id="invResidence" readonly />
+              </div>
               <div class="col">
                 <label>Appartement</label>
                 <input type="text" id="invAppart" readonly />
@@ -428,11 +462,9 @@
             </div>
 
             <div class="accept-signature-container">
-              <label style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px;">
-                <input type="checkbox" id="acceptCheckbox" required style="margin-top: 3px; width: auto; flex-shrink: 0;">
-                <span style="font-size: 14px; line-height: 1.5;">
-                  En utilisant cette application, vous acceptez que les informations fournies lors de votre première inscription soient traitées conformément à la réglementation marocaine sur la protection des données personnelles. Ces données sont exclusivement utilisées pour le processus initial et ne sont pas conservées. De plus, vous vous engagez à respecter l'ensemble du règlement intérieur de l'appartement et à valider votre acceptation par votre signature.
-                </span>
+              <label style="display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+                <input type="checkbox" id="acceptCheckbox" required style="margin-right: 10px; width: auto;">
+                <span style="font-size: 16px; font-weight: bold;">En utilisant cette application, vous acceptez que les informations fournies lors de votre première inscription soient traitées conformément à la réglementation marocaine sur la protection des données personnelles. Ces données sont exclusivement utilisées pour le processus initial et ne sont pas conservées. De plus, vous vous engagez à respecter l'ensemble du règlement intérieur de l'appartement et à valider votre acceptation par votre signature.</span>
               </label>
               <div class="error-message" id="acceptCheckboxError" style="text-align: center;">Veuillez accepter les conditions</div>
               <div style="text-align: center;">
@@ -443,8 +475,8 @@
         </div>
 
         <div id="successMessage" class="banner ok hidden">
-          Enregistrement réussi ! Un onglet s'ouvre avec votre document PDF.
-          <br><br>
+          <div id="customSuccessMessageDisplay"></div>
+          <br>
           <strong>Note importante :</strong> En cas de demande des agents de sécurité, présentez ce document signé.
           Seules les personnes enregistrées dans cette réservation sont autorisées à entrer.
         </div>
@@ -504,6 +536,7 @@
   let currentDocumentData = null;
   let userSettings = { maxRecords: 10 };
   let emailSettings = { enableEmail: 'non' };
+  let customMessage = '';
 
   function encrypt(text) {
     if (!text) return '';
@@ -621,7 +654,7 @@
       const user = snapshot.val();
       
       if(user && user.pass === p){
-        currentUser = { role:'user', id:u, appart:user.appart, bat:user.bat };
+        currentUser = { role:'user', id:u, residence:user.residence, appart:user.appart, bat:user.bat };
         
         const settingsSnapshot = await database.ref('settings/' + u).once('value');
         if(settingsSnapshot.exists()){
@@ -639,10 +672,16 @@
           }
         }
         
+        const customMsgSnapshot = await database.ref('customMessages/' + u).once('value');
+        if(customMsgSnapshot.exists()){
+          customMessage = customMsgSnapshot.val();
+          document.getElementById('customSuccessMessage').value = customMessage;
+        }
+        
         document.getElementById('loginCard').classList.add('hidden');
         document.getElementById('userPanel').classList.remove('hidden');
         document.getElementById('documentColumn').classList.remove('hidden');
-        showBanner('ok', `Connecté. Appartement ${user.appart} / Immeuble ${user.bat}.`);
+        showBanner('ok', `Connecté. Résidence ${user.residence} / Appartement ${user.appart} / Immeuble ${user.bat}.`);
         startSessionTimer();
         refreshUser();
       } else {
@@ -655,6 +694,20 @@
     } finally {
       btn.disabled = false;
       btn.textContent = "Connexion";
+    }
+  }
+
+  async function saveCustomMessage(){
+    const msg = document.getElementById('customSuccessMessage').value;
+    try {
+      await database.ref('customMessages/' + currentUser.id).set(msg);
+      customMessage = msg;
+      showInlineMsg('customMsgStatus', 'ok', 'Message personnalisé enregistré avec succès.');
+      setTimeout(() => {
+        hideInlineMsg('customMsgStatus');
+      }, 3000);
+    } catch (error) {
+      showInlineMsg('customMsgStatus', 'err', 'Erreur lors de l\'enregistrement du message.');
     }
   }
 
@@ -747,6 +800,7 @@
 
 Nom: ${record.nom}
 Date d'arrivée: ${record.date}
+Résidence: ${record.residence}
 Appartement: ${record.appart}
 Immeuble: ${record.bat}
 Nombre de personnes: ${totalPersons}
@@ -791,14 +845,16 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
   }
 
   async function creerUtilisateur(){
+    const residence = document.getElementById('residenceAdmin').value.trim();
     const app = document.getElementById('appartAdmin').value.trim();
     const bat = document.getElementById('batAdmin').value.trim();
     const pass = document.getElementById('passAdmin').value.trim();
-    if(!app || !bat || !pass) return;
+    if(!residence || !app || !bat || !pass) return;
     
     const id = app + bat;
     try {
-      await database.ref('users/' + id).set({ appart:app, bat:bat, pass:pass });
+      await database.ref('users/' + id).set({ residence:residence, appart:app, bat:bat, pass:pass });
+      document.getElementById('residenceAdmin').value = '';
       document.getElementById('appartAdmin').value = '';
       document.getElementById('batAdmin').value = '';
       document.getElementById('passAdmin').value = '';
@@ -823,7 +879,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     let i = 1;
     for(let id in users){
       const u = users[id];
-      tbody.innerHTML += `<tr><td>${i++}</td><td>${u.appart}</td><td>${u.bat}</td><td>${u.pass}</td><td><button class="btn-delete" onclick="supprimerUtilisateur('${id}')">Supprimer</button></td></tr>`;
+      tbody.innerHTML += `<tr><td>${i++}</td><td>${u.residence || ''}</td><td>${u.appart}</td><td>${u.bat}</td><td>${u.pass}</td><td><button class="btn-delete" onclick="supprimerUtilisateur('${id}')">Supprimer</button></td></tr>`;
     }
 
     const snapRec = await database.ref('records').once('value');
@@ -837,7 +893,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       const persStr = r.personnes ? Object.values(r.personnes).map(p => p.nom).join(', ') : '-';
       const nbPers = r.personnes ? Object.keys(r.personnes).length + 1 : 1;
       tbodyAdmin.innerHTML += `<tr>
-        <td>${j++}</td><td>${r.appart}</td><td>${r.bat}</td><td>${r.nom}</td><td>${r.doc}</td><td>${r.typeDoc}</td><td>${r.nationalite}</td>
+        <td>${j++}</td><td>${r.residence || ''}</td><td>${r.appart}</td><td>${r.bat}</td><td>${r.nom}</td><td>${r.doc}</td><td>${r.typeDoc}</td><td>${r.nationalite}</td>
         <td>${nbPers}</td><td>${persStr}</td><td>${r.date}</td>
         <td><button onclick="afficherDocument('${id}')">Voir</button></td>
         <td><button onclick="envoyerWhatsAppAdmin('${id}')" style="background:#25D366;">WhatsApp</button><button class="btn-delete" onclick="supprimerEnregistrement('${id}')">Suppr.</button></td>
@@ -878,25 +934,23 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
         alert("Enregistrement non trouvé");
         return;
       }
+
+      const pdfBlob = await generatePDFBlob(record);
+      const pdfUrl = URL.createObjectURL(pdfBlob);
       
-      const totalPersons = record.personnes ? Object.keys(record.personnes).length + 1 : 1;
-      let autresPersonnes = '';
+      window.open(pdfUrl, '_blank');
+
+      await database.ref('records/' + recordId).remove();
+      await database.ref('documents/' + recordId).remove();
       
-      if (record.personnes) {
-        Object.values(record.personnes).forEach((p, index) => {
-          autresPersonnes += `${index + 1}. ${p.nom} - ${p.doc}\n`;
-        });
-      }
+      showBanner('ok', `La réservation de ${record.nom} a été supprimée avec succès.`);
+      alert(`La ligne de ${record.nom} a été supprimée avec succès.`);
       
-      const message = `Salam :\n\nArrivée: ${record.date}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
-      
-      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-      
-      await downloadAndDeleteRecord(record, recordId);
+      if(currentUser.role === 'admin') refreshAdmin(); else refreshUser();
       
     } catch (error) {
       console.error(error);
-      alert("Erreur lors de l'envoi WhatsApp");
+      alert("Erreur lors du traitement WhatsApp");
     }
   }
 
@@ -909,42 +963,27 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
         alert("Enregistrement non trouvé");
         return;
       }
+
+      const pdfBlob = await generatePDFBlob(record);
+      const pdfUrl = URL.createObjectURL(pdfBlob);
       
-      const totalPersons = record.personnes ? Object.keys(record.personnes).length + 1 : 1;
-      let autresPersonnes = '';
+      window.open(pdfUrl, '_blank');
+
+      await database.ref('records/' + recordId).remove();
+      await database.ref('documents/' + recordId).remove();
       
-      if (record.personnes) {
-        Object.values(record.personnes).forEach((p, index) => {
-          autresPersonnes += `${index + 1}. ${p.nom} - ${p.doc}\n`;
-        });
-      }
+      showBanner('ok', `La réservation de ${record.nom} a été supprimée avec succès.`);
+      alert(`La ligne de ${record.nom} a été supprimée avec succès.`);
       
-      const message = `Salam :\n\nArrivée: ${record.date}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
-      
-      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-      
-      await downloadAndDeleteRecord(record, recordId);
+      if(currentUser.role === 'admin') refreshAdmin(); else refreshUser();
       
     } catch (error) {
       console.error(error);
-      alert("Erreur lors de l'envoi WhatsApp");
+      alert("Erreur lors du traitement WhatsApp");
     }
   }
 
-  async function downloadAndDeleteRecord(record, recordId) {
-    await downloadRecordPDF(record, recordId);
-    
-    await database.ref('records/' + recordId).remove();
-    await database.ref('documents/' + recordId).remove();
-    
-    if(currentUser && currentUser.role === 'admin') {
-      await refreshAdmin();
-    } else if(currentUser && currentUser.role === 'user') {
-      await refreshUser();
-    }
-  }
-
-  async function downloadRecordPDF(record, recordId) {
+  async function generatePDFBlob(rec) {
     const pdf = new jsPDF('p', 'mm', 'a4');
     let yPos = 20;
     
@@ -965,7 +1004,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     pdf.line(20, yPos, 190, yPos);
     yPos += 15;
     
-    const totalPersons = record.personnes ? Object.keys(record.personnes).length + 1 : 1;
+    const totalPersons = rec.personnes ? Object.keys(rec.personnes).length + 1 : 1;
     const now = new Date();
     
     pdf.setFontSize(12);
@@ -974,22 +1013,25 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     pdf.text(`Date de réservation : ${now.toLocaleDateString('fr-FR')}`, 20, yPos);
     yPos += 8;
     
-    pdf.text(`Appartement : ${record.appart} - Immeuble : ${record.bat}`, 20, yPos);
+    pdf.text(`Résidence : ${rec.residence || ''}`, 20, yPos);
     yPos += 8;
     
-    pdf.text(`Nom du réservateur : ${record.nom}`, 20, yPos);
+    pdf.text(`Appartement : ${rec.appart} - Immeuble : ${rec.bat}`, 20, yPos);
     yPos += 8;
     
-    pdf.text(`Type de document : ${record.typeDoc}`, 20, yPos);
+    pdf.text(`Nom du réservateur : ${rec.nom}`, 20, yPos);
     yPos += 8;
     
-    pdf.text(`Numéro de document : ${record.doc}`, 20, yPos);
+    pdf.text(`Type de document : ${rec.typeDoc}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Numéro de document : ${rec.doc}`, 20, yPos);
     yPos += 8;
     
     pdf.text(`Nombre de personnes : ${totalPersons}`, 20, yPos);
     yPos += 8;
     
-    pdf.text(`Date d'arrivée : ${record.date}`, 20, yPos);
+    pdf.text(`Date d'arrivée : ${rec.date}`, 20, yPos);
     yPos += 15;
     
     pdf.setFontSize(14);
@@ -1038,7 +1080,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     
     yPos += 10;
     
-    pdf.text(`${record.nom}`, 20, yPos);
+    pdf.text(`${rec.nom}`, 20, yPos);
     yPos += 8;
     
     pdf.text(`Date : ${now.toLocaleDateString('fr-FR')}`, 20, yPos);
@@ -1047,8 +1089,8 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     try {
       const imgWidth = 80;
       const imgHeight = 40;
-      if (record.signature && record.signature.startsWith('data:image')) {
-        pdf.addImage(record.signature, 'PNG', 20, yPos, imgWidth, imgHeight);
+      if (rec.signature && rec.signature.startsWith('data:image')) {
+        pdf.addImage(rec.signature, 'PNG', 20, yPos, imgWidth, imgHeight);
         pdf.setDrawColor(0, 0, 0);
         pdf.setLineWidth(2);
         pdf.rect(20, yPos, imgWidth, imgHeight);
@@ -1057,18 +1099,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       console.log('Erreur avec la signature:', e);
     }
     
-    const pdfBlob = pdf.output('blob');
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-    
-    const fileName = `${record.appart}_${record.bat}_${record.nom}_${record.date}.pdf`;
-    const link = document.createElement('a');
-    link.href = pdfUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    setTimeout(() => URL.revokeObjectURL(pdfUrl), 100);
+    return pdf.output('blob');
   }
 
   async function supprimerEnregistrement(id){
@@ -1295,12 +1326,14 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       personnes[`pers${i-1}`] = { nom: nomVal, doc: docVal, typeDoc: typeDocVal, nationalite: nationaliteVal };
     }
 
+    const residence = document.getElementById('invResidence').value;
     const appart = document.getElementById('invAppart').value;
     const bat = document.getElementById('invBat').value;
 
     signatureData = canvas.toDataURL('image/png');
 
     const rec = { 
+      residence,
       appart, 
       bat, 
       nom, 
@@ -1328,6 +1361,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       await database.ref('documents/' + id).set({
         html: documentData,
         recordId: id,
+        residence: residence,
         appart: appart,
         bat: bat,
         nom: nom,
@@ -1338,7 +1372,16 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       
       await sendAutomaticEmail(rec);
       
-      document.getElementById('successMessage').classList.remove('hidden');
+      const successDiv = document.getElementById('successMessage');
+      const customMsgDiv = document.getElementById('customSuccessMessageDisplay');
+      
+      if(customMessage && customMessage.trim() !== ''){
+        customMsgDiv.innerHTML = `<div style="font-size: 16px; margin-bottom: 15px; padding: 10px; background: #fff3e0; border-radius: 8px; border-left: 4px solid #e67e22;">${customMessage.replace(/\n/g, '<br>')}</div>`;
+      } else {
+        customMsgDiv.innerHTML = '';
+      }
+      
+      successDiv.classList.remove('hidden');
       document.getElementById('guestForm').style.display = 'none';
 
       generateAndOpenPDF(rec);
@@ -1400,9 +1443,15 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       if(emailSnapshot.exists()){
         emailSettings = emailSnapshot.val();
       }
+      
+      const customMsgSnapshot = await database.ref('customMessages/' + userId).once('value');
+      if(customMsgSnapshot.exists()){
+        customMessage = customMsgSnapshot.val();
+      }
 
       document.getElementById('loginCard').classList.add('hidden');
       document.getElementById('invitePanel').classList.remove('hidden');
+      document.getElementById('invResidence').value = user.residence || '';
       document.getElementById('invAppart').value = user.appart;
       document.getElementById('invBat').value = user.bat;
       genererChamps();
@@ -1497,6 +1546,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
 
 <div class="doc-info">
   <p><strong>Date de réservation :</strong> ${now.toLocaleDateString('fr-FR')}</p>
+  <p><strong>Résidence :</strong> ${rec.residence || ''}</p>
   <p><strong>Appartement :</strong> ${rec.appart} - Immeuble : ${rec.bat}</p>
   <p><strong>Nom du réservateur :</strong> ${rec.nom}</p>
   <p><strong>Type de document :</strong> ${rec.typeDoc}</p>
@@ -1555,6 +1605,9 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     pdf.setTextColor(0, 0, 0);
     
     pdf.text(`Date de réservation : ${now.toLocaleDateString('fr-FR')}`, 20, yPos);
+    yPos += 8;
+    
+    pdf.text(`Résidence : ${rec.residence || ''}`, 20, yPos);
     yPos += 8;
     
     pdf.text(`Appartement : ${rec.appart} - Immeuble : ${rec.bat}`, 20, yPos);
@@ -1670,7 +1723,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
 
   function downloadCurrentDocument() {
     if (!currentDocumentData) return;
-    downloadRecordPDF(currentDocumentData, currentDocumentData.id);
+    generateAndOpenPDF(currentDocumentData);
   }
 
   function partagerWhatsApp() {
@@ -1684,11 +1737,9 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       });
     }
     
-    const message = `Salam :\n\nArrivée: ${currentDocumentData.date}\nAppartement: ${currentDocumentData.appart}\nImm: ${currentDocumentData.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${currentDocumentData.nom}\nNuméro de ${currentDocumentData.typeDoc}: ${currentDocumentData.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${currentDocumentData.date}\nالشقة: ${currentDocumentData.appart}\nرقم العمارة: ${currentDocumentData.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${currentDocumentData.nom}\nرقم ${currentDocumentData.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${currentDocumentData.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
+    const message = `Salam :\n\nArrivée: ${currentDocumentData.date}\nRésidence: ${currentDocumentData.residence || ''}\nAppartement: ${currentDocumentData.appart}\nImm: ${currentDocumentData.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${currentDocumentData.nom}\nNuméro de ${currentDocumentData.typeDoc}: ${currentDocumentData.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${currentDocumentData.date}\nالعمارة: ${currentDocumentData.residence || ''}\nالشقة: ${currentDocumentData.appart}\nرقم العمارة: ${currentDocumentData.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${currentDocumentData.nom}\nرقم ${currentDocumentData.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${currentDocumentData.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
     
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-    
-    downloadAndDeleteRecord(currentDocumentData, currentDocumentData.id);
   }
 
   document.getElementById('btnLogin').disabled = false;

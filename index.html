@@ -1135,13 +1135,9 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       
       const message = `Salam :\n\nArrivée: ${record.date}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
       
-      setTimeout(() => {
-        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-      }, 500);
+      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
       
-      setTimeout(async () => {
-        await supprimerEnregistrementAvecMessage(recordId, record.nom);
-      }, 1000);
+      await supprimerEnregistrementAvecMessage(recordId, record.nom);
       
     } catch (error) {
       console.error(error);
@@ -1172,13 +1168,9 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       
       const message = `Salam :\n\nArrivée: ${record.date}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
       
-      setTimeout(() => {
-        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-      }, 500);
+      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
       
-      setTimeout(async () => {
-        await supprimerEnregistrementAvecMessage(recordId, record.nom);
-      }, 1000);
+      await supprimerEnregistrementAvecMessage(recordId, record.nom);
       
     } catch (error) {
       console.error(error);
@@ -1711,16 +1703,13 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     
     const message = `Salam :\n\nArrivée: ${record.date}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
     
-    setTimeout(() => {
-      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-    }, 500);
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
     
-    setTimeout(async () => {
-      await supprimerEnregistrementAvecMessage(recordId, record.nom);
-      document.getElementById('docActions').classList.add('hidden');
-      document.getElementById('documentPreview').innerHTML = '<p style="text-align: center; color: #666;">Cet enregistrement a été supprimé.</p>';
-      currentDocumentData = null;
-    }, 1000);
+    supprimerEnregistrementAvecMessage(recordId, record.nom);
+    
+    document.getElementById('docActions').classList.add('hidden');
+    document.getElementById('documentPreview').innerHTML = '<p style="text-align: center; color: #666;">Cet enregistrement a été supprimé.</p>';
+    currentDocumentData = null;
   }
 
   document.getElementById('btnLogin').disabled = false;

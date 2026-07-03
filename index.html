@@ -40,7 +40,6 @@
     .consent-container { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6; }
     .consent-text { max-height: 150px; overflow-y: auto; padding: 10px; background: white; border-radius: 5px; border: 1px solid #ced4da; margin: 10px 0; }
     .btn-delete { background: var(--err) !important; margin-left: 5px; }
-    .btn-edit { background: var(--info) !important; margin-left: 5px; }
     .signature-area { margin: 40px 0; padding: 20px; border: 2px solid #ddd; border-radius: 8px; text-align: center; }
     .signature-title { font-size: 18px; margin-bottom: 20px; color: #2c3e50; }
     .signature-canvas { width: 100%; height: 200px; border: 1px solid #ccc; border-radius: 5px; background: white; cursor: crosshair; margin-bottom: 20px; }
@@ -210,25 +209,15 @@
       font-family: Arial, sans-serif;
       resize: vertical;
     }
-    .edit-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
+    .residence-name-setting {
+      background: #e8f5e9;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #a5d6a7;
+      margin-top: 15px;
     }
-    .edit-modal-content {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      max-width: 500px;
-      width: 90%;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    .residence-name-setting label {
+      color: #2e7d32;
     }
   </style>
 </head>
@@ -270,19 +259,15 @@
         </div>
         <div class="row">
           <div class="col">
-            <label>Nom de résidence *</label>
-            <input type="text" id="residenceAdmin" placeholder="Ex: Premium Village" />
-          </div>
-          <div class="col">
-            <label>Appartement *</label>
+            <label>Appartement</label>
             <input type="text" id="appartAdmin" placeholder="Ex: 12" />
           </div>
           <div class="col">
-            <label>Immeuble *</label>
+            <label>Immeuble</label>
             <input type="text" id="batAdmin" placeholder="Ex: A" />
           </div>
           <div class="col">
-            <label>Mot de passe *</label>
+            <label>Mot de passe</label>
             <input type="text" id="passAdmin" placeholder="Choisir un mot de passe" />
           </div>
         </div>
@@ -296,7 +281,7 @@
         </div>
         <table id="tableUsers">
           <thead>
-            <tr><th>N°</th><th>Résidence</th><th>Appartement</th><th>Immeuble</th><th>Mot de passe</th><th>Action</th></tr>
+            <tr><th>N°</th><th>Appartement</th><th>Immeuble</th><th>Mot de passe</th><th>Action</th></tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -309,7 +294,7 @@
         <table id="tableAdmin">
           <thead>
             <tr>
-              <th>N°</th><th>Résidence</th><th>Appart.</th><th>Immeuble</th><th>Nom</th><th>Document</th><th>Type Doc</th><th>Nationalité</th>
+              <th>N°</th><th>Appart.</th><th>Immeuble</th><th>Nom</th><th>Document</th><th>Type Doc</th><th>Nationalité</th>
               <th>Nb Pers.</th><th>Personnes</th><th>Date</th><th>Document</th><th>Action</th><th>Statut</th>
             </tr>
           </thead>
@@ -341,6 +326,13 @@
           </div>
           <button onclick="updateUserSettings()">Enregistrer les paramètres</button>
           <p id="settingsMsg" class="banner hidden"></p>
+        </div>
+        
+        <div class="residence-name-setting">
+          <label>Nom de la résidence</label>
+          <input type="text" id="residenceNameInput" placeholder="Ex: Résidence Premium Village" />
+          <button onclick="saveResidenceName()" style="margin-top: 10px; background: var(--ok);">Enregistrer le nom</button>
+          <p id="residenceMsg" class="banner hidden" style="margin-top: 10px;"></p>
         </div>
         
         <div class="email-settings">
@@ -402,10 +394,6 @@
         <div class="card">
           <form id="guestForm">
             <div class="row">
-              <div class="col">
-                <label>Résidence</label>
-                <input type="text" id="invResidence" readonly />
-              </div>
               <div class="col">
                 <label>Appartement</label>
                 <input type="text" id="invAppart" readonly />
@@ -485,7 +473,7 @@
             <div class="accept-signature-container">
               <label style="display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
                 <input type="checkbox" id="acceptCheckbox" required style="margin-right: 10px; width: auto;">
-                <span style="font-size: 16px; font-weight: bold;">En utilisant cette application, vous acceptez que les informations fournies lors de votre première inscription soient traitées conformément à la réglementation marocaine sur la protection des données personnelles. Ces données sont exclusivement utilisées pour le processus initial et ne sont pas conservées. De plus, vous vous engagez à respecter l'ensemble du règlement intérieur de l'appartement et à valider votre acceptation par votre signature.</span>
+                <span style="font-size: 16px; font-weight: bold;">Je confirme avoir lu et j'accepte le règlement intérieur ainsi queJe déclare accepter, conformément à la loi marocaine, la protection et la confidentialité de mes données personnelles..</span>
               </label>
               <div class="error-message" id="acceptCheckboxError" style="text-align: center;">Veuillez accepter les conditions</div>
               <div style="text-align: center;">
@@ -515,25 +503,6 @@
         <button onclick="downloadCurrentDocument()" style="background: var(--ok);">Télécharger PDF</button>
         <button onclick="partagerWhatsApp()" style="background: #25D366;">Partager WhatsApp</button>
       </div>
-    </div>
-  </div>
-</div>
-
-<div id="editModal" class="edit-modal hidden">
-  <div class="edit-modal-content">
-    <h3>Modifier l'utilisateur</h3>
-    <input type="hidden" id="editUserId" />
-    <label>Nom de résidence</label>
-    <input type="text" id="editResidence" />
-    <label>Appartement</label>
-    <input type="text" id="editAppart" />
-    <label>Immeuble</label>
-    <input type="text" id="editBat" />
-    <label>Mot de passe</label>
-    <input type="text" id="editPass" />
-    <div style="display: flex; gap: 10px; margin-top: 20px;">
-      <button onclick="saveUserEdit()" style="flex:1; background: var(--ok);">Enregistrer</button>
-      <button onclick="closeEditModal()" style="flex:1; background: var(--err);">Annuler</button>
     </div>
   </div>
 </div>
@@ -577,6 +546,7 @@
   let userSettings = { maxRecords: 10 };
   let emailSettings = { enableEmail: 'non' };
   let customMessage = '';
+  let residenceName = '';
 
   function encrypt(text) {
     if (!text) return '';
@@ -694,7 +664,7 @@
       const user = snapshot.val();
       
       if(user && user.pass === p){
-        currentUser = { role:'user', id:u, residence:user.residence, appart:user.appart, bat:user.bat };
+        currentUser = { role:'user', id:u, appart:user.appart, bat:user.bat };
         
         const settingsSnapshot = await database.ref('settings/' + u).once('value');
         if(settingsSnapshot.exists()){
@@ -718,10 +688,16 @@
           document.getElementById('customSuccessMessage').value = customMessage;
         }
         
+        const residenceSnapshot = await database.ref('residenceName/' + u).once('value');
+        if(residenceSnapshot.exists()){
+          residenceName = residenceSnapshot.val();
+          document.getElementById('residenceNameInput').value = residenceName;
+        }
+        
         document.getElementById('loginCard').classList.add('hidden');
         document.getElementById('userPanel').classList.remove('hidden');
         document.getElementById('documentColumn').classList.remove('hidden');
-        showBanner('ok', `Connecté. Résidence ${user.residence} / Appartement ${user.appart} / Immeuble ${user.bat}.`);
+        showBanner('ok', `Connecté. Appartement ${user.appart} / Immeuble ${user.bat}.`);
         startSessionTimer();
         refreshUser();
       } else {
@@ -734,6 +710,24 @@
     } finally {
       btn.disabled = false;
       btn.textContent = "Connexion";
+    }
+  }
+
+  async function saveResidenceName(){
+    const name = document.getElementById('residenceNameInput').value.trim();
+    if(!name){
+      showInlineMsg('residenceMsg', 'warn', 'Veuillez entrer un nom de résidence.');
+      return;
+    }
+    try {
+      await database.ref('residenceName/' + currentUser.id).set(name);
+      residenceName = name;
+      showInlineMsg('residenceMsg', 'ok', 'Nom de résidence enregistré avec succès.');
+      setTimeout(() => {
+        hideInlineMsg('residenceMsg');
+      }, 3000);
+    } catch (error) {
+      showInlineMsg('residenceMsg', 'err', 'Erreur lors de l\'enregistrement du nom.');
     }
   }
 
@@ -840,7 +834,6 @@
 
 Nom: ${record.nom}
 Date d'arrivée: ${record.date}
-Résidence: ${record.residence}
 Appartement: ${record.appart}
 Immeuble: ${record.bat}
 Nombre de personnes: ${totalPersons}
@@ -885,68 +878,20 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
   }
 
   async function creerUtilisateur(){
-    const residence = document.getElementById('residenceAdmin').value.trim();
     const app = document.getElementById('appartAdmin').value.trim();
     const bat = document.getElementById('batAdmin').value.trim();
     const pass = document.getElementById('passAdmin').value.trim();
-    if(!residence || !app || !bat || !pass) {
-      showInlineMsg('userWarn', 'warn', 'Tous les champs sont requis.');
-      return;
-    }
+    if(!app || !bat || !pass) return;
     
     const id = app + bat;
     try {
-      await database.ref('users/' + id).set({ residence:residence, appart:app, bat:bat, pass:pass });
-      document.getElementById('residenceAdmin').value = '';
+      await database.ref('users/' + id).set({ appart:app, bat:bat, pass:pass });
       document.getElementById('appartAdmin').value = '';
       document.getElementById('batAdmin').value = '';
       document.getElementById('passAdmin').value = '';
       refreshAdmin();
-      showInlineMsg('userWarn', 'ok', 'Utilisateur créé avec succès.');
     } catch (e) {
       console.error(e);
-      showInlineMsg('userWarn', 'err', 'Erreur lors de la création.');
-    }
-  }
-
-  function openEditModal(userId, userData){
-    document.getElementById('editUserId').value = userId;
-    document.getElementById('editResidence').value = userData.residence || '';
-    document.getElementById('editAppart').value = userData.appart || '';
-    document.getElementById('editBat').value = userData.bat || '';
-    document.getElementById('editPass').value = userData.pass || '';
-    document.getElementById('editModal').classList.remove('hidden');
-  }
-
-  function closeEditModal(){
-    document.getElementById('editModal').classList.add('hidden');
-  }
-
-  async function saveUserEdit(){
-    const userId = document.getElementById('editUserId').value;
-    const residence = document.getElementById('editResidence').value.trim();
-    const appart = document.getElementById('editAppart').value.trim();
-    const bat = document.getElementById('editBat').value.trim();
-    const pass = document.getElementById('editPass').value.trim();
-
-    if(!residence || !appart || !bat || !pass){
-      alert('Tous les champs sont requis.');
-      return;
-    }
-
-    try {
-      await database.ref('users/' + userId).update({
-        residence: residence,
-        appart: appart,
-        bat: bat,
-        pass: pass
-      });
-      closeEditModal();
-      refreshAdmin();
-      showInlineMsg('userWarn', 'ok', 'Utilisateur modifié avec succès.');
-    } catch (e) {
-      console.error(e);
-      alert('Erreur lors de la modification.');
     }
   }
 
@@ -965,17 +910,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     let i = 1;
     for(let id in users){
       const u = users[id];
-      tbody.innerHTML += `<tr>
-        <td>${i++}</td>
-        <td>${u.residence || ''}</td>
-        <td>${u.appart}</td>
-        <td>${u.bat}</td>
-        <td>${u.pass}</td>
-        <td>
-          <button class="btn-edit" onclick="openEditModal('${id}', ${JSON.stringify(u).replace(/"/g, '&quot;')})">Modifier</button>
-          <button class="btn-delete" onclick="supprimerUtilisateur('${id}')">Supprimer</button>
-        </td>
-      </tr>`;
+      tbody.innerHTML += `<tr><td>${i++}</td><td>${u.appart}</td><td>${u.bat}</td><td>${u.pass}</td><td><button class="btn-delete" onclick="supprimerUtilisateur('${id}')">Supprimer</button></td></tr>`;
     }
 
     const snapRec = await database.ref('records').once('value');
@@ -989,7 +924,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       const persStr = r.personnes ? Object.values(r.personnes).map(p => p.nom).join(', ') : '-';
       const nbPers = r.personnes ? Object.keys(r.personnes).length + 1 : 1;
       tbodyAdmin.innerHTML += `<tr>
-        <td>${j++}</td><td>${r.residence || ''}</td><td>${r.appart}</td><td>${r.bat}</td><td>${r.nom}</td><td>${r.doc}</td><td>${r.typeDoc}</td><td>${r.nationalite}</td>
+        <td>${j++}</td><td>${r.appart}</td><td>${r.bat}</td><td>${r.nom}</td><td>${r.doc}</td><td>${r.typeDoc}</td><td>${r.nationalite}</td>
         <td>${nbPers}</td><td>${persStr}</td><td>${r.date}</td>
         <td><button onclick="afficherDocument('${id}')">Voir</button></td>
         <td><button onclick="envoyerWhatsAppAdmin('${id}')" style="background:#25D366;">WhatsApp</button><button class="btn-delete" onclick="supprimerEnregistrement('${id}')">Suppr.</button></td>
@@ -1021,134 +956,6 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     }
   }
 
-  function generatePDFFilename(rec) {
-    const residence = (rec.residence || 'Residence').replace(/[^a-zA-Z0-9]/g, '_');
-    const bat = (rec.bat || 'Bat').replace(/[^a-zA-Z0-9]/g, '_');
-    const appart = (rec.appart || 'Appart').replace(/[^a-zA-Z0-9]/g, '_');
-    const nom = (rec.nom || 'Nom').replace(/[^a-zA-Z0-9]/g, '_');
-    const date = rec.date || 'Date';
-    return `${residence}_${bat}_${appart}_${nom}_${date}.pdf`;
-  }
-
-  async function generatePDFBlob(rec) {
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    let yPos = 20;
-    
-    pdf.setFontSize(20);
-    pdf.setTextColor(44, 62, 80);
-    pdf.text('Enregistrement des invités', 105, yPos, { align: 'center' });
-    yPos += 8;
-    pdf.setFontSize(16);
-    pdf.text('Guest Registration', 105, yPos, { align: 'center' });
-    yPos += 12;
-    
-    pdf.setFontSize(16);
-    pdf.text('RÈGLEMENT INTÉRIEUR ET INFORMATIONS DE RÉSERVATION', 105, yPos, { align: 'center' });
-    yPos += 15;
-    
-    pdf.setDrawColor(44, 62, 80);
-    pdf.setLineWidth(1);
-    pdf.line(20, yPos, 190, yPos);
-    yPos += 15;
-    
-    const totalPersons = rec.personnes ? Object.keys(rec.personnes).length + 1 : 1;
-    const now = new Date();
-    
-    pdf.setFontSize(12);
-    pdf.setTextColor(0, 0, 0);
-    
-    pdf.text(`Date de réservation : ${now.toLocaleDateString('fr-FR')}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Résidence : ${rec.residence || ''}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Appartement : ${rec.appart} - Immeuble : ${rec.bat}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Nom du réservateur : ${rec.nom}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Type de document : ${rec.typeDoc}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Numéro de document : ${rec.doc}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Nombre de personnes : ${totalPersons}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Date d'arrivée : ${rec.date}`, 20, yPos);
-    yPos += 15;
-    
-    pdf.setFontSize(14);
-    pdf.setTextColor(44, 62, 80);
-    pdf.text('RÈGLEMENT INTÉRIEUR ACCEPTÉ :', 20, yPos);
-    yPos += 10;
-    
-    pdf.setFontSize(12);
-    const rules = [
-      '1. Si vous êtes des Couples marocains:',
-      'selon la loi marocaine ce logement autorise que les couples mariés.',
-      '',
-      '2. Tranquillité et bruit',
-      'Silence total obligatoire après 23h00. Pas de musique forte, cris ou',
-      'nuisances sonores à toute heure.',
-      '',
-      '3. Tabagisme',
-      'Fumer est strictement interdit à l\'intérieur. Autorisé uniquement en',
-      'extérieur (terrasse ou jardin), avec obligation de nettoyer les mégots',
-      'et cendres.',
-      '',
-      '4. Nombre de personnes',
-      'Maximum 5 personnes autorisées dans l\'appartement.',
-      '',
-      '5. Piscine',
-      'Douche obligatoire avant la baignade.',
-      'Pas de verre ni objets fragiles autour de la piscine.',
-      'Surveillance permanente des enfants par un adulte.',
-      'Horaires : fermeture à 20h00.',
-      'Pas de courses ni plongeons.',
-      '',
-      '6. Propreté et entretien',
-      'Maintenir les lieux propres en permanence.',
-      'Vider régulièrement les poubelles.',
-      'Respecter les sols et surfaces (pas de traces, pas de nourriture hors cuisine).'
-    ];
-
-    rules.forEach(line => {
-      if (yPos > 250) {
-        pdf.addPage();
-        yPos = 20;
-      }
-      pdf.text(line, 20, yPos);
-      yPos += line === '' ? 5 : 7;
-    });
-    
-    yPos += 10;
-    
-    pdf.text(`${rec.nom}`, 20, yPos);
-    yPos += 8;
-    
-    pdf.text(`Date : ${now.toLocaleDateString('fr-FR')}`, 20, yPos);
-    yPos += 15;
-    
-    try {
-      const imgWidth = 80;
-      const imgHeight = 40;
-      if (rec.signature && rec.signature.startsWith('data:image')) {
-        pdf.addImage(rec.signature, 'PNG', 20, yPos, imgWidth, imgHeight);
-        pdf.setDrawColor(0, 0, 0);
-        pdf.setLineWidth(2);
-        pdf.rect(20, yPos, imgWidth, imgHeight);
-      }
-    } catch (e) {
-      console.log('Erreur avec la signature:', e);
-    }
-    
-    return pdf.output('blob');
-  }
-
   async function envoyerWhatsAppAdmin(recordId) {
     try {
       const snapshot = await database.ref('records/' + recordId).once('value');
@@ -1158,18 +965,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
         alert("Enregistrement non trouvé");
         return;
       }
-
-      const pdfBlob = await generatePDFBlob(record);
-      const pdfUrl = URL.createObjectURL(pdfBlob);
       
-      const link = document.createElement('a');
-      link.href = pdfUrl;
-      link.download = generatePDFFilename(record);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
-
       const totalPersons = record.personnes ? Object.keys(record.personnes).length + 1 : 1;
       let autresPersonnes = '';
       
@@ -1179,21 +975,12 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
         });
       }
       
-      const message = `Salam :\n\nArrivée: ${record.date}\nRésidence: ${record.residence || ''}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالعمارة: ${record.residence || ''}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
+      const message = `Salam :\n\nArrivée: ${record.date}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
       
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-
-      await database.ref('records/' + recordId).remove();
-      await database.ref('documents/' + recordId).remove();
-      
-      showBanner('ok', `La réservation de ${record.nom} a été supprimée avec succès.`);
-      alert(`La ligne de ${record.nom} a été supprimée avec succès.`);
-      
-      if(currentUser.role === 'admin') refreshAdmin(); else refreshUser();
-      
     } catch (error) {
       console.error(error);
-      alert("Erreur lors du traitement WhatsApp");
+      alert("Erreur lors de l'envoi WhatsApp");
     }
   }
 
@@ -1206,18 +993,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
         alert("Enregistrement non trouvé");
         return;
       }
-
-      const pdfBlob = await generatePDFBlob(record);
-      const pdfUrl = URL.createObjectURL(pdfBlob);
       
-      const link = document.createElement('a');
-      link.href = pdfUrl;
-      link.download = generatePDFFilename(record);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
-
       const totalPersons = record.personnes ? Object.keys(record.personnes).length + 1 : 1;
       let autresPersonnes = '';
       
@@ -1227,21 +1003,12 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
         });
       }
       
-      const message = `Salam :\n\nArrivée: ${record.date}\nRésidence: ${record.residence || ''}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالعمارة: ${record.residence || ''}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
+      const message = `Salam :\n\nArrivée: ${record.date}\nAppartement: ${record.appart}\nImm: ${record.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${record.nom}\nNuméro de ${record.typeDoc}: ${record.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${record.date}\nالشقة: ${record.appart}\nرقم العمارة: ${record.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${record.nom}\nرقم ${record.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${record.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
       
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-
-      await database.ref('records/' + recordId).remove();
-      await database.ref('documents/' + recordId).remove();
-      
-      showBanner('ok', `La réservation de ${record.nom} a été supprimée avec succès.`);
-      alert(`La ligne de ${record.nom} a été supprimée avec succès.`);
-      
-      if(currentUser.role === 'admin') refreshAdmin(); else refreshUser();
-      
     } catch (error) {
       console.error(error);
-      alert("Erreur lors du traitement WhatsApp");
+      alert("Erreur lors de l'envoi WhatsApp");
     }
   }
 
@@ -1469,14 +1236,12 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       personnes[`pers${i-1}`] = { nom: nomVal, doc: docVal, typeDoc: typeDocVal, nationalite: nationaliteVal };
     }
 
-    const residence = document.getElementById('invResidence').value;
     const appart = document.getElementById('invAppart').value;
     const bat = document.getElementById('invBat').value;
 
     signatureData = canvas.toDataURL('image/png');
 
     const rec = { 
-      residence,
       appart, 
       bat, 
       nom, 
@@ -1487,7 +1252,8 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       date, 
       sent:false,
       signature: signatureData,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      residenceName: residenceName || ''
     };
 
     try {
@@ -1504,13 +1270,13 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       await database.ref('documents/' + id).set({
         html: documentData,
         recordId: id,
-        residence: residence,
         appart: appart,
         bat: bat,
         nom: nom,
         date: rec.date,
         signature: signatureData,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        residenceName: residenceName || ''
       });
       
       await sendAutomaticEmail(rec);
@@ -1591,10 +1357,14 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       if(customMsgSnapshot.exists()){
         customMessage = customMsgSnapshot.val();
       }
+      
+      const residenceSnapshot = await database.ref('residenceName/' + userId).once('value');
+      if(residenceSnapshot.exists()){
+        residenceName = residenceSnapshot.val();
+      }
 
       document.getElementById('loginCard').classList.add('hidden');
       document.getElementById('invitePanel').classList.remove('hidden');
-      document.getElementById('invResidence').value = user.residence || '';
       document.getElementById('invAppart').value = user.appart;
       document.getElementById('invBat').value = user.bat;
       genererChamps();
@@ -1683,13 +1453,14 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
   function generateDocumentHTML(rec) {
     const totalPersons = rec.personnes ? Object.keys(rec.personnes).length + 1 : 1;
     const now = new Date();
+    const displayResidence = rec.residenceName || residenceName || '';
     
     return `
-<div class="doc-title">Enregistrement des invités / Guest Registration</div>
+<div class="doc-title">${displayResidence || 'Enregistrement des invités'} / Guest Registration</div>
 
 <div class="doc-info">
   <p><strong>Date de réservation :</strong> ${now.toLocaleDateString('fr-FR')}</p>
-  <p><strong>Résidence :</strong> ${rec.residence || ''}</p>
+  <p><strong>Résidence :</strong> ${displayResidence || 'Non spécifiée'}</p>
   <p><strong>Appartement :</strong> ${rec.appart} - Immeuble : ${rec.bat}</p>
   <p><strong>Nom du réservateur :</strong> ${rec.nom}</p>
   <p><strong>Type de document :</strong> ${rec.typeDoc}</p>
@@ -1724,9 +1495,12 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     const pdf = new jsPDF('p', 'mm', 'a4');
     let yPos = 20;
     
+    const displayResidence = rec.residenceName || residenceName || '';
+    const titleText = displayResidence || 'Enregistrement des invités';
+    
     pdf.setFontSize(20);
     pdf.setTextColor(44, 62, 80);
-    pdf.text('Enregistrement des invités', 105, yPos, { align: 'center' });
+    pdf.text(titleText, 105, yPos, { align: 'center' });
     yPos += 8;
     pdf.setFontSize(16);
     pdf.text('Guest Registration', 105, yPos, { align: 'center' });
@@ -1750,7 +1524,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     pdf.text(`Date de réservation : ${now.toLocaleDateString('fr-FR')}`, 20, yPos);
     yPos += 8;
     
-    pdf.text(`Résidence : ${rec.residence || ''}`, 20, yPos);
+    pdf.text(`Résidence : ${displayResidence || 'Non spécifiée'}`, 20, yPos);
     yPos += 8;
     
     pdf.text(`Appartement : ${rec.appart} - Immeuble : ${rec.bat}`, 20, yPos);
@@ -1836,8 +1610,25 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       console.log('Erreur avec la signature:', e);
     }
     
-    const filename = generatePDFFilename(rec);
-    pdf.save(filename);
+    const pdfBlob = pdf.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    
+    const safeResidence = (displayResidence || 'residence').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
+    const safeAppart = (rec.appart || '').replace(/[^a-zA-Z0-9]/g, '_');
+    const safeBat = (rec.bat || '').replace(/[^a-zA-Z0-9]/g, '_');
+    const safeNom = (rec.nom || 'invite').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
+    const safeDate = (rec.date || '').replace(/[^0-9-]/g, '');
+    
+    const fileName = `${safeResidence}_${safeAppart}_${safeBat}_${safeNom}_${safeDate}.pdf`;
+    
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    window.open(pdfUrl, '_blank');
   }
 
   async function afficherDocument(id) {
@@ -1878,7 +1669,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       });
     }
     
-    const message = `Salam :\n\nArrivée: ${currentDocumentData.date}\nRésidence: ${currentDocumentData.residence || ''}\nAppartement: ${currentDocumentData.appart}\nImm: ${currentDocumentData.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${currentDocumentData.nom}\nNuméro de ${currentDocumentData.typeDoc}: ${currentDocumentData.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${currentDocumentData.date}\nالعمارة: ${currentDocumentData.residence || ''}\nالشقة: ${currentDocumentData.appart}\nرقم العمارة: ${currentDocumentData.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${currentDocumentData.nom}\nرقم ${currentDocumentData.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${currentDocumentData.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
+    const message = `Salam :\n\nArrivée: ${currentDocumentData.date}\nAppartement: ${currentDocumentData.appart}\nImm: ${currentDocumentData.bat}\nNombre de personnes: ${totalPersons} personnes\n\nRéservation au nom de:\nNom et Prénom: ${currentDocumentData.nom}\nNuméro de ${currentDocumentData.typeDoc}: ${currentDocumentData.doc}\n\nAutres personnes:\n${autresPersonnes}\nNB : Svp pas d'autres personnes autorisées seul Les personnes figurent dans la réservation.\n\nMerci\n------------------------------------------\nالسلام عليكم:\n\nالوصول: ${currentDocumentData.date}\nالشقة: ${currentDocumentData.appart}\nرقم العمارة: ${currentDocumentData.bat}\nعدد الأشخاص: ${totalPersons} أشخاص\n\nالحجز باسم:\nالإسم و اللقب: ${currentDocumentData.nom}\nرقم ${currentDocumentData.typeDoc === 'Passeport' ? 'جواز السفر' : 'بطاقة الهوية'}: ${currentDocumentData.doc}\n\nأشخاص آخرون:\n${autresPersonnes}\nملاحظة: الرجاء عدم السماح لأي أشخاص آخرين، فقط الأشخاص المذكورين في الحجز.\n\nشكرًا.`;
     
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   }

@@ -1,4 +1,4 @@
-
+```html
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1083,13 +1083,11 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     const pdfUrl = URL.createObjectURL(pdfBlob);
     
     const displayResidence = rec.residenceName || residenceName || '';
-    const safeResidence = (displayResidence || 'residence').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
-    const safeAppart = (rec.appart || '').replace(/[^a-zA-Z0-9]/g, '_');
-    const safeBat = (rec.bat || '').replace(/[^a-zA-Z0-9]/g, '_');
-    const safeNom = (rec.nom || 'invite').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
+    const safeResidence = (displayResidence || 'residence').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 15);
     const safeDate = (rec.date || '').replace(/[^0-9-]/g, '');
+    const safeNom = (rec.nom || 'invite').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
     
-    const fileName = `${safeResidence}_${safeAppart}_${safeBat}_${safeNom}_${safeDate}.pdf`;
+    const fileName = `${safeDate}_${safeResidence}_${safeNom}.pdf`;
     
     const link = document.createElement('a');
     link.href = pdfUrl;

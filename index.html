@@ -219,6 +219,66 @@
     .residence-name-setting label {
       color: #2e7d32;
     }
+    .history-section {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+      margin-top: 20px;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .history-filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .history-filters select {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: auto;
+      min-width: 150px;
+    }
+    .status-sent { color: #0f9d58; font-weight: bold; }
+    .status-pending { color: #f4b400; font-weight: bold; }
+    .category-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .category-1 { background: #e8f0fe; color: #174ea6; }
+    .category-2 { background: #fef7e0; color: #a66300; }
+    .btn-whatsapp { background: #25D366 !important; }
+    .btn-view { background: #4285f4 !important; }
+    .table-compact th, .table-compact td { padding: 6px 4px; font-size: 13px; }
+    .filter-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .filter-tab {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .filter-tab.active {
+      background: var(--c1);
+      color: white;
+      border-color: var(--c1);
+    }
   </style>
 </head>
 <body>
@@ -301,6 +361,33 @@
           <tbody></tbody>
         </table>
       </div>
+
+      <div class="card history-section">
+        <div class="history-header">
+          <div><strong>Historique des envois WhatsApp</strong></div>
+          <div class="history-filters">
+            <select id="historyPeriodFilter" onchange="loadHistory()">
+              <option value="current">Période actuelle (2 mois avant + 2 mois après)</option>
+              <option value="all">Tout l'historique</option>
+              <option value="2months">2 mois précédents</option>
+              <option value="next2months">2 mois à venir</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-tabs">
+          <div class="filter-tab active" data-filter="all" onclick="filterHistory('all')">Tous</div>
+          <div class="filter-tab" data-filter="sent" onclick="filterHistory('sent')">Envoyés</div>
+          <div class="filter-tab" data-filter="pending" onclick="filterHistory('pending')">En cours</div>
+        </div>
+        <table id="tableHistory" class="table-compact">
+          <thead>
+            <tr>
+              <th>N°</th><th>Nom</th><th>Date d'arrivée</th><th>Statut</th><th>Date d'envoi</th><th>Catégorie</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
 
     <div id="userPanel" class="hidden">
@@ -378,6 +465,33 @@
           <thead>
             <tr>
               <th>N°</th><th>Nom</th><th>Document</th><th>Type Doc</th><th>Nationalité</th><th>Nb Pers.</th><th>Personnes</th><th>Date</th><th>Document</th><th>Statut</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="card history-section">
+        <div class="history-header">
+          <div><strong>Historique des envois WhatsApp</strong></div>
+          <div class="history-filters">
+            <select id="historyPeriodFilterUser" onchange="loadHistoryUser()">
+              <option value="current">Période actuelle (2 mois avant + 2 mois après)</option>
+              <option value="all">Tout l'historique</option>
+              <option value="2months">2 mois précédents</option>
+              <option value="next2months">2 mois à venir</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-tabs">
+          <div class="filter-tab active" data-filter="all" onclick="filterHistoryUser('all')">Tous</div>
+          <div class="filter-tab" data-filter="sent" onclick="filterHistoryUser('sent')">Envoyés</div>
+          <div class="filter-tab" data-filter="pending" onclick="filterHistoryUser('pending')">En cours</div>
+        </div>
+        <table id="tableHistoryUser" class="table-compact">
+          <thead>
+            <tr>
+              <th>N°</th><th>Nom</th><th>Date d'arrivée</th><th>Statut</th><th>Date d'envoi</th><th>Catégorie</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -547,6 +661,10 @@
   let emailSettings = { enableEmail: 'non' };
   let customMessage = '';
   let residenceName = '';
+  let currentHistoryFilter = 'all';
+  let currentHistoryFilterUser = 'all';
+  let currentHistoryData = [];
+  let currentHistoryDataUser = [];
 
   function encrypt(text) {
     if (!text) return '';
@@ -655,6 +773,7 @@
         showBanner('ok', "Connecté en tant qu'administrateur.");
         startSessionTimer();
         refreshAdmin();
+        loadHistory();
         return;
       }
 
@@ -700,6 +819,7 @@
         showBanner('ok', `Connecté. Appartement ${user.appart} / Immeuble ${user.bat}.`);
         startSessionTimer();
         refreshUser();
+        loadHistoryUser();
       } else {
         showInlineMsg('loginMsg','err',"Identifiants incorrects.");
         await firebase.auth().signOut();
@@ -927,7 +1047,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
         <td>${j++}</td><td>${r.appart}</td><td>${r.bat}</td><td>${r.nom}</td><td>${r.doc}</td><td>${r.typeDoc}</td><td>${r.nationalite}</td>
         <td>${nbPers}</td><td>${persStr}</td><td>${r.date}</td>
         <td><button onclick="afficherDocument('${id}')">Voir</button></td>
-        <td><button onclick="envoyerWhatsAppAdmin('${id}')" style="background:#25D366;">WhatsApp</button><button class="btn-delete" onclick="supprimerEnregistrement('${id}')">Suppr.</button></td>
+        <td><button class="btn-whatsapp" onclick="envoyerWhatsAppAdmin('${id}')">WhatsApp</button><button class="btn-delete" onclick="supprimerEnregistrement('${id}')">Suppr.</button></td>
         <td>${r.sent ? '✅ Envoyé' : '⏳ En attente'}</td>
       </tr>`;
     }
@@ -950,7 +1070,7 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
           <td>${nbPers}</td><td>${persStr}</td><td>${r.date}</td>
           <td><button onclick="afficherDocument('${id}')">Voir</button></td>
           <td>${r.sent ? '✅ Envoyé' : '⏳ En attente'}</td>
-          <td><button onclick="envoyerWhatsAppUser('${id}')" style="background:#25D366;">WhatsApp</button><button class="btn-delete" onclick="supprimerEnregistrement('${id}')">Suppr.</button></td>
+          <td><button class="btn-whatsapp" onclick="envoyerWhatsAppUser('${id}')">WhatsApp</button><button class="btn-delete" onclick="supprimerEnregistrement('${id}')">Suppr.</button></td>
         </tr>`;
       }
     }
@@ -1101,13 +1221,19 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     }
   }
 
-  async function supprimerEnregistrementAvecMessage(id, nom) {
-    await database.ref('records/' + id).remove();
-    await database.ref('documents/' + id).remove();
-    const msg = `La ligne pour ${nom} a été supprimée avec succès.`;
-    showBanner('ok', msg);
-    setTimeout(() => hideBanner(), 5000);
-    if(currentUser && currentUser.role === 'admin') refreshAdmin(); else if(currentUser) refreshUser();
+  async function archiverEnregistrement(recordId, record, userRole) {
+    const now = Date.now();
+    const archiveData = {
+      nom: record.nom,
+      dateArrivee: record.date,
+      status: 'envoye',
+      dateEnvoi: now,
+      appart: record.appart,
+      bat: record.bat,
+      categorie: userRole === 'admin' ? 'categorie_1' : 'categorie_2',
+      timestamp: now
+    };
+    await database.ref('historiqueWhatsApp').push(archiveData);
   }
 
   async function envoyerWhatsAppAdmin(recordId) {
@@ -1135,7 +1261,15 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
       
-      await supprimerEnregistrementAvecMessage(recordId, record.nom);
+      await archiverEnregistrement(recordId, record, 'admin');
+      await database.ref('records/' + recordId).remove();
+      await database.ref('documents/' + recordId).remove();
+      
+      const msg = `La ligne pour ${record.nom} a été supprimée et archivée avec succès.`;
+      showBanner('ok', msg);
+      setTimeout(() => hideBanner(), 5000);
+      refreshAdmin();
+      loadHistory();
       
     } catch (error) {
       console.error(error);
@@ -1168,7 +1302,15 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
       
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
       
-      await supprimerEnregistrementAvecMessage(recordId, record.nom);
+      await archiverEnregistrement(recordId, record, 'user');
+      await database.ref('records/' + recordId).remove();
+      await database.ref('documents/' + recordId).remove();
+      
+      const msg = `La ligne pour ${record.nom} a été supprimée et archivée avec succès.`;
+      showBanner('ok', msg);
+      setTimeout(() => hideBanner(), 5000);
+      refreshUser();
+      loadHistoryUser();
       
     } catch (error) {
       console.error(error);
@@ -1193,6 +1335,152 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     document.execCommand('copy');
     document.body.removeChild(tempInput);
     showBanner('info', "Copiez/partagez ce lien avec vos invités.");
+  }
+
+  async function loadHistory() {
+    const periodFilter = document.getElementById('historyPeriodFilter').value;
+    const snapshot = await database.ref('historiqueWhatsApp').once('value');
+    const allHistory = snapshot.val() || {};
+    
+    let historyArray = Object.values(allHistory).filter(h => h.categorie === 'categorie_1');
+    
+    const now = Date.now();
+    const twoMonthsMs = 60 * 24 * 60 * 60 * 1000;
+    let startDate, endDate;
+    
+    if (periodFilter === 'current') {
+      startDate = now - twoMonthsMs;
+      endDate = now + twoMonthsMs;
+    } else if (periodFilter === '2months') {
+      startDate = now - twoMonthsMs;
+      endDate = now;
+    } else if (periodFilter === 'next2months') {
+      startDate = now;
+      endDate = now + twoMonthsMs;
+    } else {
+      startDate = 0;
+      endDate = Infinity;
+    }
+    
+    historyArray = historyArray.filter(h => h.timestamp >= startDate && h.timestamp <= endDate);
+    currentHistoryData = historyArray.sort((a, b) => b.dateEnvoi - a.dateEnvoi);
+    renderHistoryTable();
+  }
+
+  async function loadHistoryUser() {
+    const periodFilter = document.getElementById('historyPeriodFilterUser').value;
+    const snapshot = await database.ref('historiqueWhatsApp').once('value');
+    const allHistory = snapshot.val() || {};
+    
+    let historyArray = Object.values(allHistory).filter(h => 
+      h.categorie === 'categorie_2' && h.appart === currentUser.appart && h.bat === currentUser.bat
+    );
+    
+    const now = Date.now();
+    const twoMonthsMs = 60 * 24 * 60 * 60 * 1000;
+    let startDate, endDate;
+    
+    if (periodFilter === 'current') {
+      startDate = now - twoMonthsMs;
+      endDate = now + twoMonthsMs;
+    } else if (periodFilter === '2months') {
+      startDate = now - twoMonthsMs;
+      endDate = now;
+    } else if (periodFilter === 'next2months') {
+      startDate = now;
+      endDate = now + twoMonthsMs;
+    } else {
+      startDate = 0;
+      endDate = Infinity;
+    }
+    
+    historyArray = historyArray.filter(h => h.timestamp >= startDate && h.timestamp <= endDate);
+    currentHistoryDataUser = historyArray.sort((a, b) => b.dateEnvoi - a.dateEnvoi);
+    renderHistoryTableUser();
+  }
+
+  function renderHistoryTable() {
+    const tbody = document.querySelector('#tableHistory tbody');
+    tbody.innerHTML = '';
+    
+    let filteredData = currentHistoryData;
+    if (currentHistoryFilter === 'sent') {
+      filteredData = filteredData.filter(h => h.status === 'envoye');
+    } else if (currentHistoryFilter === 'pending') {
+      filteredData = filteredData.filter(h => h.status === 'en_cours');
+    }
+    
+    if (filteredData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">Aucun enregistrement trouvé</td></tr>';
+      return;
+    }
+    
+    filteredData.forEach((h, index) => {
+      const statusText = h.status === 'envoye' ? '✅ Envoyé' : '⏳ En cours';
+      const statusClass = h.status === 'envoye' ? 'status-sent' : 'status-pending';
+      const catText = h.categorie === 'categorie_1' ? 'Catégorie 1' : 'Catégorie 2';
+      const catClass = h.categorie === 'categorie_1' ? 'category-1' : 'category-2';
+      const dateEnvoi = h.dateEnvoi ? new Date(h.dateEnvoi).toLocaleDateString('fr-FR') + ' ' + new Date(h.dateEnvoi).toLocaleTimeString('fr-FR') : '-';
+      
+      tbody.innerHTML += `<tr>
+        <td>${index + 1}</td>
+        <td>${h.nom}</td>
+        <td>${h.dateArrivee}</td>
+        <td class="${statusClass}">${statusText}</td>
+        <td>${dateEnvoi}</td>
+        <td><span class="category-badge ${catClass}">${catText}</span></td>
+      </tr>`;
+    });
+  }
+
+  function renderHistoryTableUser() {
+    const tbody = document.querySelector('#tableHistoryUser tbody');
+    tbody.innerHTML = '';
+    
+    let filteredData = currentHistoryDataUser;
+    if (currentHistoryFilterUser === 'sent') {
+      filteredData = filteredData.filter(h => h.status === 'envoye');
+    } else if (currentHistoryFilterUser === 'pending') {
+      filteredData = filteredData.filter(h => h.status === 'en_cours');
+    }
+    
+    if (filteredData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">Aucun enregistrement trouvé</td></tr>';
+      return;
+    }
+    
+    filteredData.forEach((h, index) => {
+      const statusText = h.status === 'envoye' ? '✅ Envoyé' : '⏳ En cours';
+      const statusClass = h.status === 'envoye' ? 'status-sent' : 'status-pending';
+      const catText = h.categorie === 'categorie_1' ? 'Catégorie 1' : 'Catégorie 2';
+      const catClass = h.categorie === 'categorie_1' ? 'category-1' : 'category-2';
+      const dateEnvoi = h.dateEnvoi ? new Date(h.dateEnvoi).toLocaleDateString('fr-FR') + ' ' + new Date(h.dateEnvoi).toLocaleTimeString('fr-FR') : '-';
+      
+      tbody.innerHTML += `<tr>
+        <td>${index + 1}</td>
+        <td>${h.nom}</td>
+        <td>${h.dateArrivee}</td>
+        <td class="${statusClass}">${statusText}</td>
+        <td>${dateEnvoi}</td>
+        <td><span class="category-badge ${catClass}">${catText}</span></td>
+      </tr>`;
+    });
+  }
+
+  function filterHistory(filter) {
+    currentHistoryFilter = filter;
+    document.querySelectorAll('#adminPanel .filter-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.filter === filter);
+    });
+    renderHistoryTable();
+  }
+
+  function filterHistoryUser(filter) {
+    currentHistoryFilterUser = filter;
+    document.querySelectorAll('#userPanel .filter-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.filter === filter);
+    });
+    renderHistoryTableUser();
   }
 
   const canvas = document.getElementById('signatureCanvas');
@@ -1703,10 +1991,21 @@ Cette réservation a été enregistrée via l'application Enregistrement des inv
     
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
     
-    supprimerEnregistrementAvecMessage(recordId, record.nom);
+    archiverEnregistrement(recordId, record, currentUser ? currentUser.role : 'user').then(() => {
+      database.ref('records/' + recordId).remove();
+      database.ref('documents/' + recordId).remove();
+      
+      if (currentUser && currentUser.role === 'admin') {
+        refreshAdmin();
+        loadHistory();
+      } else if (currentUser) {
+        refreshUser();
+        loadHistoryUser();
+      }
+    });
     
     document.getElementById('docActions').classList.add('hidden');
-    document.getElementById('documentPreview').innerHTML = '<p style="text-align: center; color: #666;">Cet enregistrement a été supprimé.</p>';
+    document.getElementById('documentPreview').innerHTML = '<p style="text-align: center; color: #666;">Cet enregistrement a été supprimé et archivé.</p>';
     currentDocumentData = null;
   }
 

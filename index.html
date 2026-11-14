@@ -1,241 +1,145 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Check-in Invités</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;color:#222;background:#fff}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;border-bottom:1px solid #ddd;background:#fff;position:sticky;top:0;z-index:5}
-.logo{color:#ff385c;font-weight:800;font-size:21px}
-.hero{height:220px;background:linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.25)),url(https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=70) center/cover}
-main{max-width:780px;margin:-48px auto 48px;padding:0 16px}
-.card{background:#fff;border-radius:20px;box-shadow:0 8px 28px rgba(0,0,0,.14);padding:22px;margin-bottom:18px}
-.ban{background:#222;color:#fff;border-radius:14px;padding:13px 16px;margin-bottom:18px;font-size:14px;border-left:6px solid #ff385c}
-input,select,textarea{width:100%;padding:13px;border:1px solid #8a8a8a;border-radius:12px;font:inherit;margin:4px 0 12px;background:#fff;color:#222}
-textarea{min-height:90px}
-input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #222;outline-offset:1px}
-button{background:#ff385c;color:#fff;border:0;border-radius:12px;padding:12px 20px;font:inherit;font-weight:700;cursor:pointer;margin:4px 6px 4px 0}
-button.s{background:#fff;color:#222;border:1px solid #222}
-canvas{width:100%;height:160px;border:1px solid #8a8a8a;border-radius:12px;touch-action:none;display:block;margin-bottom:6px}
-table{width:100%;border-collapse:collapse}
-td{padding:9px 6px;border-bottom:1px solid #ddd}
-.g{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
-@media(max-width:560px){.g{grid-template-columns:1fr}.hero{height:160px}}
-small{color:#5e5e5e}
-a{color:#d70466}
-h2{margin:0 0 14px}
+:root{--c1:#FF385C;--ok:#222;--info:#717171}
+body{font-family:"Inter","Circular",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#fff;color:#222;margin:0;padding:0 20px 40px}
+h2,h3,h4{color:#222}
+.premium-header{background:#fff;color:#FF385C;border-radius:0;text-align:left;padding:18px 0;margin:0 0 8px;border-bottom:1px solid #ebebeb}
+.premium-header h1{margin:0;font-size:22px;font-weight:800;color:#FF385C}
+.premium-header p{display:none}
+.card,.user-settings,.email-settings,.residence-name-setting,.custom-message-area{border-radius:20px;border:1px solid #ebebeb;box-shadow:0 6px 24px rgba(0,0,0,.07)}
+.card{background:#fff}
+button{background:linear-gradient(90deg,#E61E4D,#FF385C);border-radius:12px;font-weight:700;padding:12px 22px}
+button.ghost{background:#fff;color:#222;border:1px solid #222}
+input,select,textarea{border-radius:12px;border:1px solid #b0b0b0;width:100%;padding:12px;box-sizing:border-box;font-size:16px;font-family:inherit}
+th{background:#f7f7f7;color:#222}
+.hero{display:flex;flex-wrap:wrap;gap:32px;align-items:center;padding:36px 0}
+.hero-text{flex:1 1 320px}
+.hero h2{font-size:clamp(36px,7vw,64px);line-height:1.03;font-weight:800;letter-spacing:-1.5px;margin:0 0 16px;text-align:left}
+.hero p{font-size:19px;color:#555;margin:0 0 24px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+.hero-img{flex:1 1 320px;min-height:340px;border-radius:28px;background-size:cover;background-position:center}
+.sec-h{font-size:30px;font-weight:800;letter-spacing:-.5px;margin:30px 0 14px}
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+.g-card{height:220px;border-radius:20px;background-size:cover;background-position:center;position:relative;overflow:hidden}
+.g-card span{position:absolute;left:14px;bottom:12px;background:#fff;border-radius:10px;padding:6px 12px;font-weight:700}
+.pg{height:6px;background:#ebebeb;border-radius:9px;overflow:hidden;margin:6px 0 22px}
+.pg i{display:block;height:100%;width:0;background:#FF385C;transition:width .3s}
+.sg-count{font-size:14px;color:#717171;font-weight:600}
+#sgTitle{font-size:32px;font-weight:800;letter-spacing:-.8px;margin:0 0 8px;text-align:left}
+#sgSub{color:#555;margin:0 0 18px}
+.sg-nav{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
+.retention{background:#FFF1F3;border:1px solid #FFC2CC;color:#8A1F33;padding:14px 16px;border-radius:14px;margin-bottom:14px;font-weight:600}
 </style>
-</head>
-<body>
-<div id="app"></div>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js"></script>
 <script>
-const FB={apiKey:"",authDomain:"",databaseURL:"",projectId:"",appId:""};
-const EJ={pub:"",service:"",tpl:""};
-firebase.initializeApp(FB);
-const auth=firebase.auth(),db=firebase.database();
-if(EJ.pub)emailjs.init({publicKey:EJ.pub});
-const $=s=>document.querySelector(s),app=$("#app"),H48=48*36e5;
-const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let L=localStorage.l||"fr",U,A={},G={},A1,GU,GR,SG=0,GID,OFF,WA=0;
-const T={
-fr:{app:"Check-in Invités",login:"Connexion",signup:"Créer un compte",email:"E-mail",pass:"Mot de passe",forgot:"Mot de passe oublié ?",sent:"E-mail de réinitialisation envoyé",logout:"Déconnexion",apt:"Appartement",name:"Nom",addr:"Adresse",wifi:"Wi-Fi (nom + code)",guide:"Guide du logement",door:"Liens d'ouverture de porte (un par ligne)",save:"Enregistrer",gl:"Lien d'enregistrement",el:"Lien dépenses",mkexp:"Créer le lien dépenses",count:"Nombre de personnes",guests:"Invités enregistrés",none:"Aucun invité",ban:"Données supprimées automatiquement après 48 h. Envoyez ce PDF par WhatsApp pour le télécharger avant son expiration.",cons:"J'accepte que mes données soient conservées 48 heures puis supprimées.",fiche:"Fiche d'enregistrement",rules:"Règlement intérieur",fn:"Nom complet",nat:"Nationalité",doc:"N° pièce d'identité / passeport",tel:"Téléphone",in:"Arrivée",out:"Départ",sign:"Signature",clear:"Effacer",send:"Envoyer",thanks:"Merci ! Votre enregistrement est envoyé.",req:"Champs, signature et consentement obligatoires",members:"Participants",exp:"Dépenses",desc:"Libellé",amt:"Montant",add:"Ajouter",bal:"Soldes",total:"Total",s1:"Votre compte",s2:"Votre appartement",s3:"Bâtiment",s4:"Wi-Fi",s5:"Guide du logement",s6:"Ouverture de porte",city:"Ville",bld:"Nom du bâtiment",floor:"Étage",code:"Code d'entrée",num:"N° d'appartement",wifin:"Nom du Wi-Fi",wific:"Code Wi-Fi",phone:"Téléphone du gestionnaire",next:"Suivant",back:"Retour",finish:"Terminer",req2:"Tous les champs sont obligatoires",pass6:"Mot de passe : 6 caractères minimum"},
-en:{app:"Guest Check-in",login:"Log in",signup:"Create account",email:"Email",pass:"Password",forgot:"Forgot password?",sent:"Reset email sent",logout:"Log out",apt:"Apartment",name:"Name",addr:"Address",wifi:"Wi-Fi (name + code)",guide:"Home guide",door:"Door opening links (one per line)",save:"Save",gl:"Check-in link",el:"Expenses link",mkexp:"Create expenses link",count:"Number of people",guests:"Registered guests",none:"No guests",ban:"Data is automatically deleted after 48 h. Send this PDF via WhatsApp to download it before it expires.",cons:"I agree my data is kept for 48 hours, then deleted.",fiche:"Registration form",rules:"House Rules",fn:"Full name",nat:"Nationality",doc:"ID / passport number",tel:"Phone",in:"Arrival",out:"Departure",sign:"Signature",clear:"Clear",send:"Submit",thanks:"Thank you! Your registration is sent.",req:"Fields, signature and consent are required",members:"Participants",exp:"Expenses",desc:"Label",amt:"Amount",add:"Add",bal:"Balances",total:"Total",s1:"Your account",s2:"Your apartment",s3:"Building",s4:"Wi-Fi",s5:"Home guide",s6:"Door opening",city:"City",bld:"Building name",floor:"Floor",code:"Entrance code",num:"Apartment no.",wifin:"Wi-Fi name",wific:"Wi-Fi code",phone:"Manager phone",next:"Next",back:"Back",finish:"Finish",req2:"All fields are required",pass6:"Password: 6 characters minimum"},
-ar:{app:"تسجيل الضيوف",ban:"تُحذف البيانات تلقائياً بعد 48 ساعة. أرسل ملف PDF عبر واتساب لتحميله قبل انتهاء صلاحيته.",cons:"أوافق على الاحتفاظ ببياناتي لمدة 48 ساعة ثم حذفها.",fn:"الاسم الكامل",nat:"الجنسية",doc:"رقم الهوية / جواز السفر",tel:"الهاتف",in:"الوصول",out:"المغادرة",sign:"التوقيع",clear:"مسح",send:"إرسال",thanks:"شكراً! تم إرسال تسجيلك.",req:"الحقول والتوقيع والموافقة إجبارية"}
+const $=id=>document.getElementById(id);
+const PHOTOS={hero:'',g1:'',g2:'',g3:''};
+const art=(a,b,s)=>'url("data:image/svg+xml,'+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 420'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='${a}'/><stop offset='1' stop-color='${b}'/></linearGradient></defs><rect width='600' height='420' fill='url(#g)'/>${s}</svg>`)+'")';
+const ART={
+hero:art('#FFE3E8','#FFC4D0',"<circle cx='470' cy='110' r='55' fill='#FFE08A'/><ellipse cx='150' cy='90' rx='70' ry='22' fill='#fff'/><ellipse cx='210' cy='105' rx='50' ry='16' fill='#fff'/><rect x='210' y='190' width='180' height='140' rx='18' fill='#FF385C'/><rect x='260' y='162' width='80' height='36' rx='10' fill='none' stroke='#222' stroke-width='10'/><rect x='240' y='190' width='12' height='140' fill='#E61E4D'/><rect x='348' y='190' width='12' height='140' fill='#E61E4D'/><rect y='330' width='600' height='90' fill='#F4D9A6'/>"),
+g1:art('#FFD1A9','#FF8A8A',"<circle cx='430' cy='190' r='60' fill='#FFE08A'/><rect y='250' width='600' height='170' fill='#1AA6B7'/><path d='M0 330Q150 290 300 330T600 330V420H0Z' fill='#F4D9A6'/><path d='M130 360Q140 270 150 200' stroke='#6B4423' stroke-width='9' fill='none'/><path d='M150 200Q100 190 70 220M150 200Q200 180 230 215M150 200Q150 150 190 140M150 200Q110 150 75 150' stroke='#2E8B57' stroke-width='10' fill='none' stroke-linecap='round'/>"),
+g2:art('#CFE8FF','#EAF4FF',"<circle cx='480' cy='90' r='36' fill='#fff'/><path d='M0 330L170 120L300 280L400 170L600 340V420H0Z' fill='#4A6FA5'/><path d='M170 120L130 175L170 160L200 185Z' fill='#fff'/><path d='M0 360Q300 300 600 370V420H0Z' fill='#2F5D50'/>"),
+g3:art('#FFE3B3','#FFB36B',"<circle cx='300' cy='120' r='50' fill='#FFF3C4'/><rect x='60' y='230' width='140' height='190' fill='#C8553D'/><rect x='220' y='190' width='160' height='230' fill='#E07A5F'/><path d='M220 190Q300 100 380 190Z' fill='#3D5A80'/><rect x='400' y='250' width='140' height='170' fill='#C8553D'/><path d='M270 420V320Q300 280 330 320V420Z' fill='#3D2B1F'/>")
 };
-const t=k=>(T[L]||{})[k]||T.fr[k];
-const tp=k=>(T[L=="ar"?"en":L]||{})[k]||T.fr[k];
-function shell(h){
-app.innerHTML=`<header><span class="logo">⌂ ${t("app")}</span><select style="width:auto;margin:0" onchange="L=this.value;localStorage.l=L;route()">${["fr","en","ar"].map(x=>`<option ${x==L?"selected":""}>${x}</option>`).join("")}</select></header><div class="hero"></div><main>${h}</main>`;
-document.documentElement.dir=L=="ar"?"rtl":"ltr";
+const bg=k=>PHOTOS[k]?`url("${PHOTOS[k]}")`:ART[k];
+document.querySelector('.form-column').insertAdjacentHTML('afterbegin',`
+<div id="landing">
+<section class="hero">
+<div class="hero-text"><h2>Enregistrez vos invités, en toute simplicité.</h2><p>Créez votre espace, partagez un lien et recevez les fiches signées de vos voyageurs.</p>
+<div class="hero-cta"><button onclick="openSignup()">Créer mon espace</button><button class="ghost" onclick="openLogin()">Se connecter</button></div></div>
+<div class="hero-img" style="background-image:${bg('hero')}"></div>
+</section>
+<div class="sec-h">Partez l'esprit léger</div>
+<div class="gallery">
+<div class="g-card" style="background-image:${bg('g1')}"><span>Plages</span></div>
+<div class="g-card" style="background-image:${bg('g2')}"><span>Montagnes</span></div>
+<div class="g-card" style="background-image:${bg('g3')}"><span>Médinas</span></div>
+</div>
+</div>
+<div id="signupCard" class="card hidden">
+<div class="sg-count" id="sgCount"></div>
+<div class="pg"><i id="sgBar"></i></div>
+<h3 id="sgTitle"></h3><p id="sgSub"></p>
+<div id="sgField"></div>
+<p id="sgErr" class="banner err hidden"></p>
+<div class="sg-nav"><button type="button" class="ghost" id="sgPrev" onclick="sgPrev()">Précédent</button><button type="button" id="sgNext" onclick="sgNext()">Suivant</button></div>
+<p style="text-align:center"><a href="#" onclick="showLanding(true);return false">Annuler</a></p>
+</div>`);
+$('userPanel').insertAdjacentHTML('afterbegin','<div class="retention">⚠️ <b>Important :</b> téléchargez les PDF ou envoyez-les par WhatsApp. Les enregistrements sont supprimés automatiquement après 48 heures.</div>');
+$('loginMsg').insertAdjacentHTML('afterend','<button type="button" class="ghost" onclick="showLanding(true)">← Retour</button>');
+function hideAuthUi(){['landing','loginCard','signupCard'].forEach(i=>$(i).classList.add('hidden'))}
+function showLanding(v){['loginCard','signupCard'].forEach(i=>$(i).classList.add('hidden'));$('landing').classList.toggle('hidden',!v)}
+function openLogin(){hideAuthUi();$('loginCard').classList.remove('hidden')}
+const panels=['adminPanel','userPanel','invitePanel','readonlyPanel'].map($);
+const obs=new MutationObserver(()=>{if(panels.some(p=>!p.classList.contains('hidden')))hideAuthUi()});
+panels.forEach(p=>obs.observe(p,{attributes:true,attributeFilter:['class']}));
+$('loginCard').classList.add('hidden');
+const q0=new URLSearchParams(location.search);
+if(q0.has('invite')||q0.has('readonly'))$('landing').classList.add('hidden');
+const _logout=logout;
+window.logout=function(e){_logout(e);showLanding(true)};
+const STEPS=[
+{k:'appart',t:"Quel est votre appartement ?",s:"Indiquez le numéro de votre appartement.",p:"Ex : 12"},
+{k:'bat',t:"Dans quel immeuble ?",s:"Indiquez le numéro ou la lettre de l'immeuble.",p:"Ex : A"},
+{k:'pass',t:"Choisissez un mot de passe",s:"Au moins 4 caractères. Il vous servira à vous connecter.",p:"Mot de passe",type:'password'},
+{k:'email',t:"Où recevoir les notifications ?",s:"Adresse email qui recevra chaque nouvel enregistrement.",p:"securite@exemple.com",type:'email'},
+{k:'msg',t:"Votre message pour les invités",s:"Il s'affiche après l'enregistrement de chaque invité.",p:"Bienvenue ! Voici les informations utiles pour votre séjour...",area:true}
+];
+let si=0;const SD={};
+function openSignup(){si=0;hideAuthUi();$('signupCard').classList.remove('hidden');renderStep()}
+function renderStep(){
+const S=STEPS[si],last=si==STEPS.length-1;
+$('sgBar').style.width=((si+1)/STEPS.length*100)+'%';
+$('sgCount').textContent='Étape '+(si+1)+' sur '+STEPS.length;
+$('sgTitle').textContent=S.t;$('sgSub').textContent=S.s;
+$('sgField').innerHTML=S.area?`<textarea id="sgIn" rows="5" placeholder="${S.p}"></textarea>`:`<input id="sgIn" type="${S.type||'text'}" placeholder="${S.p}" autocomplete="off">`;
+$('sgIn').value=SD[S.k]||'';$('sgIn').focus();
+$('sgErr').classList.add('hidden');
+$('sgPrev').style.visibility=si?'visible':'hidden';
+$('sgNext').textContent=last?'Créer mon espace':'Suivant';
 }
-let RT=0;
-function route(){
-if(OFF){OFF();OFF=0}
-const my=++RT,h=location.hash.slice(1).split("/");
-if(h[1]=="g")guest(h[2],h[3],my);else if(h[1]=="t")trip(h[2]);else owner();
+function sgPrev(){SD[STEPS[si].k]=$('sgIn').value.trim();si--;renderStep()}
+async function sgNext(){
+const S=STEPS[si],v=$('sgIn').value.trim();let e='';
+if(!v)e='Ce champ est obligatoire.';
+else if(S.k=='pass'&&v.length<4)e='Le mot de passe doit contenir au moins 4 caractères.';
+else if(S.k=='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))e='Adresse email invalide.';
+if(e){showInlineMsg('sgErr','err',e);return}
+SD[S.k]=v;
+if(si<STEPS.length-1){si++;renderStep();return}
+await createSpace();
 }
-addEventListener("hashchange",route);
-auth.onAuthStateChanged(()=>{if(!/^#\/[gt]\//.test(location.hash))route()});
-if(/^#\/[gt]\//.test(location.hash))route();
-function authView(){
-WA=0;shell(`<div class="card"><h2>${t("app")}</h2><input id="e" type="email" placeholder="${t("email")}"><input id="p" type="password" placeholder="${t("pass")}"><button onclick="doAuth('in')">${t("login")}</button><button class="s" onclick="wiz()">${t("signup")}</button><br><a href="#" onclick="reset();return false">${t("forgot")}</a></div>`);
-}
-const WS=[["s1",[["w_e","email","email"],["w_p","pass","password"]]],["s2",[["w_n","name","text"],["w_a","addr","text"],["w_c","city","text"]]],["s3",[["w_b","bld","text"],["w_f","floor","text"],["w_k","code","text"],["w_u","num","text"]]],["s4",[["w_wn","wifin","text"],["w_wc","wific","text"]]],["s5",[["w_g","guide","area"]]],["s6",[["w_d","door","area"],["w_t","phone","tel"]]]];
-let WI=0,WD={};
-function wiz(){
-WA=1;
-const s=WS[WI];
-shell(`<div class="card"><small>${WI+1} / ${WS.length}</small><h2>${t(s[0])}</h2>${s[1].map(f=>`<label>${t(f[1])}${f[2]=="area"?`<textarea id="${f[0]}">${esc(WD[f[0]]||"")}</textarea>`:`<input id="${f[0]}" type="${f[2]}" value="${esc(WD[f[0]]||"")}">`}</label>`).join("")}${WI?`<button class="s" onclick="wBack()">${t("back")}</button>`:`<button class="s" onclick="authView()">${t("login")}</button>`}<button onclick="wNext()">${WI==WS.length-1?t("finish"):t("next")}</button></div>`);
-}
-function wRead(){WS[WI][1].forEach(f=>{WD[f[0]]=$("#"+f[0]).value.trim()})}
-function wBack(){wRead();WI--;wiz()}
-async function wNext(){
-wRead();
-if(WS[WI][1].some(f=>!WD[f[0]]))return alert(t("req2"));
-if(WI==0&&WD.w_p.length<6)return alert(t("pass6"));
-if(WI<WS.length-1){WI++;return wiz()}
+async function createSpace(){
+const b=$('sgNext');b.disabled=true;b.textContent='Création...';
+const id=(SD.appart+SD.bat).replace(/[\s.#$\[\]\/]/g,'');
 try{
-await auth.createUserWithEmailAndPassword(WD.w_e,WD.w_p);
-U=auth.currentUser.uid;
-await db.ref("apts/"+U).push({name:WD.w_n,addr:WD.w_a+", "+WD.w_c,email:WD.w_e,bld:WD.w_b,floor:WD.w_f,code:WD.w_k,num:WD.w_u,wifi:WD.w_wn+" / "+WD.w_wc,guide:WD.w_g,door:WD.w_d,tel:WD.w_t});
-WD={};WI=0;WA=0;owner();
-}catch(x){alert(x.message)}
+await firebase.auth().signInWithEmailAndPassword(AUTH_EMAIL,AUTH_PASS);
+const ex=await database.ref('users/'+id).once('value');
+if(ex.exists()){si=0;renderStep();showInlineMsg('sgErr','err','Cet appartement existe déjà dans cet immeuble. Connectez-vous ou modifiez vos informations.');return}
+await database.ref('users/'+id).set({appart:SD.appart,bat:SD.bat,pass:SD.pass});
+await database.ref('settings/'+id).set({maxRecords:10});
+await database.ref('emailSettings/'+id).set({enableEmail:'oui',guardEmail:encrypt(SD.email)});
+await database.ref('customMessages/'+id).set(SD.msg);
+$('loginUser').value=id;$('loginPass').value=SD.pass;
+await login();
+showBanner('ok','Votre espace est créé. Identifiant de connexion : '+id);
+}catch(e){showInlineMsg('sgErr','err','Erreur : '+(e.message||'création impossible'))}
+finally{b.disabled=false;b.textContent='Créer mon espace'}
 }
-async function doAuth(m){
-const e=$("#e").value,p=$("#p").value;
-try{m=="up"?await auth.createUserWithEmailAndPassword(e,p):await auth.signInWithEmailAndPassword(e,p)}catch(x){alert(x.message)}
+async function purgeExpired(){
+const lim=Date.now()-48*3600*1000;
+for(const [path,f] of [['records','timestamp'],['sentRecords','sentAt'],['history','deletedAt']]){
+try{
+const s=(await database.ref(path).once('value')).val()||{};
+for(const id in s){
+if(s[id][f]&&s[id][f]<lim){
+await database.ref(path+'/'+id).remove();
+if(path=='records')await database.ref('documents/'+id).remove();
 }
-async function reset(){
-const e=$("#e").value;
-if(!e)return alert(t("email"));
-try{await auth.sendPasswordResetEmail(e);alert(t("sent"))}catch(x){alert(x.message)}
 }
-function cp(u){navigator.clipboard.writeText(u).then(()=>alert(u)).catch(()=>prompt("",u))}
-async function owner(){
-const u=auth.currentUser;
-if(!u)return WA?wiz():authView();
-U=u.uid;
-const r=await Promise.all(["apts","guests","ogroups"].map(p=>db.ref(p+"/"+U).get()));
-A=r[0].val()||{};G=r[1].val()||{};
-const O=r[2].val()||{},now=Date.now(),base=location.origin+location.pathname;
-for(const k in G)if(G[k].exp<now){db.ref(`guests/${U}/${k}`).remove();delete G[k]}
-shell(`<div class="ban">${t("ban")}</div>
-<div class="card"><h2>${t("apt")}</h2><div class="g"><div><input id="an" placeholder="${t("name")}"><input id="aa" placeholder="${t("addr")}"><input id="ae" type="email" placeholder="${t("email")}"></div><div><input id="aw" placeholder="${t("wifi")}"><textarea id="ag" placeholder="${t("guide")}"></textarea></div></div><textarea id="ad" placeholder="${t("door")}"></textarea><button onclick="addApt()">${t("save")}</button><button class="s" onclick="auth.signOut()">${t("logout")}</button></div>
-${Object.entries(A).map(([k,v])=>`<div class="card"><b>${esc(v.name)}</b><br><small>${esc(v.addr)}</small><br><br><button onclick="cp('${base}#/g/${U}/${k}')">${t("gl")}</button>${O[k]?`<button class="s" onclick="cp('${base}#/t/${O[k]}')">${t("el")}</button>`:`<button class="s" onclick="mkGroup('${k}')">${t("mkexp")}</button>`}</div>`).join("")}
-<div class="card"><h2>${t("guests")}</h2>${Object.entries(G).map(([k,v])=>`<p><b>${esc(v.name)}</b> — ${esc(v.aptName)}<br><small>${esc(v.in)} → ${esc(v.out)} (${Math.max(0,Math.round((v.exp-now)/36e5))} h)</small><br><button class="s" onclick="pdfG('${k}')">PDF</button><button onclick="shareG('${k}')">WhatsApp</button></p>`).join("")||t("none")}</div>`);
+}catch(e){}
 }
-async function addApt(){
-const v={name:$("#an").value.trim(),addr:$("#aa").value,email:$("#ae").value,wifi:$("#aw").value,guide:$("#ag").value,door:$("#ad").value};
-if(!v.name)return;
-await db.ref("apts/"+U).push(v);
-owner();
 }
-async function mkGroup(k){
-const n=prompt(t("name"),A[k].name);
-if(!n)return;
-const c=parseInt(prompt(t("count"),"2"))||2,r=db.ref("groups").push();
-await r.set({name:n,members:Array.from({length:c},(_,i)=>"P"+(i+1))});
-await db.ref(`ogroups/${U}/${k}`).set(r.key);
-owner();
-}
-function pdfG(k){pdfF(G[k],A[G[k].apt]||{}).save("fiche.pdf")}
-function shareG(k){shareDoc(pdfF(G[k],A[G[k].apt]||{}),"fiche.pdf")}
-function head(d,title){
-d.setFillColor(255,56,92);d.rect(0,0,210,18,"F");d.setTextColor(255);d.setFontSize(9);
-d.text(d.splitTextToSize(tp("ban"),190),10,7);
-d.setTextColor(34);d.setFontSize(18);d.text(title,15,32);d.setFontSize(11);
-}
-function pdfF(r,a){
-const d=new jspdf.jsPDF();
-head(d,tp("fiche"));
-let y=46;
-[[tp("apt"),a.name],[tp("fn"),r.name],[tp("nat"),r.nat],[tp("doc"),r.doc],[tp("tel"),r.tel],[tp("in"),r.in],[tp("out"),r.out]].forEach(x=>{d.text(`${x[0]}: ${x[1]||""}`,15,y);y+=9});
-d.text(tp("sign"),15,y+6);
-d.addImage(r.sig,"PNG",15,y+10,70,24);
-return d;
-}
-function pdfR(a){
-const d=new jspdf.jsPDF();
-head(d,tp("rules"));
-let y=46;
-const w=(l,v)=>{d.setFont(undefined,"bold");d.text(l,15,y);d.setFont(undefined,"normal");y+=7;const s=d.splitTextToSize(v||"-",180);d.text(s,15,y);y+=s.length*6+6};
-w(a.name||"",a.addr);w(tp("bld"),[a.bld,a.floor&&tp("floor")+" "+a.floor,a.code&&tp("code")+" "+a.code,a.num&&"#"+a.num].filter(Boolean).join(" · "));w(tp("wifi"),a.wifi);w(tp("guide"),a.guide);
-d.setFont(undefined,"bold");d.text(tp("door"),15,y);y+=7;d.setFont(undefined,"normal");
-(a.door||"").split("\n").filter(Boolean).forEach(u=>{d.setTextColor(215,4,102);d.textWithLink(u,15,y,{url:u});y+=7});
-return d;
-}
-async function shareDoc(d,n){
-const f=new File([d.output("blob")],n,{type:"application/pdf"});
-if(navigator.canShare&&navigator.canShare({files:[f]})){try{return await navigator.share({files:[f],text:tp("ban")})}catch(e){}}
-d.save(n);
-open("https://wa.me/?text="+encodeURIComponent(tp("ban")));
-}
-async function guest(uid,aid,my){
-const s=await db.ref(`apts/${uid}/${aid}`).get();
-if(my&&my!=RT)return;
-if(!s.exists())return shell('<div class="card">404</div>');
-A1=s.val();
-if(GR&&GU&&GU[0]==uid&&GU[1]==aid)return thanks();
-GU=[uid,aid];SG=0;
-shell(`<div class="ban">${t("ban")}</div><div class="card"><h2>${esc(A1.name)}</h2><div class="g"><div><label>${t("fn")}<input id="f1"></label><label>${t("nat")}<input id="f2"></label><label>${t("doc")}<input id="f3"></label></div><div><label>${t("tel")}<input id="f4" type="tel"></label><label>${t("in")}<input id="f5" type="date"></label><label>${t("out")}<input id="f6" type="date"></label></div></div><label>${t("sign")}</label><canvas id="sg" width="600" height="200"></canvas><button class="s" onclick="clr()">${t("clear")}</button><p><label><input type="checkbox" id="cs" style="width:auto;margin-right:8px">${t("cons")}</label></p><button onclick="send()">${t("send")}</button></div>`);
-sig();
-}
-function sig(){
-const c=$("#sg"),x=c.getContext("2d");
-let d=0;
-x.lineWidth=3;x.lineCap="round";
-const p=e=>{const r=c.getBoundingClientRect(),q=e.touches?e.touches[0]:e;return[(q.clientX-r.left)*c.width/r.width,(q.clientY-r.top)*c.height/r.height]};
-const o={passive:false};
-const st=e=>{e.preventDefault();d=1;SG=1;x.beginPath();x.moveTo(...p(e))};
-const mv=e=>{if(!d)return;e.preventDefault();x.lineTo(...p(e));x.stroke()};
-const en=()=>{d=0};
-["mousedown","touchstart"].forEach(v=>c.addEventListener(v,st,o));
-["mousemove","touchmove"].forEach(v=>c.addEventListener(v,mv,o));
-["mouseup","mouseleave","touchend"].forEach(v=>c.addEventListener(v,en));
-}
-function clr(){const c=$("#sg");c.getContext("2d").clearRect(0,0,c.width,c.height);SG=0}
-async function send(){
-const q=i=>$("#f"+i).value.trim();
-if(!q(1)||!q(3)||!q(5)||!q(6)||!SG||!$("#cs").checked)return alert(t("req"));
-const now=Date.now(),r={name:q(1),nat:q(2),doc:q(3),tel:q(4),in:q(5),out:q(6),sig:$("#sg").toDataURL(),apt:GU[1],aptName:A1.name,ts:now,exp:now+H48};
-await db.ref("guests/"+GU[0]).push(r);
-if(EJ.service&&A1.email)emailjs.send(EJ.service,EJ.tpl,{to_email:A1.email,guest:r.name,apt:A1.name,arrival:r.in,departure:r.out,phone:r.tel}).catch(()=>{});
-GR=r;thanks();
-}
-function thanks(){
-shell(`<div class="ban">${t("ban")}</div><div class="card"><h2>${t("thanks")}</h2><button onclick="pdfF(GR,A1).save('fiche.pdf')">${t("fiche")}</button><button class="s" onclick="shareDoc(pdfF(GR,A1),'fiche.pdf')">WhatsApp</button><br><button onclick="pdfR(A1).save('reglement.pdf')">${t("rules")}</button><button class="s" onclick="shareDoc(pdfR(A1),'reglement.pdf')">WhatsApp</button></div>`);
-}
-function bal(g){
-const m=g.members,b=m.map(()=>0);
-let tot=0;
-Object.values(g.exp||{}).forEach(e=>{b[e.p]+=e.a;tot+=e.a});
-const sh=tot/m.length;
-return{b:b.map(x=>x-sh),tot};
-}
-function settle(b,m){
-const d=b.map((x,i)=>[i,x]).filter(x=>x[1]<-.005).sort((x,y)=>x[1]-y[1]);
-const c=b.map((x,i)=>[i,x]).filter(x=>x[1]>.005).sort((x,y)=>y[1]-x[1]);
-const out=[];
-let i=0,j=0;
-while(i<d.length&&j<c.length){
-const v=Math.min(-d[i][1],c[j][1]);
-out.push(`${m[d[i][0]]} → ${m[c[j][0]]} : ${v.toFixed(2)}`);
-d[i][1]+=v;c[j][1]-=v;
-if(d[i][1]>-.005)i++;
-if(c[j][1]<.005)j++;
-}
-return out;
-}
-function trip(id){
-GID=id;
-const r=db.ref("groups/"+id),f=r.on("value",s=>draw(s.val()));
-OFF=()=>r.off("value",f);
-}
-function draw(g){
-if(!g)return shell('<div class="card">404</div>');
-const m=g.members,E=g.exp||{},z=bal(g),b=z.b;
-shell(`<div class="card"><h2>${esc(g.name)}</h2><b>${t("members")}</b><div class="g">${m.map((x,i)=>`<input value="${esc(x)}" onchange="db.ref('groups/${GID}/members/${i}').set(this.value)">`).join("")}</div></div>
-<div class="card"><h2>${t("exp")}</h2><input id="xd" placeholder="${t("desc")}"><input id="xa" type="number" step="0.01" placeholder="${t("amt")}"><select id="xp">${m.map((x,i)=>`<option value="${i}">${esc(x)}</option>`).join("")}</select><button onclick="addX()">${t("add")}</button>
-<table>${Object.entries(E).map(([k,e])=>`<tr><td>${esc(e.d)}</td><td>${e.a.toFixed(2)}</td><td>${esc(m[e.p])}</td><td><button class="s" onclick="editX('${k}')">✎</button><button class="s" onclick="db.ref('groups/${GID}/exp/${k}').remove()">✕</button></td></tr>`).join("")}</table></div>
-<div class="card"><h2>${t("bal")}</h2><small>${t("total")}: ${z.tot.toFixed(2)}</small><table>${m.map((x,i)=>`<tr><td>${esc(x)}</td><td style="color:${b[i]<0?"#c13515":"#008a05"}"><b>${b[i].toFixed(2)}</b></td></tr>`).join("")}</table><p>${settle(b,m).map(esc).join("<br>")}</p></div>`);
-}
-function addX(){
-const a=parseFloat($("#xa").value),d=$("#xd").value.trim();
-if(!a||!d)return;
-db.ref(`groups/${GID}/exp`).push({d:d,a:a,p:+$("#xp").value});
-}
-async function editX(k){
-const r=db.ref(`groups/${GID}/exp/${k}`),e=(await r.get()).val();
-const d=prompt(t("desc"),e.d),a=parseFloat(prompt(t("amt"),e.a));
-if(d&&a)r.update({d:d,a:a});
-}
+['refreshAdmin','refreshUser','refreshReadonly'].forEach(n=>{
+const o=window[n];
+window[n]=async function(){await purgeExpired();return o.apply(this,arguments)};
+});
 </script>
-</body>
-</html>

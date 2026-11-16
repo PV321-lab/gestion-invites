@@ -1,145 +1,2159 @@
-<style>
-:root{--c1:#FF385C;--ok:#222;--info:#717171}
-body{font-family:"Inter","Circular",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#fff;color:#222;margin:0;padding:0 20px 40px}
-h2,h3,h4{color:#222}
-.premium-header{background:#fff;color:#FF385C;border-radius:0;text-align:left;padding:18px 0;margin:0 0 8px;border-bottom:1px solid #ebebeb}
-.premium-header h1{margin:0;font-size:22px;font-weight:800;color:#FF385C}
-.premium-header p{display:none}
-.card,.user-settings,.email-settings,.residence-name-setting,.custom-message-area{border-radius:20px;border:1px solid #ebebeb;box-shadow:0 6px 24px rgba(0,0,0,.07)}
-.card{background:#fff}
-button{background:linear-gradient(90deg,#E61E4D,#FF385C);border-radius:12px;font-weight:700;padding:12px 22px}
-button.ghost{background:#fff;color:#222;border:1px solid #222}
-input,select,textarea{border-radius:12px;border:1px solid #b0b0b0;width:100%;padding:12px;box-sizing:border-box;font-size:16px;font-family:inherit}
-th{background:#f7f7f7;color:#222}
-.hero{display:flex;flex-wrap:wrap;gap:32px;align-items:center;padding:36px 0}
-.hero-text{flex:1 1 320px}
-.hero h2{font-size:clamp(36px,7vw,64px);line-height:1.03;font-weight:800;letter-spacing:-1.5px;margin:0 0 16px;text-align:left}
-.hero p{font-size:19px;color:#555;margin:0 0 24px}
-.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
-.hero-img{flex:1 1 320px;min-height:340px;border-radius:28px;background-size:cover;background-position:center}
-.sec-h{font-size:30px;font-weight:800;letter-spacing:-.5px;margin:30px 0 14px}
-.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
-.g-card{height:220px;border-radius:20px;background-size:cover;background-position:center;position:relative;overflow:hidden}
-.g-card span{position:absolute;left:14px;bottom:12px;background:#fff;border-radius:10px;padding:6px 12px;font-weight:700}
-.pg{height:6px;background:#ebebeb;border-radius:9px;overflow:hidden;margin:6px 0 22px}
-.pg i{display:block;height:100%;width:0;background:#FF385C;transition:width .3s}
-.sg-count{font-size:14px;color:#717171;font-weight:600}
-#sgTitle{font-size:32px;font-weight:800;letter-spacing:-.8px;margin:0 0 8px;text-align:left}
-#sgSub{color:#555;margin:0 0 18px}
-.sg-nav{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
-.retention{background:#FFF1F3;border:1px solid #FFC2CC;color:#8A1F33;padding:14px 16px;border-radius:14px;margin-bottom:14px;font-weight:600}
-</style>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Enregistrement des invités / Guest Registration</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <script>
-const $=id=>document.getElementById(id);
-const PHOTOS={hero:'',g1:'',g2:'',g3:''};
-const art=(a,b,s)=>'url("data:image/svg+xml,'+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 420'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='${a}'/><stop offset='1' stop-color='${b}'/></linearGradient></defs><rect width='600' height='420' fill='url(#g)'/>${s}</svg>`)+'")';
-const ART={
-hero:art('#FFE3E8','#FFC4D0',"<circle cx='470' cy='110' r='55' fill='#FFE08A'/><ellipse cx='150' cy='90' rx='70' ry='22' fill='#fff'/><ellipse cx='210' cy='105' rx='50' ry='16' fill='#fff'/><rect x='210' y='190' width='180' height='140' rx='18' fill='#FF385C'/><rect x='260' y='162' width='80' height='36' rx='10' fill='none' stroke='#222' stroke-width='10'/><rect x='240' y='190' width='12' height='140' fill='#E61E4D'/><rect x='348' y='190' width='12' height='140' fill='#E61E4D'/><rect y='330' width='600' height='90' fill='#F4D9A6'/>"),
-g1:art('#FFD1A9','#FF8A8A',"<circle cx='430' cy='190' r='60' fill='#FFE08A'/><rect y='250' width='600' height='170' fill='#1AA6B7'/><path d='M0 330Q150 290 300 330T600 330V420H0Z' fill='#F4D9A6'/><path d='M130 360Q140 270 150 200' stroke='#6B4423' stroke-width='9' fill='none'/><path d='M150 200Q100 190 70 220M150 200Q200 180 230 215M150 200Q150 150 190 140M150 200Q110 150 75 150' stroke='#2E8B57' stroke-width='10' fill='none' stroke-linecap='round'/>"),
-g2:art('#CFE8FF','#EAF4FF',"<circle cx='480' cy='90' r='36' fill='#fff'/><path d='M0 330L170 120L300 280L400 170L600 340V420H0Z' fill='#4A6FA5'/><path d='M170 120L130 175L170 160L200 185Z' fill='#fff'/><path d='M0 360Q300 300 600 370V420H0Z' fill='#2F5D50'/>"),
-g3:art('#FFE3B3','#FFB36B',"<circle cx='300' cy='120' r='50' fill='#FFF3C4'/><rect x='60' y='230' width='140' height='190' fill='#C8553D'/><rect x='220' y='190' width='160' height='230' fill='#E07A5F'/><path d='M220 190Q300 100 380 190Z' fill='#3D5A80'/><rect x='400' y='250' width='140' height='170' fill='#C8553D'/><path d='M270 420V320Q300 280 330 320V420Z' fill='#3D2B1F'/>")
-};
-const bg=k=>PHOTOS[k]?`url("${PHOTOS[k]}")`:ART[k];
-document.querySelector('.form-column').insertAdjacentHTML('afterbegin',`
-<div id="landing">
-<section class="hero">
-<div class="hero-text"><h2>Enregistrez vos invités, en toute simplicité.</h2><p>Créez votre espace, partagez un lien et recevez les fiches signées de vos voyageurs.</p>
-<div class="hero-cta"><button onclick="openSignup()">Créer mon espace</button><button class="ghost" onclick="openLogin()">Se connecter</button></div></div>
-<div class="hero-img" style="background-image:${bg('hero')}"></div>
-</section>
-<div class="sec-h">Partez l'esprit léger</div>
-<div class="gallery">
-<div class="g-card" style="background-image:${bg('g1')}"><span>Plages</span></div>
-<div class="g-card" style="background-image:${bg('g2')}"><span>Montagnes</span></div>
-<div class="g-card" style="background-image:${bg('g3')}"><span>Médinas</span></div>
-</div>
-</div>
-<div id="signupCard" class="card hidden">
-<div class="sg-count" id="sgCount"></div>
-<div class="pg"><i id="sgBar"></i></div>
-<h3 id="sgTitle"></h3><p id="sgSub"></p>
-<div id="sgField"></div>
-<p id="sgErr" class="banner err hidden"></p>
-<div class="sg-nav"><button type="button" class="ghost" id="sgPrev" onclick="sgPrev()">Précédent</button><button type="button" id="sgNext" onclick="sgNext()">Suivant</button></div>
-<p style="text-align:center"><a href="#" onclick="showLanding(true);return false">Annuler</a></p>
-</div>`);
-$('userPanel').insertAdjacentHTML('afterbegin','<div class="retention">⚠️ <b>Important :</b> téléchargez les PDF ou envoyez-les par WhatsApp. Les enregistrements sont supprimés automatiquement après 48 heures.</div>');
-$('loginMsg').insertAdjacentHTML('afterend','<button type="button" class="ghost" onclick="showLanding(true)">← Retour</button>');
-function hideAuthUi(){['landing','loginCard','signupCard'].forEach(i=>$(i).classList.add('hidden'))}
-function showLanding(v){['loginCard','signupCard'].forEach(i=>$(i).classList.add('hidden'));$('landing').classList.toggle('hidden',!v)}
-function openLogin(){hideAuthUi();$('loginCard').classList.remove('hidden')}
-const panels=['adminPanel','userPanel','invitePanel','readonlyPanel'].map($);
-const obs=new MutationObserver(()=>{if(panels.some(p=>!p.classList.contains('hidden')))hideAuthUi()});
-panels.forEach(p=>obs.observe(p,{attributes:true,attributeFilter:['class']}));
-$('loginCard').classList.add('hidden');
-const q0=new URLSearchParams(location.search);
-if(q0.has('invite')||q0.has('readonly'))$('landing').classList.add('hidden');
-const _logout=logout;
-window.logout=function(e){_logout(e);showLanding(true)};
-const STEPS=[
-{k:'appart',t:"Quel est votre appartement ?",s:"Indiquez le numéro de votre appartement.",p:"Ex : 12"},
-{k:'bat',t:"Dans quel immeuble ?",s:"Indiquez le numéro ou la lettre de l'immeuble.",p:"Ex : A"},
-{k:'pass',t:"Choisissez un mot de passe",s:"Au moins 4 caractères. Il vous servira à vous connecter.",p:"Mot de passe",type:'password'},
-{k:'email',t:"Où recevoir les notifications ?",s:"Adresse email qui recevra chaque nouvel enregistrement.",p:"securite@exemple.com",type:'email'},
-{k:'msg',t:"Votre message pour les invités",s:"Il s'affiche après l'enregistrement de chaque invité.",p:"Bienvenue ! Voici les informations utiles pour votre séjour...",area:true}
-];
-let si=0;const SD={};
-function openSignup(){si=0;hideAuthUi();$('signupCard').classList.remove('hidden');renderStep()}
-function renderStep(){
-const S=STEPS[si],last=si==STEPS.length-1;
-$('sgBar').style.width=((si+1)/STEPS.length*100)+'%';
-$('sgCount').textContent='Étape '+(si+1)+' sur '+STEPS.length;
-$('sgTitle').textContent=S.t;$('sgSub').textContent=S.s;
-$('sgField').innerHTML=S.area?`<textarea id="sgIn" rows="5" placeholder="${S.p}"></textarea>`:`<input id="sgIn" type="${S.type||'text'}" placeholder="${S.p}" autocomplete="off">`;
-$('sgIn').value=SD[S.k]||'';$('sgIn').focus();
-$('sgErr').classList.add('hidden');
-$('sgPrev').style.visibility=si?'visible':'hidden';
-$('sgNext').textContent=last?'Créer mon espace':'Suivant';
-}
-function sgPrev(){SD[STEPS[si].k]=$('sgIn').value.trim();si--;renderStep()}
-async function sgNext(){
-const S=STEPS[si],v=$('sgIn').value.trim();let e='';
-if(!v)e='Ce champ est obligatoire.';
-else if(S.k=='pass'&&v.length<4)e='Le mot de passe doit contenir au moins 4 caractères.';
-else if(S.k=='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))e='Adresse email invalide.';
-if(e){showInlineMsg('sgErr','err',e);return}
-SD[S.k]=v;
-if(si<STEPS.length-1){si++;renderStep();return}
-await createSpace();
-}
-async function createSpace(){
-const b=$('sgNext');b.disabled=true;b.textContent='Création...';
-const id=(SD.appart+SD.bat).replace(/[\s.#$\[\]\/]/g,'');
-try{
-await firebase.auth().signInWithEmailAndPassword(AUTH_EMAIL,AUTH_PASS);
-const ex=await database.ref('users/'+id).once('value');
-if(ex.exists()){si=0;renderStep();showInlineMsg('sgErr','err','Cet appartement existe déjà dans cet immeuble. Connectez-vous ou modifiez vos informations.');return}
-await database.ref('users/'+id).set({appart:SD.appart,bat:SD.bat,pass:SD.pass});
-await database.ref('settings/'+id).set({maxRecords:10});
-await database.ref('emailSettings/'+id).set({enableEmail:'oui',guardEmail:encrypt(SD.email)});
-await database.ref('customMessages/'+id).set(SD.msg);
-$('loginUser').value=id;$('loginPass').value=SD.pass;
-await login();
-showBanner('ok','Votre espace est créé. Identifiant de connexion : '+id);
-}catch(e){showInlineMsg('sgErr','err','Erreur : '+(e.message||'création impossible'))}
-finally{b.disabled=false;b.textContent='Créer mon espace'}
-}
-async function purgeExpired(){
-const lim=Date.now()-48*3600*1000;
-for(const [path,f] of [['records','timestamp'],['sentRecords','sentAt'],['history','deletedAt']]){
-try{
-const s=(await database.ref(path).once('value')).val()||{};
-for(const id in s){
-if(s[id][f]&&s[id][f]<lim){
-await database.ref(path+'/'+id).remove();
-if(path=='records')await database.ref('documents/'+id).remove();
-}
-}
-}catch(e){}
-}
-}
-['refreshAdmin','refreshUser','refreshReadonly'].forEach(n=>{
-const o=window[n];
-window[n]=async function(){await purgeExpired();return o.apply(this,arguments)};
-});
+if(/[?&](invite|readonly)=/.test(location.search)){document.documentElement.classList.add('direct');}
 </script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<style>
+:root{--c1:#007bff;--bg:#f0f2f5;--ok:#0f9d58;--warn:#f4b400;--err:#d93025;--info:#4285f4;}
+body{font-family:Arial,sans-serif;margin:16px;background:var(--bg);}
+h2{text-align:center;margin:8px 0 16px;color:#2c3e50;}
+.card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.12);margin-bottom:16px;}
+label{font-weight:600;display:block;margin-top:10px;}
+input,select,button{font-size:16px;}
+input,select{width:100%;padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box;}
+input[readonly]{background:#e9ecef;}
+button{margin-top:14px;padding:10px 14px;border:none;border-radius:10px;background:var(--c1);color:#fff;cursor:pointer;}
+button:disabled{opacity:.6;cursor:not-allowed;}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+th,td{border:1px solid #e5e7eb;padding:8px;text-align:center;}
+th{background:var(--c1);color:#fff;}
+.hidden{display:none !important;}
+.row{display:flex;gap:12px;flex-wrap:wrap;}
+.col{flex:1 1 220px;min-width:220px;}
+.banner{padding:10px 12px;border-radius:10px;margin-bottom:12px;font-weight:600;}
+.banner.info{background:#e8f0fe;color:#174ea6;border:1px solid #c6dafc;}
+.banner.ok{background:#e6f4ea;color:#137333;border:1px solid #cce8d3;}
+.banner.warn{background:#fef7e0;color:#a66300;border:1px solid #fde293;}
+.banner.err{background:#fce8e6;color:#a50e0e;border:1px solid #f7b9b4;}
+.toolbar{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;}
+.note{font-size:13px;opacity:.8;}
+.recap{background:#fafafa;border:1px dashed #ccc;padding:10px;border-radius:8px;min-width:240px;}
+.person-group{background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:15px;border:1px solid #e9ecef;}
+.person-group h4{margin:0 0 10px 0;color:#1E40AF;}
+.consent-container{margin:20px 0;padding:15px;background:#f8f9fa;border-radius:8px;border:1px solid #dee2e6;}
+.consent-text{max-height:150px;overflow-y:auto;padding:10px;background:white;border-radius:5px;border:1px solid #ced4da;margin:10px 0;}
+.btn-delete{background:var(--err) !important;margin-left:5px;}
+.signature-area{margin:40px 0;padding:20px;border:2px solid #ddd;border-radius:8px;text-align:center;}
+.signature-title{font-size:18px;margin-bottom:20px;color:#2c3e50;}
+.signature-canvas{width:100%;height:200px;border:1px solid #ccc;border-radius:5px;background:white;cursor:crosshair;margin-bottom:20px;}
+.doc-type-row{display:flex;gap:10px;}
+.doc-type-row .col{flex:1;}
+.rules-container{margin:20px 0;padding:15px;background:#f8f9fa;border-radius:8px;border:1px solid #dee2e6;max-height:250px;overflow-y:auto;}
+.rules-container h4{margin-top:0;color:#2c3e50;}
+.rules-container ul{padding-left:20px;margin:10px 0;}
+.rules-container li{margin-bottom:8px;}
+.signature-controls{display:flex;gap:10px;justify-content:center;margin-top:15px;}
+.document-column{border-left:2px solid #007bff;padding-left:20px;min-height:100vh;background:#f9f9f9;}
+.document-preview{background:white;padding:20px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.1);margin-top:20px;max-height:500px;overflow-y:auto;}
+.doc-title{text-align:center;font-size:24px;font-weight:bold;color:#2c3e50;margin-bottom:30px;border-bottom:2px solid #2c3e50;padding-bottom:10px;}
+.doc-info{margin-bottom:20px;}
+.doc-info p{margin:5px 0;}
+.doc-section{margin-bottom:30px;}
+.doc-section-title{font-size:18px;font-weight:bold;color:#2c3e50;margin-bottom:10px;border-bottom:1px solid #ddd;padding-bottom:5px;}
+.doc-signature{text-align:center;margin-top:40px;padding-top:20px;border-top:2px solid #2c3e50;}
+.doc-signature-box{border:1px solid #000;height:100px;margin:20px auto;width:300px;position:relative;}
+.two-column-layout{display:flex;gap:20px;flex-wrap:wrap;}
+.form-column{flex:2;min-width:300px;}
+.document-column{flex:1;min-width:300px;}
+.doc-actions{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;}
+.nationality-row{display:flex;gap:10px;margin-top:10px;}
+.nationality-row .col{flex:1;}
+.accept-signature-container{margin-top:20px;padding:15px;background:#f8f9fa;border-radius:8px;border:1px solid #dee2e6;}
+.premium-header{background:linear-gradient(135deg,#2c3e50,#4a6491);color:white;padding:20px;border-radius:12px;margin-bottom:20px;text-align:center;}
+.user-settings{background:#fff;padding:15px;border-radius:8px;border:1px solid #dee2e6;margin-top:15px;}
+.email-settings{background:#fff;padding:15px;border-radius:8px;border:1px solid #dee2e6;margin-top:15px;}
+.email-settings h4{margin-top:0;color:#2c3e50;}
+.signature-preview{border:2px solid #000;background:white;margin:10px auto;max-width:300px;}
+.error-message{color:#d93025;font-size:14px;margin-top:5px;display:none;}
+.error-border{border-color:#d93025 !important;}
+.smtp-info{background:#e8f4f8;padding:12px;border-radius:6px;margin-top:10px;font-size:13px;border-left:4px solid #007bff;}
+.custom-message-area{margin-top:20px;margin-bottom:20px;padding:15px;background:#fff3e0;border-radius:8px;border:1px solid #ffcc80;}
+.custom-message-area label{margin-top:0;color:#e67e22;}
+.custom-message-area textarea{width:100%;padding:10px;border:1px solid #ffcc80;border-radius:8px;font-family:Arial,sans-serif;resize:vertical;box-sizing:border-box;}
+.residence-name-setting{background:#e8f5e9;padding:15px;border-radius:8px;border:1px solid #a5d6a7;margin-top:15px;}
+.residence-name-setting label{color:#2e7d32;}
+.guide-setting{background:#e3f2fd;padding:15px;border-radius:8px;border:1px solid #90caf9;margin-top:15px;}
+.guide-setting label{color:#1565c0;}
+.guide-setting textarea{width:100%;padding:10px;border:1px solid #90caf9;border-radius:8px;font-family:Arial,sans-serif;resize:vertical;box-sizing:border-box;}
+.lang-selector{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:15px;}
+.lang-selector button{margin-top:0;padding:6px 12px;font-size:14px;background:#e9ecef;color:#2c3e50;}
+.lang-selector button.active{background:var(--c1);color:#fff;}
+.readonly-link-box{background:#e3f2fd;padding:12px;border-radius:8px;margin-top:12px;border:1px solid #90caf9;}
+.readonly-link-box label{color:#1565c0;margin-top:0;}
+.section-title-ro{font-size:18px;font-weight:bold;color:#2c3e50;margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--c1);}
+.section-title-ro.sent{border-bottom-color:var(--ok);color:var(--ok);}
+.badge-sent{background:#e6f4ea;color:#137333;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600;}
+.badge-pending{background:#fef7e0;color:#a66300;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600;}
+html.direct #loginCard{display:none !important;}
+#directLoader{display:none;text-align:center;padding:30px;font-weight:600;color:#2c3e50;}
+html.direct #directLoader{display:block;}
+.hero{margin-bottom:18px;}
+.hero h2{margin:0 0 6px;font-size:26px;color:#1e293b;}
+.hero p.sub{text-align:center;margin:0 0 14px;color:#475569;}
+.hero-grid{display:flex;gap:10px;flex-wrap:wrap;}
+.hero-item{flex:1 1 150px;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.15);background:#fff;}
+.hero-item svg{display:block;width:100%;height:auto;}
+.hero-item .cap{text-align:center;font-weight:700;padding:8px;color:#1e293b;}
+.login-sep{border:none;border-top:1px solid #e5e7eb;margin:18px 0 4px;}
+.retention-note{margin-top:12px;font-size:13px;background:#fef7e0;color:#a66300;border:1px solid #fde293;padding:8px 10px;border-radius:8px;}
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;}
+.modal-box{background:#fff;border-radius:16px;padding:20px;max-width:440px;width:100%;box-sizing:border-box;max-height:90vh;overflow-y:auto;}
+.progress-wrap{margin-bottom:16px;}
+.progress-top{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#334155;margin-bottom:6px;}
+.progress{height:10px;background:#e2e8f0;border-radius:6px;overflow:hidden;}
+.progress-bar{height:100%;width:0;background:linear-gradient(90deg,#ff385c,#e31c5f);transition:width .3s;}
+.wiz-btns{display:flex;gap:10px;}
+.wiz-btns button{flex:1;}
+.btn-grey{background:#94a3b8 !important;}
+.btn-pink{background:#ff385c !important;}
+#downloadPage{text-align:center;}
+#downloadPage h3{color:#2c3e50;}
+</style>
+</head>
+<body>
+
+<div class="premium-header">
+<h1 id="appMainTitle">Enregistrement des invités / Guest Registration</h1>
+<p id="appSubTitle">Gestion des enregistrements des invités</p>
+</div>
+
+<div id="directLoader">⏳ ...</div>
+
+<div class="two-column-layout">
+<div class="form-column">
+<div id="banner" class="banner info hidden"></div>
+
+<div id="loginCard" class="card">
+<div class="hero">
+<h2 data-i18n="heroTitle">Check-in simple pour vos voyageurs</h2>
+<p class="sub" data-i18n="heroSub">Enregistrez vos invités en quelques minutes, signez et recevez votre guide d'entrée.</p>
+<div class="hero-grid">
+<div class="hero-item">
+<svg viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4facfe"/><stop offset="1" stop-color="#a6e3ff"/></linearGradient></defs>
+<rect width="300" height="190" fill="url(#g1)"/>
+<circle cx="245" cy="45" r="22" fill="#ffe27a"/>
+<ellipse cx="70" cy="50" rx="34" ry="12" fill="#fff" opacity=".9"/>
+<ellipse cx="100" cy="42" rx="26" ry="10" fill="#fff" opacity=".9"/>
+<path d="M30 70 L120 50 L135 58 L82 78 L100 100 L88 104 L60 84 L38 90 Z" fill="#fff" stroke="#1e293b" stroke-width="2"/>
+<rect x="95" y="105" width="110" height="72" rx="10" fill="#ff385c"/>
+<rect x="122" y="92" width="56" height="18" rx="8" fill="none" stroke="#1e293b" stroke-width="5"/>
+<rect x="95" y="128" width="110" height="6" fill="#e31c5f"/>
+<rect x="147" y="122" width="6" height="18" fill="#fff"/>
+<circle cx="115" cy="180" r="5" fill="#1e293b"/><circle cx="185" cy="180" r="5" fill="#1e293b"/>
+</svg>
+<div class="cap" data-i18n="hero1">Voyage</div>
+</div>
+<div class="hero-item">
+<svg viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbd786"/><stop offset="1" stop-color="#f7797d"/></linearGradient></defs>
+<rect width="300" height="190" fill="url(#g2)"/>
+<rect x="30" y="110" width="240" height="14" rx="4" fill="#7c4a2d"/>
+<rect x="45" y="124" width="12" height="55" fill="#5b3520"/><rect x="243" y="124" width="12" height="55" fill="#5b3520"/>
+<rect x="95" y="40" width="110" height="70" rx="8" fill="#fff"/>
+<rect x="105" y="52" width="60" height="8" rx="3" fill="#cbd5e1"/>
+<rect x="105" y="68" width="90" height="8" rx="3" fill="#cbd5e1"/>
+<circle cx="180" cy="94" r="9" fill="#0f9d58"/><path d="M175 94 l4 4 l7 -8" stroke="#fff" stroke-width="3" fill="none"/>
+<circle cx="70" cy="95" r="10" fill="#ffd9b3"/><rect x="60" y="105" width="20" height="5" fill="#1e293b"/>
+<g transform="translate(225,60)"><circle cx="0" cy="0" r="12" fill="#ffd700" stroke="#b8860b" stroke-width="2"/><rect x="10" y="-3" width="32" height="6" fill="#ffd700" stroke="#b8860b" stroke-width="2"/><rect x="30" y="3" width="5" height="9" fill="#b8860b"/><rect x="38" y="3" width="5" height="12" fill="#b8860b"/></g>
+</svg>
+<div class="cap" data-i18n="hero2">Check-in</div>
+</div>
+<div class="hero-item">
+<svg viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb88c"/><stop offset="1" stop-color="#de6262"/></linearGradient></defs>
+<rect width="300" height="190" fill="url(#g3)"/>
+<circle cx="220" cy="60" r="30" fill="#ffe9a8"/>
+<path d="M0 150 Q60 100 120 140 T240 130 T300 150 V190 H0 Z" fill="#2c5364"/>
+<path d="M0 165 Q70 130 140 160 T300 160 V190 H0 Z" fill="#203a43"/>
+<rect x="105" y="85" width="90" height="60" fill="#fff"/>
+<polygon points="95,88 150,48 205,88" fill="#e31c5f"/>
+<rect x="138" y="108" width="24" height="37" fill="#7c4a2d"/>
+<rect x="115" y="98" width="18" height="18" fill="#a6e3ff"/><rect x="167" y="98" width="18" height="18" fill="#a6e3ff"/>
+<path d="M50 40 c0 -14 22 -14 22 0 c0 12 -11 22 -11 22 c0 0 -11 -10 -11 -22 z" fill="#fff"/><circle cx="61" cy="40" r="4" fill="#e31c5f"/>
+</svg>
+<div class="cap" data-i18n="hero3">Bienvenue</div>
+</div>
+</div>
+</div>
+
+<div class="toolbar">
+<div><strong data-i18n="loginTitle">Connexion - Enregistrement des invités</strong></div>
+<div class="note" data-i18n="loginNote">Veuillez entrer vos identifiants</div>
+</div>
+<label data-i18n="userLabel">Utilisateur</label>
+<input type="text" id="loginUser" autocomplete="username" placeholder="Identifiant" required />
+<label data-i18n="passLabel">Mot de passe</label>
+<input type="password" id="loginPass" autocomplete="current-password" placeholder="Mot de passe" required />
+<button id="btnLogin" onclick="login()" data-i18n="loginBtn">Connexion</button>
+<p id="loginMsg" class="banner err hidden"></p>
+<div class="retention-note" data-i18n="retentionMsg">Important : vos données et documents sont conservés uniquement 48 heures, puis supprimés automatiquement. Pensez à télécharger vos documents.</div>
+<hr class="login-sep" />
+<div class="note" style="margin-top:12px;" data-i18n="signupHomeNote">Pas encore de compte ? Créez votre espace en quelques étapes, sans passer par l'administrateur.</div>
+<button type="button" class="btn-pink" onclick="openSignup()" data-i18n="signupOpenBtn">Créer mon compte</button>
+</div>
+
+<div id="adminPanel" class="hidden">
+<div class="toolbar card">
+<div><strong data-i18n="adminTitle">Panneau administrateur - Enregistrement des invités</strong></div>
+<div><button onclick="logout()" data-i18n="logoutBtn">Déconnexion</button></div>
+</div>
+
+<div class="card">
+<div class="toolbar"><div><strong data-i18n="usersMgmtTitle">Gestion des utilisateurs</strong></div></div>
+<div class="row">
+<div class="col">
+<label data-i18n="appartLabel">Appartement</label>
+<input type="text" id="appartAdmin" placeholder="Ex: 12" />
+</div>
+<div class="col">
+<label data-i18n="batLabel">Immeuble</label>
+<input type="text" id="batAdmin" placeholder="Ex: A" />
+</div>
+<div class="col">
+<label data-i18n="passLabel">Mot de passe</label>
+<input type="text" id="passAdmin" placeholder="Choisir un mot de passe" />
+</div>
+</div>
+<button onclick="creerUtilisateur()" data-i18n="createUserBtn">Créer utilisateur</button>
+<p id="userWarn" class="banner warn hidden"></p>
+</div>
+
+<div class="card">
+<div class="toolbar"><div><strong data-i18n="existingUsersTitle">Utilisateurs existants</strong></div></div>
+<table id="tableUsers">
+<thead><tr><th>N°</th><th data-i18n="thAppart">Appartement</th><th data-i18n="thBat">Immeuble</th><th data-i18n="thPass">Mot de passe</th><th data-i18n="thAction">Action</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+
+<div class="card">
+<div class="toolbar"><div><strong data-i18n="recordsMgmtTitle">Enregistrements des invités</strong></div></div>
+<table id="tableAdmin">
+<thead>
+<tr>
+<th>N°</th><th data-i18n="thAppartShort">Appart.</th><th data-i18n="thBat">Immeuble</th><th data-i18n="thName">Nom</th><th data-i18n="thDoc">Document</th><th data-i18n="thDocType">Type Doc</th><th data-i18n="thNationality">Nationalité</th>
+<th data-i18n="thNbPers">Nb Pers.</th><th data-i18n="thPersons">Personnes</th><th data-i18n="thDate">Date</th><th data-i18n="thDocument">Document</th><th data-i18n="thAction">Action</th><th data-i18n="thStatus">Statut</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+
+<div id="userPanel" class="hidden">
+<div class="toolbar card">
+<div><strong data-i18n="mySpaceTitle">Mon espace - Enregistrement des invités</strong></div>
+<div><button onclick="logout()" data-i18n="logoutBtn">Déconnexion</button></div>
+</div>
+
+<div class="card">
+<div class="toolbar"><div><strong data-i18n="myAccountTitle">Paramètres de mon compte</strong></div></div>
+<div class="user-settings">
+<div class="row">
+<div class="col">
+<label data-i18n="maxRecordsLabel">Nombre maximum d'enregistrements</label>
+<input type="number" id="maxRecords" min="1" value="10" />
+</div>
+<div class="col">
+<label data-i18n="newPasswordLabel">Nouveau mot de passe (optionnel)</label>
+<input type="password" id="newPassword" placeholder="Laisser vide pour ne pas changer" />
+</div>
+</div>
+<button onclick="updateUserSettings()" data-i18n="saveSettingsBtn">Enregistrer les paramètres</button>
+<p id="settingsMsg" class="banner hidden"></p>
+</div>
+
+<div class="residence-name-setting">
+<label data-i18n="residenceNameLabel">Nom de la résidence</label>
+<input type="text" id="residenceNameInput" placeholder="Ex: Résidence Premium Village" />
+<button onclick="saveResidenceName()" style="margin-top:10px;background:var(--ok);" data-i18n="saveNameBtn">Enregistrer le nom</button>
+<p id="residenceMsg" class="banner hidden" style="margin-top:10px;"></p>
+</div>
+
+<div class="guide-setting">
+<h4 style="margin-top:0;color:#1565c0;" data-i18n="guideSetTitle">Guide d'entrée pour les invités</h4>
+<p class="note" data-i18n="guideSetNote">Ces informations seront incluses dans le guide d'entrée téléchargé par l'invité, traduit dans sa langue.</p>
+<label data-i18n="wifiNameLabel">Nom du réseau Wi-Fi</label>
+<input type="text" id="gWifiName" />
+<label data-i18n="wifiPassLabel">Mot de passe Wi-Fi</label>
+<input type="text" id="gWifiPass" />
+<label data-i18n="doorCodeLabel">Code d'accès / porte</label>
+<input type="text" id="gDoorCode" />
+<label data-i18n="guideInfoLabel">Autres informations utiles</label>
+<textarea id="gInfo" rows="4"></textarea>
+<button onclick="saveGuide()" style="background:#1565c0;" data-i18n="saveGuideBtn">Enregistrer le guide</button>
+<p id="guideMsg" class="banner hidden" style="margin-top:10px;"></p>
+</div>
+
+<div class="email-settings">
+<h4 data-i18n="emailNotifTitle">Notifications par Email</h4>
+<p class="note" data-i18n="emailNotifNote">Recevez une notification quand un invité s'enregistre.</p>
+<label data-i18n="enableNotifLabel">Activer les notifications</label>
+<select id="enableEmail" onchange="toggleEmailFields()">
+<option value="non" data-i18n="optNo">Non</option>
+<option value="oui" data-i18n="optYes">Oui</option>
+</select>
+<div id="emailFields" class="hidden">
+<div class="smtp-info"><strong data-i18n="emailJsInfoTitle">Configuration EmailJS :</strong> <span data-i18n="emailJsInfoText">Utilise le service EmailJS pour envoyer les notifications.</span></div>
+<label data-i18n="guardEmailLabel">Email du destinataire (ex: Sécurité)</label>
+<input type="email" id="guardEmail" placeholder="securite@exemple.com" />
+</div>
+<div class="row" style="margin-top:15px;">
+<button onclick="saveEmailSettings()" style="flex:1;" data-i18n="saveEmailBtn">Enregistrer Email</button>
+<button onclick="testEmailSettings()" style="flex:1;background:var(--ok);" data-i18n="testEmailBtn">Tester l'envoi</button>
+</div>
+<p id="emailMsg" class="banner hidden"></p>
+</div>
+
+<div class="custom-message-area">
+<label data-i18n="customMsgLabel">Message personnalisé pour les invités (affiché après enregistrement)</label>
+<textarea id="customSuccessMessage" rows="3" placeholder="Saisissez votre message personnalisé ici..."></textarea>
+<button onclick="saveCustomMessage()" style="margin-top:10px;background:var(--info);" data-i18n="saveCustomMsgBtn">Enregistrer le message</button>
+<p id="customMsgStatus" class="banner hidden" style="margin-top:10px;"></p>
+</div>
+</div>
+
+<div class="card">
+<div class="toolbar">
+<div><strong data-i18n="myRecordsTitle">Mes enregistrements</strong></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+<button onclick="genererLien()" style="background:var(--ok);" data-i18n="genLinkBtn">Générer lien invité</button>
+<button onclick="genererLienLectureSeule()" style="background:var(--info);" data-i18n="genReadonlyLinkBtn">Générer lien lecture seule</button>
+</div>
+</div>
+<table id="tableUser">
+<thead>
+<tr>
+<th>N°</th><th data-i18n="thName">Nom</th><th data-i18n="thDoc">Document</th><th data-i18n="thDocType">Type Doc</th><th data-i18n="thNationality">Nationalité</th><th data-i18n="thNbPers">Nb Pers.</th><th data-i18n="thPersons">Personnes</th><th data-i18n="thDate">Date</th><th data-i18n="thDocument">Document</th><th data-i18n="thStatus">Statut</th><th data-i18n="thAction">Action</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+
+<div id="readonlyPanel" class="hidden">
+<div class="toolbar card">
+<div><strong data-i18n="readonlyTitle">Enregistrements (lecture seule)</strong></div>
+</div>
+<div class="card">
+<div id="readonlyResidence" class="note" style="margin-bottom:10px;"></div>
+<div class="section-title-ro" data-i18n="sectionPending">Enregistrements en cours</div>
+<table id="tableReadonlyPending">
+<thead>
+<tr>
+<th>N°</th><th data-i18n="thName">Nom</th><th data-i18n="thDate">Date</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div class="section-title-ro sent" data-i18n="sectionSent">Enregistrements traités / envoyés</div>
+<table id="tableReadonlySent">
+<thead>
+<tr>
+<th>N°</th><th data-i18n="thName">Nom</th><th data-i18n="thDate">Date</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div class="section-title-ro" data-i18n="sectionHistory">Historique des suppressions</div>
+<table id="tableReadonlyHistory">
+<thead>
+<tr>
+<th data-i18n="thDate">Date</th>
+<th data-i18n="thName">Nom</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+
+<div id="invitePanel" class="hidden">
+<div class="guest-form-container">
+<div class="toolbar" style="margin-bottom:20px;">
+<h3 style="margin:0;flex-grow:1;" data-i18n="guestFormTitle">Enregistrement Invité</h3>
+</div>
+
+<div class="lang-selector" id="langSelector">
+<button type="button" data-lang="fr">Français</button>
+<button type="button" data-lang="en">English</button>
+<button type="button" data-lang="ar">العربية</button>
+<button type="button" data-lang="es">Español</button>
+<button type="button" data-lang="it">Italiano</button>
+<button type="button" data-lang="de">Deutsch</button>
+<button type="button" data-lang="nl">Nederlands</button>
+<button type="button" data-lang="pt">Português</button>
+<button type="button" data-lang="pl">Polski</button>
+<button type="button" data-lang="ru">Русский</button>
+<button type="button" data-lang="tr">Türkçe</button>
+<button type="button" data-lang="el">Ελληνικά</button>
+<button type="button" data-lang="sv">Svenska</button>
+<button type="button" data-lang="da">Dansk</button>
+<button type="button" data-lang="no">Norsk</button>
+<button type="button" data-lang="fi">Suomi</button>
+<button type="button" data-lang="cs">Čeština</button>
+<button type="button" data-lang="hu">Magyar</button>
+<button type="button" data-lang="ro">Română</button>
+<button type="button" data-lang="uk">Українська</button>
+<button type="button" data-lang="ja">日本語</button>
+<button type="button" data-lang="zh">中文</button>
+<button type="button" data-lang="ko">한국어</button>
+<button type="button" data-lang="hi">हिन्दी</button>
+</div>
+
+<div class="card">
+<form id="guestForm">
+<div class="row">
+<div class="col">
+<label data-i18n="appartLabel">Appartement</label>
+<input type="text" id="invAppart" readonly />
+</div>
+<div class="col">
+<label data-i18n="batLabel">Immeuble</label>
+<input type="text" id="invBat" readonly />
+</div>
+</div>
+
+<label data-i18n="arrivalDateLabel">Date d'arrivée *</label>
+<input type="date" id="dateArrivee" required class="guest-input" />
+<div class="error-message" id="dateArriveeError" data-i18n="errArrivalDate">Veuillez sélectionner une date d'arrivée</div>
+
+<label data-i18n="nbGuestsLabel">Nombre des invités *</label>
+<input type="number" id="nbPers" min="1" value="1" onchange="genererChamps()" required class="guest-input" />
+<div class="error-message" id="nbPersError" data-i18n="errNbGuests">Veuillez entrer le nombre d'invités (minimum 1)</div>
+
+<label data-i18n="mainNameLabel">Nom et Prénom de la personne principale *</label>
+<input type="text" id="nomPrincipal" required data-i18n-ph="mainNamePh" placeholder="Nom complet" class="guest-input" />
+<div class="error-message" id="nomPrincipalError" data-i18n="errMainName">Veuillez entrer le nom et prénom</div>
+
+<div class="row doc-type-row">
+<div class="col">
+<label data-i18n="docTypeLabel">Type de document *</label>
+<select id="typeDocPrincipal" required class="guest-input">
+<option value="" data-i18n="selectOption">Sélectionner</option>
+<option value="Passeport" data-i18n="optPassport">Passeport</option>
+<option value="Carte d'identité" data-i18n="optIdCard">Carte d'identité</option>
+</select>
+<div class="error-message" id="typeDocPrincipalError" data-i18n="errDocType">Veuillez sélectionner un type de document</div>
+</div>
+<div class="col">
+<label data-i18n="docNumLabel">Numéro de document *</label>
+<input type="text" id="docPrincipal" required data-i18n-ph="docNumPh" placeholder="N° de document" class="guest-input" />
+<div class="error-message" id="docPrincipalError" data-i18n="errDocNum">Veuillez entrer le numéro de document</div>
+</div>
+</div>
+
+<div class="nationality-row">
+<div class="col">
+<label data-i18n="nationalityLabel">Nationalité *</label>
+<input type="text" id="nationalitePrincipal" required data-i18n-ph="nationalityPh" placeholder="Nationalité" class="guest-input" />
+<div class="error-message" id="nationalitePrincipalError" data-i18n="errNationality">Veuillez entrer la nationalité</div>
+</div>
+</div>
+
+<div id="personnes"></div>
+
+<div class="rules-container" id="rulesContainer">
+<h4 data-i18n="rulesTitle">Règlement intérieur à respecter :</h4>
+<ul id="rulesList"></ul>
+</div>
+
+<div class="signature-area">
+<div class="signature-title" data-i18n="signatureTitle">Signature *</div>
+<canvas id="signatureCanvas" class="signature-canvas">Votre navigateur ne supporte pas la signature.</canvas>
+<div class="error-message" id="signatureError" data-i18n="errSignature">Veuillez signer le document</div>
+<div class="signature-controls">
+<button type="button" id="clearBtn" class="btn" style="background:#e74c3c;" data-i18n="clearSigBtn">Effacer la signature</button>
+</div>
+<div id="signaturePreview" class="signature-preview hidden"></div>
+<p style="margin-top:15px;font-size:14px;color:#666;" data-i18n="signatureNote">En signant, vous acceptez le règlement intérieur et consentez au traitement de vos données personnelles.</p>
+</div>
+
+<div class="accept-signature-container">
+<label style="display:flex;align-items:center;justify-content:center;margin-bottom:15px;">
+<input type="checkbox" id="acceptCheckbox" required style="margin-right:10px;width:auto;">
+<span style="font-size:16px;font-weight:bold;" data-i18n="acceptText">En utilisant cette application, vous acceptez que les informations fournies lors de votre première inscription soient traitées conformément à la réglementation marocaine sur la protection des données personnelles. Ces données sont exclusivement utilisées pour le processus initial et ne sont pas conservées. De plus, vous vous engagez à respecter l'ensemble du règlement intérieur de l'appartement et à valider votre acceptation par votre signature.</span>
+</label>
+<div class="error-message" id="acceptCheckboxError" style="text-align:center;" data-i18n="errAccept">Veuillez accepter les conditions</div>
+<div style="text-align:center;">
+<button type="button" id="registerBtn" class="btn" style="background:#27ae60;padding:12px 30px;font-size:18px;" data-i18n="registerBtn">Enregistrer et valider</button>
+</div>
+</div>
+</form>
+</div>
+
+<div id="downloadPage" class="card hidden">
+<h3 data-i18n="dlTitle">Vos documents sont prêts</h3>
+<p data-i18n="dlText">Téléchargez votre document signé et le guide d'entrée (code Wi-Fi, accès, informations utiles).</p>
+<div class="doc-actions">
+<button type="button" onclick="downloadInlineDocument()" style="background:var(--ok);" data-i18n="dlSigned">Télécharger le document signé</button>
+<button type="button" onclick="downloadGuide()" style="background:var(--info);" data-i18n="dlGuide">Télécharger le guide d'entrée</button>
+</div>
+<div class="retention-note" style="margin-top:16px;" data-i18n="retentionMsg">Important : vos données et documents sont conservés uniquement 48 heures, puis supprimés automatiquement. Pensez à télécharger vos documents.</div>
+</div>
+
+<div id="successMessage" class="banner ok hidden">
+<div id="customSuccessMessageDisplay"></div>
+<br>
+<strong data-i18n="noteImportant">Note importante :</strong> <span data-i18n="noteImportantText">En cas de demande des agents de sécurité, présentez ce document signé. Seules les personnes enregistrées dans cette réservation sont autorisées à entrer.</span>
+</div>
+
+<div id="inlineDocumentContainer" class="hidden">
+<div class="card">
+<h3 data-i18n="signedDocTitle">Document Signé - Enregistrement des invités</h3>
+<div id="inlineDocumentPreview" class="document-preview"></div>
+<div class="doc-actions">
+<button onclick="downloadInlineDocument()" style="background:var(--ok);" data-i18n="downloadPdfBtn">Télécharger PDF</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="documentColumn" class="document-column hidden">
+<div class="card">
+<h3 data-i18n="signedDocTitle">Document Signé - Enregistrement des invités</h3>
+<div id="documentPreview" class="document-preview">
+<p style="text-align:center;color:#666;" data-i18n="selectRecordMsg">Sélectionnez un enregistrement pour voir le document.</p>
+</div>
+<div id="docActions" class="doc-actions hidden">
+<button onclick="downloadCurrentDocument()" style="background:var(--ok);" data-i18n="downloadPdfBtn">Télécharger PDF</button>
+<button onclick="partagerWhatsApp()" style="background:#25D366;" data-i18n="shareWaBtn">Partager WhatsApp</button>
+</div>
+</div>
+</div>
+</div>
+
+<div id="retentionModal" class="modal hidden">
+<div class="modal-box">
+<h3 style="margin-top:0;color:#a66300;" data-i18n="retentionTitle">Information importante</h3>
+<p style="font-size:16px;line-height:1.5;" data-i18n="retentionMsg">Important : vos données et documents sont conservés uniquement 48 heures, puis supprimés automatiquement. Pensez à télécharger vos documents.</p>
+<button type="button" style="width:100%;" onclick="confirmLogin()" data-i18n="retentionOk">J'ai compris, continuer</button>
+</div>
+</div>
+
+<div id="signupModal" class="modal hidden">
+<div class="modal-box">
+<div class="progress-wrap">
+<div class="progress-top"><span id="wizStepLabel"></span><span id="wizPct"></span></div>
+<div class="progress"><div class="progress-bar" id="wizBar"></div></div>
+</div>
+<h3 style="margin:0 0 6px;color:#1e293b;" data-i18n="wizTitle">Créer mon compte</h3>
+<label id="wizLabel"></label>
+<input type="text" id="wizInput" autocomplete="off" />
+<div class="error-message" id="wizErr"></div>
+<div class="wiz-btns">
+<button type="button" id="wizPrev" class="btn-grey" onclick="wizPrev()" data-i18n="wizPrev">Précédent</button>
+<button type="button" id="wizNext" class="btn-pink" onclick="wizNext()" data-i18n="wizNext">Suivant</button>
+</div>
+<button type="button" class="btn-grey" style="width:100%;" onclick="closeSignup()" data-i18n="wizCancel">Annuler</button>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<script>
+(function(){
+  emailjs.init("IWJc8rbQr6EMWWQbs");
+})();
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDbJe_e0Uz5YavmQDwabym11FStEPjxo2E",
+  authDomain: "invitedb-6ce9f.firebaseapp.com",
+  databaseURL: "https://invitedb-6ce9f-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "invitedb-6ce9f",
+  storageBucket: "invitedb-6ce9f.firebasestorage.app",
+  messagingSenderId: "253833375693",
+  appId: "1:253833375693:web:a1d68bef41916c86be5e84",
+  measurementId: "G-BS2EBMM7T3"
+};
+
+try {
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+} catch (e) {
+  console.error("Firebase Init Error:", e);
+}
+const database = firebase.database();
+const AUTH_EMAIL = "maraminho10@gmail.com";
+const AUTH_PASS = "M@ra10";
+const RETENTION_MS = 48 * 60 * 60 * 1000;
+
+let currentUser = null;
+const SESSION_TIMEOUT_MS = 10 * 60 * 1000;
+let sessionTimer = null;
+let signatureData = '';
+let hasSignature = false;
+let currentDocumentData = null;
+let userSettings = { maxRecords: 10 };
+let emailSettings = { enableEmail: 'non' };
+let customMessage = '';
+let residenceName = '';
+let currentLang = 'fr';
+let inlineDocumentData = null;
+let currentReadonlyParams = null;
+let guideData = { wifiName: '', wifiPass: '', doorCode: '', info: '' };
+
+const TRANSLATIONS = {
+fr: {
+appMainTitle: "Enregistrement des invités / Guest Registration",
+appSubTitle: "Gestion des enregistrements des invités",
+loginTitle: "Connexion - Enregistrement des invités",
+loginNote: "Veuillez entrer vos identifiants",
+userLabel: "Utilisateur",
+passLabel: "Mot de passe",
+loginBtn: "Connexion",
+logoutBtn: "Déconnexion",
+adminTitle: "Panneau administrateur - Enregistrement des invités",
+usersMgmtTitle: "Gestion des utilisateurs",
+appartLabel: "Appartement",
+batLabel: "Immeuble",
+createUserBtn: "Créer utilisateur",
+existingUsersTitle: "Utilisateurs existants",
+thAppart: "Appartement",
+thAppartShort: "Appart.",
+thBat: "Immeuble",
+thPass: "Mot de passe",
+thAction: "Action",
+recordsMgmtTitle: "Enregistrements des invités",
+thName: "Nom",
+thDoc: "Document",
+thDocType: "Type Doc",
+thNationality: "Nationalité",
+thNbPers: "Nb Pers.",
+thPersons: "Personnes",
+thDate: "Date",
+thDocument: "Document",
+thStatus: "Statut",
+mySpaceTitle: "Mon espace - Enregistrement des invités",
+myAccountTitle: "Paramètres de mon compte",
+maxRecordsLabel: "Nombre maximum d'enregistrements",
+newPasswordLabel: "Nouveau mot de passe (optionnel)",
+saveSettingsBtn: "Enregistrer les paramètres",
+residenceNameLabel: "Nom de la résidence",
+saveNameBtn: "Enregistrer le nom",
+emailNotifTitle: "Notifications par Email",
+emailNotifNote: "Recevez une notification quand un invité s'enregistre.",
+enableNotifLabel: "Activer les notifications",
+optNo: "Non",
+optYes: "Oui",
+emailJsInfoTitle: "Configuration EmailJS :",
+emailJsInfoText: "Utilise le service EmailJS pour envoyer les notifications.",
+guardEmailLabel: "Email du destinataire (ex: Sécurité)",
+saveEmailBtn: "Enregistrer Email",
+testEmailBtn: "Tester l'envoi",
+customMsgLabel: "Message personnalisé pour les invités (affiché après enregistrement)",
+saveCustomMsgBtn: "Enregistrer le message",
+myRecordsTitle: "Mes enregistrements",
+genLinkBtn: "Générer lien invité",
+genReadonlyLinkBtn: "Générer lien lecture seule",
+readonlyTitle: "Enregistrements (lecture seule)",
+sectionPending: "Enregistrements en cours",
+sectionSent: "Enregistrements traités / envoyés",
+sectionHistory: "Historique des suppressions",
+guestFormTitle: "Enregistrement Invité",
+arrivalDateLabel: "Date d'arrivée *",
+errArrivalDate: "Veuillez sélectionner une date d'arrivée",
+nbGuestsLabel: "Nombre des invités *",
+errNbGuests: "Veuillez entrer le nombre d'invités (minimum 1)",
+mainNameLabel: "Nom et Prénom de la personne principale *",
+mainNamePh: "Nom complet",
+errMainName: "Veuillez entrer le nom et prénom",
+docTypeLabel: "Type de document *",
+selectOption: "Sélectionner",
+optPassport: "Passeport",
+optIdCard: "Carte d'identité",
+errDocType: "Veuillez sélectionner un type de document",
+docNumLabel: "Numéro de document *",
+docNumPh: "N° de document",
+errDocNum: "Veuillez entrer le numéro de document",
+nationalityLabel: "Nationalité *",
+nationalityPh: "Nationalité",
+errNationality: "Veuillez entrer la nationalité",
+rulesTitle: "Règlement intérieur à respecter :",
+signatureTitle: "Signature *",
+errSignature: "Veuillez signer le document",
+clearSigBtn: "Effacer la signature",
+signatureNote: "En signant, vous acceptez le règlement intérieur et consentez au traitement de vos données personnelles.",
+acceptText: "En utilisant cette application, vous acceptez que les informations fournies lors de votre première inscription soient traitées conformément à la réglementation marocaine sur la protection des données personnelles. Ces données sont exclusivement utilisées pour le processus initial et ne sont pas conservées. De plus, vous vous engagez à respecter l'ensemble du règlement intérieur de l'appartement et à valider votre acceptation par votre signature.",
+errAccept: "Veuillez accepter les conditions",
+registerBtn: "Enregistrer et valider",
+noteImportant: "Note importante :",
+noteImportantText: "En cas de demande des agents de sécurité, présentez ce document signé. Seules les personnes enregistrées dans cette réservation sont autorisées à entrer.",
+signedDocTitle: "Document Signé - Enregistrement des invités",
+instructionsTitle: "Instructions",
+selectRecordMsg: "Sélectionnez un enregistrement pour voir le document.",
+downloadPdfBtn: "Télécharger PDF",
+shareWaBtn: "Partager WhatsApp",
+personLabel: "Personne",
+personName: "Nom & Prénom *",
+personNamePh: "Nom complet personne",
+pdfHeader: "RÈGLEMENT INTÉRIEUR ET INFORMATIONS DE RÉSERVATION",
+pdfRulesTitle: "RÈGLEMENT INTÉRIEUR ACCEPTÉ :",
+pdfDateLabel: "Date de réservation",
+pdfResidenceLabel: "Résidence",
+pdfNotSpecified: "Non spécifiée",
+pdfAppartLabel: "Appartement",
+pdfBuildingLabel: "Immeuble",
+pdfNomLabel: "Nom du réservateur",
+pdfDocTypeLabel: "Type de document",
+pdfDocNumLabel: "Numéro de document",
+pdfNbPersLabel: "Nombre de personnes",
+pdfArrivalLabel: "Date d'arrivée",
+pdfRules: [
+"1. Si vous êtes des Couples marocains:",
+"selon la loi marocaine ce logement autorise que les couples mariés.",
+"",
+"2. Tranquillité et bruit",
+"Silence total obligatoire après 23h00. Pas de musique forte, cris ou",
+"nuisances sonores à toute heure.",
+"",
+"3. Tabagisme",
+"Fumer est strictement interdit à l'intérieur. Autorisé uniquement en",
+"extérieur (terrasse ou jardin), avec obligation de nettoyer les mégots",
+"et cendres.",
+"",
+"4. Nombre de personnes",
+"Maximum 5 personnes autorisées dans l'appartement.",
+"",
+"5. Propreté et entretien",
+"Maintenir les lieux propres en permanence.",
+"Vider régulièrement les poubelles.",
+"Respecter les sols et surfaces (pas de traces, pas de nourriture hors cuisine)."
+],
+rules: [
+{ strong: "1. Si vous êtes des Couples marocains :", text: " selon la loi marocaine ce logement autorise que les couples mariés." },
+{ strong: "2. Tranquillité et bruit :", text: " Silence total obligatoire après 23h00. Pas de musique forte, cris ou nuisances sonores à toute heure." },
+{ strong: "3. Tabagisme :", text: " Fumer est strictement interdit à l'intérieur. Autorisé uniquement en extérieur (terrasse ou jardin), avec obligation de nettoyer les mégots et cendres." },
+{ strong: "4. Nombre de personnes :", text: " Maximum 5 personnes autorisées dans l'appartement." },
+{ strong: "5. Propreté et entretien :", text: " Maintenir les lieux propres en permanence. Vider régulièrement les poubelles. Respecter les sols et surfaces (pas de traces, pas de nourriture hors cuisine)." }
+]
+},
+en: {
+appMainTitle: "Guest Registration",
+appSubTitle: "Guest registration management",
+loginTitle: "Login - Guest Registration",
+loginNote: "Please enter your credentials",
+userLabel: "User",
+passLabel: "Password",
+loginBtn: "Login",
+logoutBtn: "Logout",
+adminTitle: "Admin Panel - Guest Registration",
+usersMgmtTitle: "User Management",
+appartLabel: "Apartment",
+batLabel: "Building",
+createUserBtn: "Create User",
+existingUsersTitle: "Existing Users",
+thAppart: "Apartment",
+thAppartShort: "Apt.",
+thBat: "Building",
+thPass: "Password",
+thAction: "Action",
+recordsMgmtTitle: "Guest Records",
+thName: "Name",
+thDoc: "Document",
+thDocType: "Doc Type",
+thNationality: "Nationality",
+thNbPers: "Nb Pers.",
+thPersons: "Persons",
+thDate: "Date",
+thDocument: "Document",
+thStatus: "Status",
+mySpaceTitle: "My Space - Guest Registration",
+myAccountTitle: "My Account Settings",
+maxRecordsLabel: "Maximum number of records",
+newPasswordLabel: "New password (optional)",
+saveSettingsBtn: "Save Settings",
+residenceNameLabel: "Residence Name",
+saveNameBtn: "Save Name",
+emailNotifTitle: "Email Notifications",
+emailNotifNote: "Get notified when a guest registers.",
+enableNotifLabel: "Enable notifications",
+optNo: "No",
+optYes: "Yes",
+emailJsInfoTitle: "EmailJS Configuration:",
+emailJsInfoText: "Uses EmailJS service to send notifications.",
+guardEmailLabel: "Recipient email (e.g. Security)",
+saveEmailBtn: "Save Email",
+testEmailBtn: "Test Send",
+customMsgLabel: "Custom message for guests (shown after registration)",
+saveCustomMsgBtn: "Save Message",
+myRecordsTitle: "My Records",
+genLinkBtn: "Generate Guest Link",
+genReadonlyLinkBtn: "Generate Read-only Link",
+readonlyTitle: "Records (Read-only)",
+sectionPending: "Ongoing Records",
+sectionSent: "Processed / Sent Records",
+sectionHistory: "Deletion History",
+guestFormTitle: "Guest Registration",
+arrivalDateLabel: "Arrival Date *",
+errArrivalDate: "Please select an arrival date",
+nbGuestsLabel: "Number of Guests *",
+errNbGuests: "Please enter the number of guests (minimum 1)",
+mainNameLabel: "Full Name of Main Person *",
+mainNamePh: "Full name",
+errMainName: "Please enter the full name",
+docTypeLabel: "Document Type *",
+selectOption: "Select",
+optPassport: "Passport",
+optIdCard: "ID Card",
+errDocType: "Please select a document type",
+docNumLabel: "Document Number *",
+docNumPh: "Document No.",
+errDocNum: "Please enter the document number",
+nationalityLabel: "Nationality *",
+nationalityPh: "Nationality",
+errNationality: "Please enter the nationality",
+rulesTitle: "Internal Rules to Follow:",
+signatureTitle: "Signature *",
+errSignature: "Please sign the document",
+clearSigBtn: "Clear Signature",
+signatureNote: "By signing, you accept the internal rules and consent to the processing of your personal data.",
+acceptText: "By using this application, you agree that the information provided during your first registration will be processed in accordance with Moroccan personal data protection regulations. This data is used exclusively for the initial process and is not retained. Furthermore, you agree to comply with all internal rules of the apartment and to validate your acceptance by signing.",
+errAccept: "Please accept the conditions",
+registerBtn: "Register and Validate",
+noteImportant: "Important note:",
+noteImportantText: "If requested by security agents, present this signed document. Only persons registered in this reservation are allowed to enter.",
+signedDocTitle: "Signed Document - Guest Registration",
+instructionsTitle: "Instructions",
+selectRecordMsg: "Select a record to view the document.",
+downloadPdfBtn: "Download PDF",
+shareWaBtn: "Share WhatsApp",
+personLabel: "Person",
+personName: "Full Name *",
+personNamePh: "Full name person",
+pdfHeader: "INTERNAL RULES AND RESERVATION INFORMATION",
+pdfRulesTitle: "INTERNAL RULES ACCEPTED:",
+pdfDateLabel: "Reservation date",
+pdfResidenceLabel: "Residence",
+pdfNotSpecified: "Not specified",
+pdfAppartLabel: "Apartment",
+pdfBuildingLabel: "Building",
+pdfNomLabel: "Booker's name",
+pdfDocTypeLabel: "Document type",
+pdfDocNumLabel: "Document number",
+pdfNbPersLabel: "Number of persons",
+pdfArrivalLabel: "Arrival date",
+pdfRules: [
+"1. Moroccan Couples:",
+"According to Moroccan law, this accommodation only allows married couples.",
+"",
+"2. Quiet and Noise",
+"Total silence required after 11:00 PM. No loud music, shouting or",
+"noise nuisances at any time.",
+"",
+"3. Smoking",
+"Smoking is strictly prohibited indoors. Allowed only outdoors",
+"(terrace or garden), with obligation to clean up butts and ashes.",
+"",
+"4. Number of Persons",
+"Maximum 5 persons allowed in the apartment.",
+"",
+"5. Cleanliness and Maintenance",
+"Keep the premises clean at all times.",
+"Empty bins regularly.",
+"Respect floors and surfaces (no marks, no food outside kitchen)."
+],
+rules: [
+{ strong: "1. Moroccan Couples:", text: " According to Moroccan law, this accommodation only allows married couples." },
+{ strong: "2. Quiet and Noise:", text: " Total silence required after 11:00 PM. No loud music, shouting or noise nuisances at any time." },
+{ strong: "3. Smoking:", text: " Smoking is strictly prohibited indoors. Allowed only outdoors (terrace or garden), with obligation to clean up butts and ashes." },
+{ strong: "4. Number of Persons:", text: " Maximum 5 persons allowed in the apartment." },
+{ strong: "5. Cleanliness and Maintenance:", text: " Keep the premises clean at all times. Empty bins regularly. Respect floors and surfaces (no marks, no food outside kitchen)." }
+]
+},
+ar: {
+appMainTitle: "تسجيل الضيوف",
+appSubTitle: "إدارة تسجيلات الضيوف",
+loginTitle: "تسجيل الدخول - تسجيل الضيوف",
+loginNote: "يرجى إدخال بيانات الدخول",
+userLabel: "المستخدم",
+passLabel: "كلمة المرور",
+loginBtn: "دخول",
+logoutBtn: "خروج",
+adminTitle: "لوحة المسؤول - تسجيل الضيوف",
+usersMgmtTitle: "إدارة المستخدمين",
+appartLabel: "الشقة",
+batLabel: "العمارة",
+createUserBtn: "إنشاء مستخدم",
+existingUsersTitle: "المستخدمون الحاليون",
+thAppart: "الشقة",
+thAppartShort: "شقة",
+thBat: "العمارة",
+thPass: "كلمة المرور",
+thAction: "إجراء",
+recordsMgmtTitle: "تسجيلات الضيوف",
+thName: "الاسم",
+thDoc: "الوثيقة",
+thDocType: "نوع الوثيقة",
+thNationality: "الجنسية",
+thNbPers: "عدد الأشخاص",
+thPersons: "الأشخاص",
+thDate: "التاريخ",
+thDocument: "الوثيقة",
+thStatus: "الحالة",
+mySpaceTitle: "مساحتي - تسجيل الضيوف",
+myAccountTitle: "إعدادات حسابي",
+maxRecordsLabel: "الحد الأقصى لعدد التسجيلات",
+newPasswordLabel: "كلمة مرور جديدة (اختياري)",
+saveSettingsBtn: "حفظ الإعدادات",
+residenceNameLabel: "اسم الإقامة",
+saveNameBtn: "حفظ الاسم",
+emailNotifTitle: "إشعارات البريد الإلكتروني",
+emailNotifNote: "تلقي إشعار عند تسجيل ضيف.",
+enableNotifLabel: "تفعيل الإشعارات",
+optNo: "لا",
+optYes: "نعم",
+emailJsInfoTitle: "إعداد EmailJS:",
+emailJsInfoText: "يستخدم خدمة EmailJS لإرسال الإشعارات.",
+guardEmailLabel: "البريد الإلكتروني للمستلم (مثال: الأمن)",
+saveEmailBtn: "حفظ البريد",
+testEmailBtn: "اختبار الإرسال",
+customMsgLabel: "رسالة مخصصة للضيوف (تظهر بعد التسجيل)",
+saveCustomMsgBtn: "حفظ الرسالة",
+myRecordsTitle: "تسجيلاتي",
+genLinkBtn: "إنشاء رابط الضيف",
+genReadonlyLinkBtn: "إنشاء رابط للقراءة فقط",
+readonlyTitle: "التسجيلات (قراءة فقط)",
+sectionPending: "التسجيلات الجارية",
+sectionSent: "التسجيلات المعالجة / المرسلة",
+sectionHistory: "سجل الحذف",
+guestFormTitle: "تسجيل ضيف",
+arrivalDateLabel: "تاريخ الوصول *",
+errArrivalDate: "يرجى اختيار تاريخ الوصول",
+nbGuestsLabel: "عدد الضيوف *",
+errNbGuests: "يرجى إدخال عدد الضيوف (1 على الأقل)",
+mainNameLabel: "الاسم الكامل للشخص الرئيسي *",
+mainNamePh: "الاسم الكامل",
+errMainName: "يرجى إدخال الاسم الكامل",
+docTypeLabel: "نوع الوثيقة *",
+selectOption: "اختر",
+optPassport: "جواز السفر",
+optIdCard: "بطاقة الهوية",
+errDocType: "يرجى اختيار نوع الوثيقة",
+docNumLabel: "رقم الوثيقة *",
+docNumPh: "رقم الوثيقة",
+errDocNum: "يرجى إدخال رقم الوثيقة",
+nationalityLabel: "الجنسية *",
+nationalityPh: "الجنسية",
+errNationality: "يرجى إدخال الجنسية",
+rulesTitle: "القواعد الداخلية الواجب احترامها:",
+signatureTitle: "التوقيع *",
+errSignature: "يرجى التوقيع على الوثيقة",
+clearSigBtn: "مسح التوقيع",
+signatureNote: "بالتوقيع، أنت تقبل القواعد الداخلية وتوافق على معالجة بياناتك الشخصية.",
+acceptText: "باستخدام هذا التطبيق، فإنك توافق على أن المعلومات المقدمة أثناء تسجيلك الأول ستُعالج وفقًا للوائح المغربية لحماية البيانات الشخصية. تُستخدم هذه البيانات حصريًا للعملية الأولية ولا يتم الاحتفاظ بها. كما تلتزم باحترام جميع القواعد الداخلية للشقة والتصديق على قبولك بتوقيعك.",
+errAccept: "يرجى قبول الشروط",
+registerBtn: "تسجيل والتحقق",
+noteImportant: "ملاحظة هامة:",
+noteImportantText: "في حالة طلب حراس الأمن، قدم هذه الوثيقة الموقعة. يُسمح فقط للأشخاص المسجلين في هذا الحجز بالدخول.",
+signedDocTitle: "الوثيقة الموقعة - تسجيل الضيوف",
+instructionsTitle: "التعليمات",
+selectRecordMsg: "اختر تسجيلاً لعرض الوثيقة.",
+downloadPdfBtn: "تحميل PDF",
+shareWaBtn: "مشاركة واتساب",
+personLabel: "شخص",
+personName: "الاسم الكامل *",
+personNamePh: "الاسم الكامل للشخص",
+pdfHeader: "القواعد الداخلية ومعلومات الحجز",
+pdfRulesTitle: "القواعد الداخلية المقبولة:",
+pdfDateLabel: "تاريخ الحجز",
+pdfResidenceLabel: "الإقامة",
+pdfNotSpecified: "غير محددة",
+pdfAppartLabel: "الشقة",
+pdfBuildingLabel: "العمارة",
+pdfNomLabel: "اسم الحاجز",
+pdfDocTypeLabel: "نوع الوثيقة",
+pdfDocNumLabel: "رقم الوثيقة",
+pdfNbPersLabel: "عدد الأشخاص",
+pdfArrivalLabel: "تاريخ الوصول",
+pdfRules: [
+"1. الأزواج المغاربة:",
+"وفقًا للقانون المغربي، هذا السكن يسمح فقط للأزواج المتزوجين.",
+"",
+"2. الهدوء والضوضاء",
+"الصمت التام إلزامي بعد الساعة 23:00. لا موسيقى صاخبة، صراخ",
+"أو ضوضاء في أي وقت.",
+"",
+"3. التدخين",
+"التدخين ممنوع منعاً باتاً في الداخل. مسموح فقط في الخارج",
+"(الشرفة أو الحديقة)، مع الالتزام بتنظيف الأعقاب والرماد.",
+"",
+"4. عدد الأشخاص",
+"يُسمح بحد أقصى 5 أشخاص في الشقة.",
+"",
+"5. النظافة والصيانة",
+"الحفاظ على نظافة المكان باستمرار.",
+"إفراغ القمامة بانتظام.",
+"احترام الأرضيات والأسطح (لا آثار، لا طعام خارج المطبخ)."
+],
+rules: [
+{ strong: "1. الأزواج المغاربة:", text: " وفقًا للقانون المغربي، هذا السكن يسمح فقط للأزواج المتزوجين." },
+{ strong: "2. الهدوء والضوضاء:", text: " الصمت التام إلزامي بعد الساعة 23:00. لا موسيقى صاخبة، صراخ أو ضوضاء في أي وقت." },
+{ strong: "3. التدخين:", text: " التدخين ممنوع منعاً باتاً في الداخل. مسموح فقط في الخارج (الشرفة أو الحديقة)، مع الالتزام بتنظيف الأعقاب والرماد." },
+{ strong: "4. عدد الأشخاص:", text: " يُسمح بحد أقصى 5 أشخاص في الشقة." },
+{ strong: "5. النظافة والصيانة:", text: " الحفاظ على نظافة المكان باستمرار. إفراغ القمامة بانتظام. احترام الأرضيات والأسطح (لا آثار، لا طعام خارج المطبخ)." }
+]
+},
+es: {
+appMainTitle: "Registro de Invitados",
+appSubTitle: "Gestión de registros de invitados",
+loginTitle: "Iniciar Sesión - Registro de Invitados",
+loginNote: "Introduzca sus credenciales",
+userLabel: "Usuario",
+passLabel: "Contraseña",
+loginBtn: "Iniciar Sesión",
+logoutBtn: "Cerrar Sesión",
+adminTitle: "Panel de Administración - Registro de Invitados",
+usersMgmtTitle: "Gestión de Usuarios",
+appartLabel: "Apartamento",
+batLabel: "Edificio",
+createUserBtn: "Crear Usuario",
+existingUsersTitle: "Usuarios Existentes",
+thAppart: "Apartamento",
+thAppartShort: "Apt.",
+thBat: "Edificio",
+thPass: "Contraseña",
+thAction: "Acción",
+recordsMgmtTitle: "Registros de Invitados",
+thName: "Nombre",
+thDoc: "Documento",
+thDocType: "Tipo Doc",
+thNationality: "Nacionalidad",
+thNbPers: "Nº Personas",
+thPersons: "Personas",
+thDate: "Fecha",
+thDocument: "Documento",
+thStatus: "Estado",
+mySpaceTitle: "Mi Espacio - Registro de Invitados",
+myAccountTitle: "Configuración de Mi Cuenta",
+maxRecordsLabel: "Número máximo de registros",
+newPasswordLabel: "Nueva contraseña (opcional)",
+saveSettingsBtn: "Guardar Configuración",
+residenceNameLabel: "Nombre de la Residencia",
+saveNameBtn: "Guardar Nombre",
+emailNotifTitle: "Notificaciones por Email",
+emailNotifNote: "Reciba una notificación cuando un invitado se registre.",
+enableNotifLabel: "Activar notificaciones",
+optNo: "No",
+optYes: "Sí",
+emailJsInfoTitle: "Configuración EmailJS:",
+emailJsInfoText: "Utiliza el servicio EmailJS para enviar notificaciones.",
+guardEmailLabel: "Email del destinatario (ej: Seguridad)",
+saveEmailBtn: "Guardar Email",
+testEmailBtn: "Probar Envío",
+customMsgLabel: "Mensaje personalizado para invitados (mostrado después del registro)",
+saveCustomMsgBtn: "Guardar Mensaje",
+myRecordsTitle: "Mis Registros",
+genLinkBtn: "Generar Enlace de Invitado",
+genReadonlyLinkBtn: "Generar Enlace de Solo Lectura",
+readonlyTitle: "Registros (Solo Lectura)",
+sectionPending: "Registros en Curso",
+sectionSent: "Registros Procesados / Enviados",
+sectionHistory: "Historial de Eliminación",
+guestFormTitle: "Registro de Invitado",
+arrivalDateLabel: "Fecha de Llegada *",
+errArrivalDate: "Seleccione una fecha de llegada",
+nbGuestsLabel: "Número de Invitados *",
+errNbGuests: "Introduzca el número de invitados (mínimo 1)",
+mainNameLabel: "Nombre Completo de la Persona Principal *",
+mainNamePh: "Nombre completo",
+errMainName: "Introduzca el nombre completo",
+docTypeLabel: "Tipo de Documento *",
+selectOption: "Seleccionar",
+optPassport: "Pasaporte",
+optIdCard: "Tarjeta de Identidad",
+errDocType: "Seleccione un tipo de documento",
+docNumLabel: "Número de Documento *",
+docNumPh: "Nº de documento",
+errDocNum: "Introduzca el número de documento",
+nationalityLabel: "Nacionalidad *",
+nationalityPh: "Nacionalidad",
+errNationality: "Introduzca la nacionalidad",
+rulesTitle: "Normas internas a respetar:",
+signatureTitle: "Firma *",
+errSignature: "Firme el documento",
+clearSigBtn: "Borrar Firma",
+signatureNote: "Al firmar, acepta las normas internas y consiente el tratamiento de sus datos personales.",
+acceptText: "Al utilizar esta aplicación, acepta que la información proporcionada durante su primer registro sea tratada de acuerdo con la normativa marroquí de protección de datos personales. Estos datos se utilizan exclusivamente para el proceso inicial y no se conservan. Además, se compromete a respetar todas las normas internas del apartamento y a validar su aceptación con su firma.",
+errAccept: "Acepte las condiciones",
+registerBtn: "Registrar y Validar",
+noteImportant: "Nota importante:",
+noteImportantText: "En caso de solicitud de los agentes de seguridad, presente este documento firmado. Solo las personas registradas en esta reserva pueden entrar.",
+signedDocTitle: "Documento Firmado - Registro de Invitados",
+instructionsTitle: "Instrucciones",
+selectRecordMsg: "Seleccione un registro para ver el documento.",
+downloadPdfBtn: "Descargar PDF",
+shareWaBtn: "Compartir WhatsApp",
+personLabel: "Persona",
+personName: "Nombre Completo *",
+personNamePh: "Nombre completo persona",
+pdfHeader: "NORMAS INTERNAS E INFORMACIÓN DE RESERVA",
+pdfRulesTitle: "NORMAS INTERNAS ACEPTADAS:",
+pdfDateLabel: "Fecha de reserva",
+pdfResidenceLabel: "Residencia",
+pdfNotSpecified: "No especificada",
+pdfAppartLabel: "Apartamento",
+pdfBuildingLabel: "Edificio",
+pdfNomLabel: "Nombre del reservante",
+pdfDocTypeLabel: "Tipo de documento",
+pdfDocNumLabel: "Número de documento",
+pdfNbPersLabel: "Número de personas",
+pdfArrivalLabel: "Fecha de llegada",
+pdfRules: [
+"1. Parejas Marroquíes:",
+"Según la ley marroquí, este alojamiento solo permite parejas casadas.",
+"",
+"2. Tranquilidad y Ruido",
+"Silencio total obligatorio después de las 23:00. Sin música alta, gritos",
+"o ruidos en ningún momento.",
+"",
+"3. Tabaquismo",
+"Fumar está estrictamente prohibido en el interior. Permitido solo en el",
+"exterior (terraza o jardín), con obligación de limpiar colillas y cenizas.",
+"",
+"4. Número de Personas",
+"Máximo 5 personas permitidas en el apartamento.",
+"",
+"5. Limpieza y Mantenimiento",
+"Mantener las instalaciones limpias en todo momento.",
+"Vaciar regularmente las papeleras.",
+"Respetar suelos y superficies (sin marcas, sin comida fuera de la cocina)."
+],
+rules: [
+{ strong: "1. Parejas Marroquíes:", text: " Según la ley marroquí, este alojamiento solo permite parejas casadas." },
+{ strong: "2. Tranquilidad y Ruido:", text: " Silencio total obligatorio después de las 23:00. Sin música alta, gritos o ruidos en ningún momento." },
+{ strong: "3. Tabaquismo:", text: " Fumar está estrictamente prohibido en el interior. Permitido solo en el exterior (terraza o jardín), con obligación de limpiar colillas y cenizas." },
+{ strong: "4. Número de Personas:", text: " Máximo 5 personas permitidas en el apartamento." },
+{ strong: "5. Limpieza y Mantenimiento:", text: " Mantener las instalaciones limpias en todo momento. Vaciar regularmente las papeleras. Respetar suelos y superficies (sin marcas, sin comida fuera de la cocina)." }
+]
+},
+it: {
+appMainTitle: "Registrazione Ospiti",
+appSubTitle: "Gestione delle registrazioni degli ospiti",
+loginTitle: "Accesso - Registrazione Ospiti",
+loginNote: "Inserisci le tue credenziali",
+userLabel: "Utente",
+passLabel: "Password",
+loginBtn: "Accedi",
+logoutBtn: "Esci",
+adminTitle: "Pannello Amministratore - Registrazione Ospiti",
+usersMgmtTitle: "Gestione Utenti",
+appartLabel: "Appartamento",
+batLabel: "Edificio",
+createUserBtn: "Crea Utente",
+existingUsersTitle: "Utenti Esistenti",
+thAppart: "Appartamento",
+thAppartShort: "App.",
+thBat: "Edificio",
+thPass: "Password",
+thAction: "Azione",
+recordsMgmtTitle: "Registrazioni Ospiti",
+thName: "Nome",
+thDoc: "Documento",
+thDocType: "Tipo Doc",
+thNationality: "Nazionalità",
+thNbPers: "Nº Persone",
+thPersons: "Persone",
+thDate: "Data",
+thDocument: "Documento",
+thStatus: "Stato",
+mySpaceTitle: "Il Mio Spazio - Registrazione Ospiti",
+myAccountTitle: "Impostazioni del Mio Account",
+maxRecordsLabel: "Numero massimo di registrazioni",
+newPasswordLabel: "Nuova password (opzionale)",
+saveSettingsBtn: "Salva Impostazioni",
+residenceNameLabel: "Nome della Residenza",
+saveNameBtn: "Salva Nome",
+emailNotifTitle: "Notifiche Email",
+emailNotifNote: "Ricevi una notifica quando un ospite si registra.",
+enableNotifLabel: "Abilita notifiche",
+optNo: "No",
+optYes: "Sì",
+emailJsInfoTitle: "Configurazione EmailJS:",
+emailJsInfoText: "Utilizza il servizio EmailJS per inviare notifiche.",
+guardEmailLabel: "Email del destinatario (es: Sicurezza)",
+saveEmailBtn: "Salva Email",
+testEmailBtn: "Prova Invio",
+customMsgLabel: "Messaggio personalizzato per gli ospiti (mostrato dopo la registrazione)",
+saveCustomMsgBtn: "Salva Messaggio",
+myRecordsTitle: "Le Mie Registrazioni",
+genLinkBtn: "Genera Link Ospite",
+genReadonlyLinkBtn: "Genera Link Sola Lettura",
+readonlyTitle: "Registrazioni (Sola Lettura)",
+sectionPending: "Registrazioni in Corso",
+sectionSent: "Registrazioni Trattate / Inviate",
+sectionHistory: "Cronologia Eliminazioni",
+guestFormTitle: "Registrazione Ospite",
+arrivalDateLabel: "Data di Arrivo *",
+errArrivalDate: "Seleziona una data di arrivo",
+nbGuestsLabel: "Numero di Ospiti *",
+errNbGuests: "Inserisci il numero di ospiti (minimo 1)",
+mainNameLabel: "Nome Completo della Persona Principale *",
+mainNamePh: "Nome completo",
+errMainName: "Inserisci il nome completo",
+docTypeLabel: "Tipo di Documento *",
+selectOption: "Seleziona",
+optPassport: "Passaporto",
+optIdCard: "Carta d'Identità",
+errDocType: "Seleziona un tipo di documento",
+docNumLabel: "Numero del Documento *",
+docNumPh: "Nº documento",
+errDocNum: "Inserisci il numero del documento",
+nationalityLabel: "Nazionalità *",
+nationalityPh: "Nazionalità",
+errNationality: "Inserisci la nazionalità",
+rulesTitle: "Regole interne da rispettare:",
+signatureTitle: "Firma *",
+errSignature: "Firma il documento",
+clearSigBtn: "Cancella Firma",
+signatureNote: "Firmando, accetti le regole interne e acconsenti al trattamento dei tuoi dati personali.",
+acceptText: "Utilizzando questa applicazione, accetti che le informazioni fornite durante la tua prima registrazione siano trattate in conformità con la normativa marocchina sulla protezione dei dati personali. Questi dati sono utilizzati esclusivamente per il processo iniziale e non vengono conservati. Inoltre, ti impegni a rispettare tutte le regole interne dell'appartamento e a convalidare la tua accettazione con la tua firma.",
+errAccept: "Accetta le condizioni",
+registerBtn: "Registra e Convalida",
+noteImportant: "Nota importante:",
+noteImportantText: "In caso di richiesta degli agenti di sicurezza, presenta questo documento firmato. Solo le persone registrate in questa prenotazione possono entrare.",
+signedDocTitle: "Documento Firmato - Registrazione Ospiti",
+instructionsTitle: "Istruzioni",
+selectRecordMsg: "Seleziona una registrazione per vedere il documento.",
+downloadPdfBtn: "Scarica PDF",
+shareWaBtn: "Condividi WhatsApp",
+personLabel: "Persona",
+personName: "Nome Completo *",
+personNamePh: "Nome completo persona",
+pdfHeader: "REGOLE INTERNE E INFORMAZIONI PRENOTAZIONE",
+pdfRulesTitle: "REGOLE INTERNE ACCETTATE:",
+pdfDateLabel: "Data prenotazione",
+pdfResidenceLabel: "Residenza",
+pdfNotSpecified: "Non specificata",
+pdfAppartLabel: "Appartamento",
+pdfBuildingLabel: "Edificio",
+pdfNomLabel: "Nome del prenotante",
+pdfDocTypeLabel: "Tipo di documento",
+pdfDocNumLabel: "Numero del documento",
+pdfNbPersLabel: "Numero di persone",
+pdfArrivalLabel: "Data di arrivo",
+pdfRules: [
+"1. Coppie Marocchine:",
+"Secondo la legge marocchina, questa struttura consente solo coppie sposate.",
+"",
+"2. Quiete e Rumore",
+"Silenzio totale obbligatorio dopo le 23:00. Niente musica alta, urla o",
+"rumori molesti in qualsiasi momento.",
+"",
+"3. Fumo",
+"Fumare è severamente vietato all'interno. Consentito solo all'esterno",
+"(terrazza o giardino), con obbligo di pulire mozziconi e cenere.",
+"",
+"4. Numero di Persone",
+"Massimo 5 persone consentite nell'appartamento.",
+"",
+"5. Pulizia e Manutenzione",
+"Mantenere i locali puliti in ogni momento.",
+"Svuotare regolarmente i cestini.",
+"Rispettare pavimenti e superfici (nessun segno, nessun cibo fuori dalla cucina)."
+],
+rules: [
+{ strong: "1. Coppie Marocchine:", text: " Secondo la legge marocchina, questa struttura consente solo coppie sposate." },
+{ strong: "2. Quiete e Rumore:", text: " Silenzio totale obbligatorio dopo le 23:00. Niente musica alta, urla o rumori molesti in qualsiasi momento." },
+{ strong: "3. Fumo:", text: " Fumare è severamente vietato all'interno. Consentito solo all'esterno (terrazza o giardino), con obbligo di pulire mozziconi e cenere." },
+{ strong: "4. Numero di Persone:", text: " Massimo 5 persone consentite nell'appartamento." },
+{ strong: "5. Pulizia e Manutenzione:", text: " Mantenere i locali puliti in ogni momento. Svuotare regolarmente i cestini. Rispettare pavimenti e superfici (nessun segno, nessun cibo fuori dalla cucina)." }
+]
+},
+de: {
+appMainTitle: "Gästeregistrierung",
+appSubTitle: "Verwaltung der Gästeregistrierungen",
+loginTitle: "Anmeldung - Gästeregistrierung",
+loginNote: "Bitte geben Sie Ihre Zugangsdaten ein",
+userLabel: "Benutzer",
+passLabel: "Passwort",
+loginBtn: "Anmelden",
+logoutBtn: "Abmelden",
+adminTitle: "Administratorbereich - Gästeregistrierung",
+usersMgmtTitle: "Benutzerverwaltung",
+appartLabel: "Wohnung",
+batLabel: "Gebäude",
+createUserBtn: "Benutzer erstellen",
+existingUsersTitle: "Vorhandene Benutzer",
+thAppart: "Wohnung",
+thAppartShort: "Whg.",
+thBat: "Gebäude",
+thPass: "Passwort",
+thAction: "Aktion",
+recordsMgmtTitle: "Gästeregistrierungen",
+thName: "Name",
+thDoc: "Dokument",
+thDocType: "Dokumenttyp",
+thNationality: "Nationalität",
+thNbPers: "Anz. Pers.",
+thPersons: "Personen",
+thDate: "Datum",
+thDocument: "Dokument",
+thStatus: "Status",
+mySpaceTitle: "Mein Bereich - Gästeregistrierung",
+myAccountTitle: "Meine Kontoeinstellungen",
+maxRecordsLabel: "Maximale Anzahl von Registrierungen",
+newPasswordLabel: "Neues Passwort (optional)",
+saveSettingsBtn: "Einstellungen speichern",
+residenceNameLabel: "Name der Residenz",
+saveNameBtn: "Namen speichern",
+emailNotifTitle: "E-Mail-Benachrichtigungen",
+emailNotifNote: "Erhalten Sie eine Benachrichtigung, wenn ein Gast sich registriert.",
+enableNotifLabel: "Benachrichtigungen aktivieren",
+optNo: "Nein",
+optYes: "Ja",
+emailJsInfoTitle: "EmailJS-Konfiguration:",
+emailJsInfoText: "Verwendet den EmailJS-Dienst zum Versenden von Benachrichtigungen.",
+guardEmailLabel: "Empfänger-E-Mail (z.B. Sicherheit)",
+saveEmailBtn: "E-Mail speichern",
+testEmailBtn: "Testversand",
+customMsgLabel: "Benutzerdefinierte Nachricht für Gäste (nach der Registrierung angezeigt)",
+saveCustomMsgBtn: "Nachricht speichern",
+myRecordsTitle: "Meine Registrierungen",
+genLinkBtn: "Gastlink generieren",
+genReadonlyLinkBtn: "Nur-Lese-Link generieren",
+readonlyTitle: "Registrierungen (Nur Lesen)",
+sectionPending: "Laufende Registrierungen",
+sectionSent: "Bearbeitete / Gesendete Registrierungen",
+sectionHistory: "Löschungsverlauf",
+guestFormTitle: "Gästeregistrierung",
+arrivalDateLabel: "Ankunftsdatum *",
+errArrivalDate: "Bitte wählen Sie ein Ankunftsdatum",
+nbGuestsLabel: "Anzahl der Gäste *",
+errNbGuests: "Bitte geben Sie die Anzahl der Gäste ein (mindestens 1)",
+mainNameLabel: "Vollständiger Name der Hauptperson *",
+mainNamePh: "Vollständiger Name",
+errMainName: "Bitte geben Sie den vollständigen Namen ein",
+docTypeLabel: "Dokumenttyp *",
+selectOption: "Auswählen",
+optPassport: "Reisepass",
+optIdCard: "Personalausweis",
+errDocType: "Bitte wählen Sie einen Dokumenttyp",
+docNumLabel: "Dokumentnummer *",
+docNumPh: "Dokument-Nr.",
+errDocNum: "Bitte geben Sie die Dokumentnummer ein",
+nationalityLabel: "Nationalität *",
+nationalityPh: "Nationalität",
+errNationality: "Bitte geben Sie die Nationalität ein",
+rulesTitle: "Zu befolgende Hausordnung:",
+signatureTitle: "Unterschrift *",
+errSignature: "Bitte unterschreiben Sie das Dokument",
+clearSigBtn: "Unterschrift löschen",
+signatureNote: "Mit Ihrer Unterschrift akzeptieren Sie die Hausordnung und willigen in die Verarbeitung Ihrer personenbezogenen Daten ein.",
+acceptText: "Durch die Nutzung dieser Anwendung stimmen Sie zu, dass die bei Ihrer ersten Registrierung angegebenen Informationen gemäß den marokkanischen Datenschutzvorschriften verarbeitet werden. Diese Daten werden ausschließlich für den Erstprozess verwendet und nicht gespeichert. Darüber hinaus verpflichten Sie sich, alle internen Regeln der Wohnung einzuhalten und Ihre Zustimmung durch Ihre Unterschrift zu bestätigen.",
+errAccept: "Bitte akzeptieren Sie die Bedingungen",
+registerBtn: "Registrieren und Bestätigen",
+noteImportant: "Wichtiger Hinweis:",
+noteImportantText: "Falls Sicherheitskräfte dies verlangen, legen Sie dieses unterschriebene Dokument vor. Nur in dieser Reservierung registrierte Personen dürfen eintreten.",
+signedDocTitle: "Unterschriebenes Dokument - Gästeregistrierung",
+instructionsTitle: "Anweisungen",
+selectRecordMsg: "Wählen Sie eine Registrierung, um das Dokument anzuzeigen.",
+downloadPdfBtn: "PDF herunterladen",
+shareWaBtn: "WhatsApp teilen",
+personLabel: "Person",
+personName: "Vollständiger Name *",
+personNamePh: "Vollständiger Name Person",
+pdfHeader: "HAUSORDNUNG UND RESERVIERUNGSINFORMATIONEN",
+pdfRulesTitle: "AKZEPTIERTE HAUSORDNUNG:",
+pdfDateLabel: "Reservierungsdatum",
+pdfResidenceLabel: "Residenz",
+pdfNotSpecified: "Nicht angegeben",
+pdfAppartLabel: "Wohnung",
+pdfBuildingLabel: "Gebäude",
+pdfNomLabel: "Name des Reservierenden",
+pdfDocTypeLabel: "Dokumenttyp",
+pdfDocNumLabel: "Dokumentnummer",
+pdfNbPersLabel: "Anzahl der Personen",
+pdfArrivalLabel: "Ankunftsdatum",
+pdfRules: [
+"1. Marokkanische Paare:",
+"Gemäß marokkanischem Recht erlaubt diese Unterkunft nur verheiratete Paare.",
+"",
+"2. Ruhe und Lärm",
+"Absolute Ruhe nach 23:00 Uhr. Keine laute Musik, kein Schreien oder",
+"Lärmbelästigung zu jeder Zeit.",
+"",
+"3. Rauchen",
+"Rauchen ist im Innenbereich strengstens verboten. Nur im Außenbereich",
+"(Terrasse oder Garten) erlaubt, mit der Pflicht, Kippen und Asche zu reinigen.",
+"",
+"4. Anzahl der Personen",
+"Maximal 5 Personen in der Wohnung erlaubt.",
+"",
+"5. Sauberkeit und Pflege",
+"Halten Sie die Räumlichkeiten jederzeit sauber.",
+"Leeren Sie regelmäßig den Müll.",
+"Respektieren Sie Böden und Oberflächen (keine Spuren, kein Essen außerhalb der Küche)."
+],
+rules: [
+{ strong: "1. Marokkanische Paare:", text: " Gemäß marokkanischem Recht erlaubt diese Unterkunft nur verheiratete Paare." },
+{ strong: "2. Ruhe und Lärm:", text: " Absolute Ruhe nach 23:00 Uhr. Keine laute Musik, kein Schreien oder Lärmbelästigung zu jeder Zeit." },
+{ strong: "3. Rauchen:", text: " Rauchen ist im Innenbereich strengstens verboten. Nur im Außenbereich (Terrasse oder Garten) erlaubt, mit der Pflicht, Kippen und Asche zu reinigen." },
+{ strong: "4. Anzahl der Personen:", text: " Maximal 5 Personen in der Wohnung erlaubt." },
+{ strong: "5. Sauberkeit und Pflege:", text: " Halten Sie die Räumlichkeiten jederzeit sauber. Leeren Sie regelmäßig den Müll. Respektieren Sie Böden und Oberflächen (keine Spuren, kein Essen außerhalb der Küche)." }
+]
+},
+nl: {
+appMainTitle: "Gastenregistratie",
+appSubTitle: "Beheer van gastenregistraties",
+loginTitle: "Inloggen - Gastenregistratie",
+loginNote: "Voer uw inloggegevens in",
+userLabel: "Gebruiker",
+passLabel: "Wachtwoord",
+loginBtn: "Inloggen",
+logoutBtn: "Uitloggen",
+adminTitle: "Beheerderspaneel - Gastenregistratie",
+usersMgmtTitle: "Gebruikersbeheer",
+appartLabel: "Appartement",
+batLabel: "Gebouw",
+createUserBtn: "Gebruiker aanmaken",
+existingUsersTitle: "Bestaande gebruikers",
+thAppart: "Appartement",
+thAppartShort: "App.",
+thBat: "Gebouw",
+thPass: "Wachtwoord",
+thAction: "Actie",
+recordsMgmtTitle: "Gastenregistraties",
+thName: "Naam",
+thDoc: "Document",
+thDocType: "Documenttype",
+thNationality: "Nationaliteit",
+thNbPers: "Aantal pers.",
+thPersons: "Personen",
+thDate: "Datum",
+thDocument: "Document",
+thStatus: "Status",
+mySpaceTitle: "Mijn ruimte - Gastenregistratie",
+myAccountTitle: "Mijn accountinstellingen",
+maxRecordsLabel: "Maximaal aantal registraties",
+newPasswordLabel: "Nieuw wachtwoord (optioneel)",
+saveSettingsBtn: "Instellingen opslaan",
+residenceNameLabel: "Naam van de residentie",
+saveNameBtn: "Naam opslaan",
+emailNotifTitle: "E-mailmeldingen",
+emailNotifNote: "Ontvang een melding wanneer een gast zich registreert.",
+enableNotifLabel: "Meldingen inschakelen",
+optNo: "Nee",
+optYes: "Ja",
+emailJsInfoTitle: "EmailJS-configuratie:",
+emailJsInfoText: "Gebruikt de EmailJS-service om meldingen te verzenden.",
+guardEmailLabel: "E-mailadres ontvanger (bijv. Beveiliging)",
+saveEmailBtn: "E-mail opslaan",
+testEmailBtn: "Test verzenden",
+customMsgLabel: "Aangepast bericht voor gasten (getoond na registratie)",
+saveCustomMsgBtn: "Bericht opslaan",
+myRecordsTitle: "Mijn registraties",
+genLinkBtn: "Gastenlink genereren",
+genReadonlyLinkBtn: "Alleen-lezen link genereren",
+readonlyTitle: "Registraties (alleen lezen)",
+sectionPending: "Lopende registraties",
+sectionSent: "Verwerkte / Verzonden registraties",
+sectionHistory: "Verwijderingsgeschiedenis",
+guestFormTitle: "Gastenregistratie",
+arrivalDateLabel: "Aankomstdatum *",
+errArrivalDate: "Selecteer een aankomstdatum",
+nbGuestsLabel: "Aantal gasten *",
+errNbGuests: "Voer het aantal gasten in (minimaal 1)",
+mainNameLabel: "Volledige naam van de hoofdpersoon *",
+mainNamePh: "Volledige naam",
+errMainName: "Voer de volledige naam in",
+docTypeLabel: "Documenttype *",
+selectOption: "Selecteren",
+optPassport: "Paspoort",
+optIdCard: "Identiteitskaart",
+errDocType: "Selecteer een documenttype",
+docNumLabel: "Documentnummer *",
+docNumPh: "Documentnr.",
+errDocNum: "Voer het documentnummer in",
+nationalityLabel: "Nationaliteit *",
+nationalityPh: "Nationaliteit",
+errNationality: "Voer de nationaliteit in",
+rulesTitle: "Na te leven huisregels:",
+signatureTitle: "Handtekening *",
+errSignature: "Onderteken het document",
+clearSigBtn: "Handtekening wissen",
+signatureNote: "Door te ondertekenen accepteert u de huisregels en stemt u in met de verwerking van uw persoonlijke gegevens.",
+acceptText: "Door deze applicatie te gebruiken, gaat u ermee akkoord dat de informatie die bij uw eerste registratie wordt verstrekt, wordt verwerkt in overeenstemming met de Marokkaanse regelgeving inzake gegevensbescherming. Deze gegevens worden uitsluitend gebruikt voor het initiële proces en worden niet bewaard. Bovendien verbindt u zich ertoe alle interne regels van het appartement na te leven en uw aanvaarding te bevestigen met uw handtekening.",
+errAccept: "Accepteer de voorwaarden",
+registerBtn: "Registreren en valideren",
+noteImportant: "Belangrijke opmerking:",
+noteImportantText: "Als beveiligingsagenten dit vragen, toon dit ondertekende document. Alleen personen die in deze reservering zijn geregistreerd, mogen binnenkomen.",
+signedDocTitle: "Ondertekend document - Gastenregistratie",
+instructionsTitle: "Instructies",
+selectRecordMsg: "Selecteer een registratie om het document te bekijken.",
+downloadPdfBtn: "PDF downloaden",
+shareWaBtn: "Delen via WhatsApp",
+personLabel: "Persoon",
+personName: "Volledige naam *",
+personNamePh: "Volledige naam persoon",
+pdfHeader: "HUISREGELS EN RESERVERINGSINFORMATIE",
+pdfRulesTitle: "GEACCEPTEERDE HUISREGELS:",
+pdfDateLabel: "Reserveringsdatum",
+pdfResidenceLabel: "Residentie",
+pdfNotSpecified: "Niet opgegeven",
+pdfAppartLabel: "Appartement",
+pdfBuildingLabel: "Gebouw",
+pdfNomLabel: "Naam van de reserveerder",
+pdfDocTypeLabel: "Documenttype",
+pdfDocNumLabel: "Documentnummer",
+pdfNbPersLabel: "Aantal personen",
+pdfArrivalLabel: "Aankomstdatum",
+pdfRules: [
+"1. Marokkaanse koppels:",
+"Volgens de Marokkaanse wet staat deze accommodatie alleen getrouwde koppels toe.",
+"",
+"2. Rust en lawaai",
+"Absolute stilte verplicht na 23.00 uur. Geen harde muziek, geschreeuw of",
+"geluidsoverlast op elk moment.",
+"",
+"3. Roken",
+"Roken is ten strengste verboden binnen. Alleen toegestaan buiten",
+"(terras of tuin), met verplichting om peuken en as op te ruimen.",
+"",
+"4. Aantal personen",
+"Maximaal 5 personen toegestaan in het appartement.",
+"",
+"5. Netheid en onderhoud",
+"Houd het pand te allen tijde schoon.",
+"Leeg regelmatig de vuilnisbakken.",
+"Respecteer vloeren en oppervlakken (geen sporen, geen eten buiten de keuken)."
+],
+rules: [
+{ strong: "1. Marokkaanse koppels:", text: " Volgens de Marokkaanse wet staat deze accommodatie alleen getrouwde koppels toe." },
+{ strong: "2. Rust en lawaai:", text: " Absolute stilte verplicht na 23.00 uur. Geen harde muziek, geschreeuw of geluidsoverlast op elk moment." },
+{ strong: "3. Roken:", text: " Roken is ten strengste verboden binnen. Alleen toegestaan buiten (terras of tuin), met verplichting om peuken en as op te ruimen." },
+{ strong: "4. Aantal personen:", text: " Maximaal 5 personen toegestaan in het appartement." },
+{ strong: "5. Netheid en onderhoud:", text: " Houd het pand te allen tijde schoon. Leeg regelmatig de vuilnisbakken. Respecteer vloeren en oppervlakken (geen sporen, geen eten buiten de keuken)." }
+]
+},
+pt: {
+appMainTitle: "Registo de Convidados",
+appSubTitle: "Gestão de registos de convidados",
+loginTitle: "Login - Registo de Convidados",
+loginNote: "Introduza as suas credenciais",
+userLabel: "Utilizador",
+passLabel: "Palavra-passe",
+loginBtn: "Entrar",
+logoutBtn: "Sair",
+adminTitle: "Painel de Administração - Registo de Convidados",
+usersMgmtTitle: "Gestão de Utilizadores",
+appartLabel: "Apartamento",
+batLabel: "Edifício",
+createUserBtn: "Criar Utilizador",
+existingUsersTitle: "Utilizadores Existentes",
+thAppart: "Apartamento",
+thAppartShort: "Apt.",
+thBat: "Edifício",
+thPass: "Palavra-passe",
+thAction: "Ação",
+recordsMgmtTitle: "Registos de Convidados",
+thName: "Nome",
+thDoc: "Documento",
+thDocType: "Tipo Doc",
+thNationality: "Nacionalidade",
+thNbPers: "Nº Pessoas",
+thPersons: "Pessoas",
+thDate: "Data",
+thDocument: "Documento",
+thStatus: "Estado",
+mySpaceTitle: "Meu Espaço - Registo de Convidados",
+myAccountTitle: "Configurações da Minha Conta",
+maxRecordsLabel: "Número máximo de registos",
+newPasswordLabel: "Nova palavra-passe (opcional)",
+saveSettingsBtn: "Guardar Configurações",
+residenceNameLabel: "Nome da Residência",
+saveNameBtn: "Guardar Nome",
+emailNotifTitle: "Notificações por Email",
+emailNotifNote: "Receba uma notificação quando um convidado se registar.",
+enableNotifLabel: "Ativar notificações",
+optNo: "Não",
+optYes: "Sim",
+emailJsInfoTitle: "Configuração EmailJS:",
+emailJsInfoText: "Utiliza o serviço EmailJS para enviar notificações.",
+guardEmailLabel: "Email do destinatário (ex: Segurança)",
+saveEmailBtn: "Guardar Email",
+testEmailBtn: "Testar Envio",
+customMsgLabel: "Mensagem personalizada para convidados (exibida após o registo)",
+saveCustomMsgBtn: "Guardar Mensagem",
+myRecordsTitle: "Meus Registos",
+genLinkBtn: "Gerar Link de Convidado",
+genReadonlyLinkBtn: "Gerar Link de Apenas Leitura",
+readonlyTitle: "Registos (Apenas Leitura)",
+sectionPending: "Registos em Curso",
+sectionSent: "Registos Processados / Enviados",
+sectionHistory: "Histórico de Eliminação",
+guestFormTitle: "Registo de Convidado",
+arrivalDateLabel: "Data de Chegada *",
+errArrivalDate: "Selecione uma data de chegada",
+nbGuestsLabel: "Número de Convidados *",
+errNbGuests: "Introduza o número de convidados (mínimo 1)",
+mainNameLabel: "Nome Completo da Pessoa Principal *",
+mainNamePh: "Nome completo",
+errMainName: "Introduza o nome completo",
+docTypeLabel: "Tipo de Documento *",
+selectOption: "Selecionar",
+optPassport: "Passaporte",
+optIdCard: "Cartão de Identidade",
+errDocType: "Selecione um tipo de documento",
+docNumLabel: "Número do Documento *",
+docNumPh: "Nº do documento",
+errDocNum: "Introduza o número do documento",
+nationalityLabel: "Nacionalidade *",
+nationalityPh: "Nacionalidade",
+errNationality: "Introduza a nacionalidade",
+rulesTitle: "Regras internas a respeitar:",
+signatureTitle: "Assinatura *",
+errSignature: "Assine o documento",
+clearSigBtn: "Limpar Assinatura",
+signatureNote: "Ao assinar, aceita as regras internas e consente o tratamento dos seus dados pessoais.",
+acceptText: "Ao utilizar esta aplicação, concorda que as informações fornecidas durante o seu primeiro registo sejam tratadas de acordo com a regulamentação marroquina de proteção de dados pessoais. Estes dados são utilizados exclusivamente para o processo inicial e não são conservados. Além disso, compromete-se a cumprir todas as regras internas do apartamento e a validar a sua aceitação com a sua assinatura.",
+errAccept: "Aceite as condições",
+registerBtn: "Registar e Validar",
+noteImportant: "Nota importante:",
+noteImportantText: "Em caso de pedido dos agentes de segurança, apresente este documento assinado. Apenas as pessoas registadas nesta reserva podem entrar.",
+signedDocTitle: "Documento Assinado - Registo de Convidados",
+instructionsTitle: "Instruções",
+selectRecordMsg: "Selecione um registo para ver o documento.",
+downloadPdfBtn: "Transferir PDF",
+shareWaBtn: "Partilhar WhatsApp",
+personLabel: "Pessoa",
+personName: "Nome Completo *",
+personNamePh: "Nome completo pessoa",
+pdfHeader: "REGRAS INTERNAS E INFORMAÇÕES DA RESERVA",
+pdfRulesTitle: "REGRAS INTERNAS ACEITES:",
+pdfDateLabel: "Data da reserva",
+pdfResidenceLabel: "Residência",
+pdfNotSpecified: "Não especificada",
+pdfAppartLabel: "Apartamento",
+pdfBuildingLabel: "Edifício",
+pdfNomLabel: "Nome do reservante",
+pdfDocTypeLabel: "Tipo de documento",
+pdfDocNumLabel: "Número do documento",
+pdfNbPersLabel: "Número de pessoas",
+pdfArrivalLabel: "Data de chegada",
+pdfRules: [
+"1. Casais Marroquinos:",
+"De acordo com a lei marroquina, este alojamento apenas permite casais casados.",
+"",
+"2. Tranquilidade e Ruído",
+"Silêncio total obrigatório após as 23h00. Sem música alta, gritos ou",
+"ruído em qualquer momento.",
+"",
+"3. Tabagismo",
+"Fumar é estritamente proibido no interior. Permitido apenas no exterior",
+"(terraço ou jardim), com obrigação de limpar pontas e cinzas.",
+"",
+"4. Número de Pessoas",
+"Máximo de 5 pessoas permitidas no apartamento.",
+"",
+"5. Limpeza e Manutenção",
+"Manter as instalações limpas em permanência.",
+"Esvaziar regularmente os caixotes.",
+"Respeitar pisos e superfícies (sem marcas, sem comida fora da cozinha)."
+],
+rules: [
+{ strong: "1. Casais Marroquinos:", text: " De acordo com a lei marroquina, este alojamento apenas permite casais casados." },
+{ strong: "2. Tranquilidade e Ruído:", text: " Silêncio total obrigatório após as 23h00. Sem música alta, gritos ou ruído em qualquer momento." },
+{ strong: "3. Tabagismo:", text: " Fumar é estritamente proibido no interior. Permitido apenas no exterior (terraço ou jardim), com obrigação de limpar pontas e cinzas." },
+{ strong: "4. Número de Pessoas:", text: " Máximo de 5 pessoas permitidas no apartamento." },
+{ strong: "5. Limpeza e Manutenção:", text: " Manter as instalações limpas em permanência. Esvaziar regularmente os caixotes. Respeitar pisos e superfícies (sem marcas, sem comida fora da cozinha)." }
+]
+},
+pl: {
+appMainTitle: "Rejestracja Gości",
+appSubTitle: "Zarządzanie rejestracjami gości",
+loginTitle: "Logowanie - Rejestracja Gości",
+loginNote: "Wprowadź swoje dane logowania",
+userLabel: "Użytkownik",
+passLabel: "Hasło",
+loginBtn: "Zaloguj się",
+logoutBtn: "Wyloguj się",
+adminTitle: "Panel Administratora - Rejestracja Gości",
+usersMgmtTitle: "Zarządzanie Użytkownikami",
+appartLabel: "Apartament",
+batLabel: "Budynek",
+createUserBtn: "Utwórz Użytkownika",
+existingUsersTitle: "Istniejący Użytkownicy",
+thAppart: "Apartament",
+thAppartShort: "Apart.",
+thBat: "Budynek",
+thPass: "Hasło",
+thAction: "Akcja",
+recordsMgmtTitle: "Rejestracje Gości",
+thName: "Imię i nazwisko",
+thDoc: "Dokument",
+thDocType: "Typ dokumentu",
+thNationality: "Narodowość",
+thNbPers: "Liczba osób",
+thPersons: "Osoby",
+thDate: "Data",
+thDocument: "Dokument",
+thStatus: "Status",
+mySpaceTitle: "Moja Przestrzeń - Rejestracja Gości",
+myAccountTitle: "Ustawienia Mojego Konta",
+maxRecordsLabel: "Maksymalna liczba rejestracji",
+newPasswordLabel: "Nowe hasło (opcjonalnie)",
+saveSettingsBtn: "Zapisz Ustawienia",
+residenceNameLabel: "Nazwa Rezydencji",
+saveNameBtn: "Zapisz Nazwę",
+emailNotifTitle: "Powiadomienia Email",
+emailNotifNote: "Otrzymuj powiadomienie, gdy gość się zarejestruje.",
+enableNotifLabel: "Włącz powiadomienia",
+optNo: "Nie",
+optYes: "Tak",
+emailJsInfoTitle: "Konfiguracja EmailJS:",
+emailJsInfoText: "Używa usługi EmailJS do wysyłania powiadomień.",
+guardEmailLabel: "Email odbiorcy (np. Ochrona)",
+saveEmailBtn: "Zapisz Email",
+testEmailBtn: "Testuj Wysyłkę",
+customMsgLabel: "Spersonalizowana wiadomość dla gości (wyświetlana po rejestracji)",
+saveCustomMsgBtn: "Zapisz Wiadomość",
+myRecordsTitle: "Moje Rejestracje",
+genLinkBtn: "Generuj Link Gościa",
+genReadonlyLinkBtn: "Generuj Link Tylko do Odczytu",
+readonlyTitle: "Rejestracje (Tylko Odczyt)",
+sectionPending: "Rejestracje w Toku",
+sectionSent: "Rejestracje Przetworzone / Wysłane",
+sectionHistory: "Historia Usunięć",
+guestFormTitle: "Rejestracja Gościa",
+arrivalDateLabel: "Data Przyjazdu *",
+errArrivalDate: "Wybierz datę przyjazdu",
+nbGuestsLabel: "Liczba Gości *",
+errNbGuests: "Wprowadź liczbę gości (minimum 1)",
+mainNameLabel: "Imię i Nazwisko Głównej Osoby *",
+mainNamePh: "Imię i nazwisko",
+errMainName: "Wprowadź imię i nazwisko",
+docTypeLabel: "Typ Dokumentu *",
+selectOption: "Wybierz",
+optPassport: "Paszport",
+optIdCard: "Dowód Osobisty",
+errDocType: "Wybierz typ dokumentu",
+docNumLabel: "Numer Dokumentu *",
+docNumPh: "Nr dokumentu",
+errDocNum: "Wprowadź numer dokumentu",
+nationalityLabel: "Narodowość *",
+nationalityPh: "Narodowość",
+errNationality: "Wprowadź narodowość",
+rulesTitle: "Regulamin wewnętrzny do przestrzegania:",
+signatureTitle: "Podpis *",
+errSignature: "Podpisz dokument",
+clearSigBtn: "Wyczyść Podpis",
+signatureNote: "Podpisując, akceptujesz regulamin wewnętrzny i wyrażasz zgodę na przetwarzanie swoich danych osobowych.",
+acceptText: "Korzystając z tej aplikacji, zgadzasz się, że informacje podane podczas pierwszej rejestracji będą przetwarzane zgodnie z marokańskimi przepisami o ochronie danych osobowych. Dane te są wykorzystywane wyłącznie do procesu początkowego i nie są przechowywane. Ponadto zobowiązujesz się do przestrzegania wszystkich wewnętrznych zasad apartamentu i potwierdzenia akceptacji swoim podpisem.",
+errAccept: "Zaakceptuj warunki",
+registerBtn: "Zarejestruj i Zatwierdź",
+noteImportant: "Ważna uwaga:",
+noteImportantText: "W razie żądania agentów ochrony okaz ten podpisany dokument. Tylko osoby zarejestrowane w tej rezerwacji mogą wejść.",
+signedDocTitle: "Podpisany Dokument - Rejestracja Gości",
+instructionsTitle: "Instrukcje",
+selectRecordMsg: "Wybierz rejestrację, aby zobaczyć dokument.",
+downloadPdfBtn: "Pobierz PDF",
+shareWaBtn: "Udostępnij WhatsApp",
+personLabel: "Osoba",
+personName: "Imię i Nazwisko *",
+personNamePh: "Imię i nazwisko osoby",
+pdfHeader: "REGULAMIN WEWNĘTRZNY I INFORMACJE O REZERWACJI",
+pdfRulesTitle: "ZAAKCEPTOWANY REGULAMIN WEWNĘTRZNY:",
+pdfDateLabel: "Data rezerwacji",
+pdfResidenceLabel: "Rezydencja",
+pdfNotSpecified: "Nie określono",
+pdfAppartLabel: "Apartament",
+pdfBuildingLabel: "Budynek",
+pdfNomLabel: "Imię i nazwisko rezerwującego",
+pdfDocTypeLabel: "Typ dokumentu",
+pdfDocNumLabel: "Numer dokumentu",
+pdfNbPersLabel: "Liczba osób",
+pdfArrivalLabel: "Data przyjazdu",
+pdfRules: [
+"1. Pary Marokańskie:",
+"Zgodnie z prawem marokańskim to zakwaterowanie pozwala tylko małżeństwom.",
+"",
+"2. Cisza i Hałas",
+"Całkowita cisza obowiązkowa po 23:00. Zakaz głośnej muzyki, krzyków",
+"i hałasu o każdej porze.",
+"",
+"3. Palenie",
+"Palenie jest surowo zabronione wewnątrz. Dozwolone tylko na zewnątrz",
+"(taras lub ogród), z obowiązkiem sprzątania niedopałków i popiołu.",
+"",
+"4. Liczba Osób",
+"Maksymalnie 5 osób w apartamencie.",
+"",
+"5. Czystość i Utrzymanie",
+"Utrzymuj pomieszczenia w czystości przez cały czas.",
+"Regularnie opróżniaj kosze.",
+"Szanuj podłogi i powierzchnie (brak śladów, brak jedzenia poza kuchnią)."
+],
+rules: [
+{ strong: "1. Pary Marokańskie:", text: " Zgodnie z prawem marokańskim to zakwaterowanie pozwala tylko małżeństwom." },
+{ strong: "2. Cisza i Hałas:", text: " Całkowita cisza obowiązkowa po 23:00. Zakaz głośnej muzyki, krzyków i hałasu o każdej porze." },
+{ strong: "3. Palenie:", text: " Palenie jest surowo zabronione wewnątrz. Dozwolone tylko na zewnątrz (taras lub ogród), z obowiązkiem sprzątania niedopałków i popiołu." },
+{ strong: "4. Liczba Osób:", text: " Maksymalnie 5 osób w apartamencie." },
+{ strong: "5. Czystość i Utrzymanie:", text: " Utrzymuj pomieszczenia w czystości przez cały czas. Regularnie opróżniaj kosze. Szanuj podłogi i powierzchnie (brak śladów, brak jedzenia poza kuchnią)." }
+]
+},
+ru: {
+appMainTitle: "Регистрация гостей",
+appSubTitle: "Управление регистрацией гостей",
+loginTitle: "Вход - Регистрация гостей",
+loginNote: "Введите свои учётные данные",
+userLabel: "Пользователь",
+passLabel: "Пароль",
+loginBtn: "Войти",
+logoutBtn: "Выйти",
+adminTitle: "Панель администратора - Регистрация гостей",
+usersMgmtTitle: "Управление пользователями",
+appartLabel: "Квартира",
+batLabel: "Здание",
+createUserBtn: "Создать пользователя",
+existingUsersTitle: "Существующие пользователи",
+thAppart: "Квартира",
+thAppartShort: "Кв.",
+thBat: "Здание",
+thPass: "Пароль",
+thAction: "Действие",
+recordsMgmtTitle: "Регистрации гостей",
+thName: "Имя",
+thDoc: "Документ",
+thDocType: "Тип документа",
+thNationality: "Гражданство",
+thNbPers: "Кол-во чел.",
+thPersons: "Персоны",
+thDate: "Дата",
+thDocument: "Документ",
+thStatus: "Статус",
+mySpaceTitle: "Моё пространство - Регистрация гостей",
+myAccountTitle: "Настройки моей учётной записи",
+maxRecordsLabel: "Максимальное количество регистраций",
+newPasswordLabel: "Новый пароль (необязательно)",
+saveSettingsBtn: "Сохранить настройки",
+residenceNameLabel: "Название резиденции",
+saveNameBtn: "Сохранить название",
+emailNotifTitle: "Уведомления по Email",
+emailNotifNote: "Получайте уведомление, когда гость регистрируется.",
+enableNotifLabel: "Включить уведомления",
+optNo: "Нет",
+optYes: "Да",
+emailJsInfoTitle: "Конфигурация EmailJS:",
+emailJsInfoText: "Использует сервис EmailJS для отправки уведомлений.",
+guardEmailLabel: "Email получателя (например, Охрана)",
+saveEmailBtn: "Сохранить Email",
+testEmailBtn: "Тестовая отправка",
+customMsgLabel: "Персональное сообщение для гостей (отображается после регистрации)",
+saveCustomMsgBtn: "Сохранить сообщение",
+myRecordsTitle: "Мои регистрации",
+genLinkBtn: "Создать ссылку для гостя",
+genReadonlyLinkBtn: "Создать ссылку только для чтения",
+readonlyTitle: "Регистрации (только чтение)",
+sectionPending: "Текущие регистрации",
+sectionSent: "Обработанные / Отправленные регистрации",
+sectionHistory: "История удалений",
+guestFormTitle: "Регистрация гостя",
+arrivalDateLabel: "Дата прибытия *",
+errArrivalDate: "Выберите дату прибытия",
+nbGuestsLabel: "Количество гостей *",
+errNbGuests: "Введите количество гостей (минимум 1)",
+mainNameLabel: "Полное имя основного гостя *",
+mainNamePh: "Полное имя",
+errMainName: "Введите полное имя",
+docTypeLabel: "Тип документа *",
+selectOption: "Выбрать",
+optPassport: "Паспорт",
+optIdCard: "Удостоверение личности",
+errDocType: "Выберите тип документа",
+docNumLabel: "Номер документа *",
+docNumPh: "№ документа",
+errDocNum: "Введите номер документа",
+nationalityLabel: "Гражданство *",
+nationalityPh: "Гражданство",
+errNationality: "Введите гражданство",
+rulesTitle: "Внутренние правила для соблюдения:",
+signatureTitle: "Подпись *",
+errSignature: "Подпишите документ",
+clearSigBtn: "Очистить подпись",
+signatureNote: "Подписывая, вы принимаете внутренние правила и соглашаетесь на обработку ваших персональных данных.",
+acceptText: "Используя это приложение, вы соглашаетесь с тем, что информация, предоставленная при вашей первой регистрации, будет обрабатываться в соответствии с марокканским законодательством о защите персональных данных. Эти данные используются исключительно для первоначального процесса и не сохраняются. Кроме того, вы обязуетесь соблюдать все внутренние правила квартиры и подтвердить своё согласие своей подписью.",
+errAccept: "Примите условия",
+registerBtn: "Зарегистрировать и подтвердить",
+noteImportant: "Важное примечание:",
+noteImportantText: "По требованию сотрудников охраны предъявите этот подписанный документ. Входить разрешено только лицам, зарегистрированным в этом бронировании.",
+signedDocTitle: "Подписанный документ - Регистрация гостей",
+instructionsTitle: "Инструкции",
+selectRecordMsg: "Выберите регистрацию для просмотра документа.",
+downloadPdfBtn: "Скачать PDF",
+shareWaBtn: "Поделиться WhatsApp",
+personLabel: "Человек",
+personName: "Полное имя *",
+personNamePh: "Полное имя человека",
+pdfHeader: "ВНУТРЕННИЕ ПРАВИЛА И ИНФОРМАЦИЯ О БРОНИРОВАНИИ",
+pdfRulesTitle: "ПРИНЯТЫЕ ВНУТРЕННИЕ ПРАВИЛА:",
+pdfDateLabel: "Дата бронирования",
+pdfResidenceLabel: "Резиденция",
+pdfNotSpecified: "Не указана",
+pdfAppartLabel: "Квартира",
+pdfBuildingLabel: "Здание",
+pdfNomLabel: "Имя бронирующего",
+pdfDocTypeLabel: "Тип документа",
+pdfDocNumLabel: "Номер документа",
+pdfNbPersLabel: "Количество человек",
+pdfArrivalLabel: "Дата прибытия",
+pdfRules: [
+"1. Марокканские пары:",
+"Согласно марокканскому законодательству, это жильё разрешено только для женатых пар.",
+"",
+"2. Тишина и шум",
+"Полная тишина обязательна после 23:00. Запрещена громкая музыка, крики",
+"и шум в любое время.",
+"",
+"3. Курение",
+"Курение строго запрещено внутри. Разрешено только на улице",
+"(терраса или сад), с обязательством убирать окурки и пепел.",
+"",
+"4. Количество человек",
+"Максимум 5 человек в квартире.",
+"",
+"5. Чистота и уход",
+"Поддерживайте чистоту помещений постоянно.",
+"Регулярно выносите мусор.",
+"Уважайте полы и поверхности (без следов, без еды вне кухни)."
+],
+rules: [
+{ strong: "1. Марокканские пары:", text: " Согласно марокканскому законодательству, это жильё разрешено только для женатых пар." },
+{ strong: "2. Тишина и шум:", text: " Полная тишина обязательна после 23:00. Запрещена громкая музыка, крики и шум в любое время." },
+{ strong: "3. Курение:", text: " Курение строго запрещено внутри. Разрешено только на улице (терраса или сад), с обязательством убирать окурки и пепел." },
+{ strong: "4. Количество человек:", text: " Максимум 5 человек в квартире." },
+{ strong: "5. Чистота и уход:", text: " Поддерживайте чистоту помещений постоянно. Регулярно выносите мусор. Уважайте полы и поверхности (без следов, без еды вне кухни)." }
+]
+},
+tr: {
+appMainTitle: "Misafir Kaydı",
+appSubTitle: "Misafir kayıtlarının yönetimi",
+loginTitle: "Giriş - Misafir Kaydı",
+loginNote: "Lütfen giriş bilgilerinizi girin",
+userLabel: "Kullanıcı",
+passLabel: "Şifre",
+loginBtn: "Giriş",
+logoutBtn: "Çıkış",
+adminTitle: "Yönetici Paneli - Misafir Kaydı",
+usersMgmtTitle: "Kullanıcı Yönetimi",
+appartLabel: "Daire",
+batLabel: "Bina",
+createUserBtn: "Kullanıcı Oluştur",
+existingUsersTitle: "Mevcut Kullanıcılar",
+thAppart: "Daire",
+thAppartShort: "Daire",
+thBat: "Bina",
+thPass: "Şifre",
+thAction: "İşlem",
+recordsMgmtTitle: "Misafir Kayıtları",
+thName: "İsim",
+thDoc: "Belge",
+thDocType: "Belge Türü",
+thNationality: "Uyruk",
+thNbPers: "Kişi Sayısı",
+thPersons: "Kişiler",
+thDate: "Tarih",
+thDocument: "Belge",
+thStatus: "Durum",
+mySpaceTitle: "Alanım - Misafir Kaydı",
+myAccountTitle: "Hesap Ayarlarım",
+maxRecordsLabel: "Maksimum kayıt sayısı",
+newPasswordLabel: "Yeni şifre (isteğe bağlı)",
+saveSettingsBtn: "Ayarları Kaydet",
+residenceNameLabel: "Rezidans Adı",
+saveNameBtn: "Adı Kaydet",
+emailNotifTitle: "E-posta Bildirimleri",
+emailNotifNote: "Bir misafir kaydolduğunda bildirim alın.",
+enableNotifLabel: "Bildirimleri etkinleştir",
+optNo: "Hayır",
+optYes: "Evet",
+emailJsInfoTitle: "EmailJS Yapılandırması:",
+emailJsInfoText: "Bildirim göndermek için EmailJS hizmetini kullanır.",
+guardEmailLabel: "Alıcı e-postası (örn: Güvenlik)",
+saveEmailBtn: "E-postayı Kaydet",
+testEmailBtn: "Test Gönderimi",
+customMsgLabel: "Misafirler için özel mesaj (kayıttan sonra gösterilir)",
+saveCustomMsgBtn: "Mesajı Kaydet",
+myRecordsTitle: "Kayıtlarım",
+genLinkBtn: "Misafir Bağlantısı Oluştur",
+genReadonlyLinkBtn: "Salt Okunur Bağlantı Oluştur",
+readonlyTitle: "Kayıtlar (Salt Okunur)",
+sectionPending: "Devam Eden Kayıtlar",
+sectionSent: "İşlenmiş / Gönderilmiş Kayıtlar",
+sectionHistory: "Silme Geçmişi",
+guestFormTitle: "Misafir Kaydı",
+arrivalDateLabel: "Varış Tarihi *",
+errArrivalDate: "Lütfen varış tarihi seçin",
+nbGuestsLabel: "Misafir Sayısı *",
+errNbGuests: "Lütfen misafir sayısını girin (minimum 1)",
+mainNameLabel: "Ana Kişinin Adı Soyadı *",
+mainNamePh: "Ad soyad",
+errMainName: "Lütfen ad soyad girin",
+docTypeLabel: "Belge Türü *",
+selectOption: "Seçin",
+optPassport: "Pasaport",
+optIdCard: "Kimlik Kartı",
+errDocType: "Lütfen bir belge türü seçin",
+docNumLabel: "Belge Numarası *",
+docNumPh: "Belge No.",
+errDocNum: "Lütfen belge numarasını girin",
+nationalityLabel: "Uyruk *",
+nationalityPh: "Uyruk",
+errNationality: "Lütfen uyruğu girin",
+rulesTitle: "Uyulması gereken iç kurallar:",
+signatureTitle: "İmza *",
+errSignature: "Lütfen belgeyi imzalayın",
+clearSigBtn: "İmzayı Temizle",
+signatureNote: "İmzalayarak iç kuralları kabul eder ve kişisel verilerinizin işlenmesine onay verirsiniz.",
+acceptText: "Bu uygulamayı kullanarak, ilk kaydınız sırasında verilen bilgilerin Fas kişisel verilerin korunması mevzuatına uygun olarak işleneceğini kabul edersiniz. Bu veriler yalnızca ilk süreç için kullanılır ve saklanmaz. Ayrıca, dairenin tüm iç kurallarına uymayı ve kabulünüzü imzanızla onaylamayı taahhüt edersiniz.",
+errAccept: "Lütfen koşulları kabul edin",
+registerBtn: "Kaydet ve Onayla",
+noteImportant: "Önemli not:",
+noteImportantText: "Güvenlik görevlileri talep ederse, bu imzalı belgeyi gösterin. Bu rezervasyonda kayıtlı kişiler giriş yapabilir.",
+signedDocTitle: "İmzalı Belge - Misafir Kaydı",
+instructionsTitle: "Talimatlar",
+selectRecordMsg: "Belgeyi görmek için bir kayıt seçin.",
+downloadPdfBtn: "PDF İndir",
+shareWaBtn: "WhatsApp'ta Paylaş",
+personLabel: "Kişi",
+personName: "Ad Soyad *",
+personNamePh: "Kişinin adı soyadı",
+pdfHeader: "İÇ KURALLAR VE REZERVASYON BİLGİLERİ",
+pdfRulesTitle: "KABUL EDİLEN İÇ KURALLAR:",
+pdfDateLabel: "Rezervasyon tarihi",
+pdfResidenceLabel: "Rezidans",
+pdfNotSpecified: "Belirtilmemiş",
+pdfAppartLabel: "Daire",
+pdfBuildingLabel: "Bina",
+pdfNomLabel: "Rezervasyon sahibinin adı",
+pdfDocTypeLabel: "Belge türü",
+pdfDocNumLabel: "Belge numarası",
+pdfNbPersLabel: "Kişi sayısı",
+pdfArrivalLabel: "Varış tarihi",
+pdfRules: [
+"1. Faslı Çiftler:",
+"Fas yasalarına göre bu konaklama yalnızca evli çiftlere izin verir.",
+"",
+"2. Sessizlik ve Gürültü",
+"23:00'ten sonra tam sessizlik zorunludur. Her zaman yüksek müzik, bağırma",
+"veya gürültü yasaktır.",
+"",
+"3. Sigara",
+"İçeride sigara içmek kesinlikle yasaktır. Yalnızca dışarıda",
+"(teras veya bahçe) izin verilir, izmarit ve kül temizleme zorunluluğu vardır.",
+"",
+"4. Kişi Sayısı",
+"Dairede maksimum 5 kişiye izin verilir.",
+"",
+"5. Temizlik ve Bakım",
+"Mekanları her zaman temiz tutun.",
+"Çöpleri düzenli olarak boşaltın.",
+"Zemin ve yüzeylere saygı gösterin (leke yok, mutfak dışında yemek yok)."
+],
+rules: [
+{ strong: "1. Faslı Çiftler:", text: " Fas yasalarına göre bu konaklama yalnızca evli çiftlere izin verir." },
+{ strong: "2. Sessizlik ve Gürültü:", text: " 23:00'ten sonra tam sessizlik zorunludur. Her zaman yüksek müzik, bağırma veya gürültü yasaktır." },
+{ strong: "3. Sigara:", text: " İçeride sigara içmek kesinlikle yasaktır. Yalnızca dışarıda (teras veya bahçe) izin verilir, izmarit ve kül temizleme zorunluluğu vardır." },
+{ strong: "4. Kişi Sayısı:", text: " Dairede maksimum 5 kişiye izin verilir." },
+{ strong: "5. Temizlik ve Bakım:", text: " Mekanları her zaman temiz tutun. Çöpleri düzenli olarak boşaltın. Zemin ve yüzeylere saygı gösterin (leke yok, mutfak dışında yemek yok)." }
+]
+},
+el: {
+appMainTitle: "Εγγραφή Επισκεπτών",
+appSubTitle: "Διαχείριση εγγραφών επισκεπτών",
+loginTitle: "Σύνδεση - Εγγραφή Επισκεπτών",
+loginNote: "Εισάγετε τα διαπιστευτήριά σας",
+userLabel: "Χρήστης",
+passLabel: "Κωδικός",
+loginBtn: "Σύνδεση",
+logoutBtn: "Αποσύνδεση",
+adminTitle: "Πίνακας Διαχειριστή - Εγγραφή Επισκεπτών",
+usersMgmtTitle: "Διαχείριση Χρηστών",
+appartLabel: "Διαμέρισμα",
+batLabel: "Κτίριο",
+createUserBtn: "Δημιουργία Χρήστη",
+existingUsersTitle: "Υπάρχοντες Χρήστες",
+thAppart: "Διαμέρισμα",
+thAppartShort: "Διαμ.",
+thBat: "Κτίριο",
+thPass: "Κωδικός",
+thAction: "Ενέργεια",
+recordsMgmtTitle: "Εγγραφές Επισκεπτών",
+thName: "Όνομα",
+thDoc: "Έγγραφο",
+thDocType: "Τύπος Εγγράφου",
+thNationality: "Εθνικότητα",
+thNbPers: "Αρ. Ατόμων",
+thPersons: "Άτομα",
+thDate: "Ημερομηνία",
+thDocument: "Έγγραφο",
+thStatus: "Κατάσταση",
+mySpaceTitle: "Ο Χώρος Μου - Εγγραφή Επισκεπτών",
+myAccountTitle: "Ρυθμίσεις Λογαριασμού Μου",
+maxRecordsLabel: "Μέγιστος αριθμός εγγραφών",
+newPasswordLabel: "Νέος κωδικός (προαιρετικό)",
+saveSettingsBtn: "Αποθήκευση Ρυθμίσεων",
+residenceNameLabel: "Όνομα Κατοικίας",
+saveNameBtn: "Αποθήκευση Ονόματος",
+emailNotifTitle: "Ειδοποιήσεις Email",
+emailNotifNote: "Λάβετε ειδοποίηση όταν ένας επισκέπτης εγγράφεται.",
+enableNotifLabel: "Ενεργοποίηση ειδοποιήσεων",
+optNo: "Όχι",
+optYes: "Ναι",
+emailJsInfoTitle: "Διαμόρφωση EmailJS:",
+emailJsInfoText: "Χρησιμοποιεί την υπηρεσία EmailJS για αποστολή ειδοποιήσεων.",
+guardEmailLabel: "Email παραλήπτη (π.χ. Ασφάλεια)",
+saveEmailBtn: "Αποθήκευση Email",
+testEmailBtn: "Δοκιμαστική Αποστολή",
+customMsgLabel: "Προσαρμοσμένο μήνυμα για επισκέπτες (εμφανίζεται μετά την εγγραφή)",
+saveCustomMsgBtn: "Αποθήκευση Μηνύματος",
+myRecordsTitle: "Οι Εγγραφές Μου",
+genLinkBtn: "Δημιουργία Συνδέσμου Επισκέπτη",
+genReadonlyLinkBtn: "Δημιουργία Συνδέσμου Μόνο Ανάγνωσης",
+readonlyTitle: "Εγγραφές (Μόνο Ανάγνωση)",
+sectionPending: "Εγγραφές σε Εξέλιξη",
+sectionSent: "Επεξεργασμένες / Απεσταλμένες Εγγραφές",
+sectionHistory: "Ιστορικό Διαγραφών",
+guestFormTitle: "Εγγραφή Επισκέπτη",
+arrivalDateLabel: "Ημερομηνία Άφιξης *",
+errArrivalDate: "Επιλέξτε ημερομηνία άφιξης",
+nbGuestsLabel: "Αριθμός Επισκεπτών *",
+errNbGuests: "Εισάγετε τον αριθμό επισκεπτών (τουλάχιστον 1)",
+mainNameLabel: "Ονοματεπώνυμο Κύριου Προσώπου *",
+mainNamePh: "Ονοματεπώνυμο",
+errMainName: "Εισάγετε το ονοματεπώνυμο",
+docTypeLabel: "Τύπος Εγγράφου *",
+selectOption: "Επιλογή",
+optPassport: "Διαβατήριο",
+optIdCard: "Δελτίο Ταυτότητας",
+errDocType: "Επιλέξτε τύπο εγγράφου",
+docNumLabel: "Αριθμός Εγγράφου *",
+docNumPh: "Αρ. εγγράφου",
+errDocNum: "Εισάγετε τον αριθμό εγγράφου",
+nationalityLabel: "Εθνικότητα *",
+nationalityPh: "Εθνικότητα",
+errNationality: "Εισάγετε την εθνικότητα",
+rulesTitle: "Εσωτερικοί κανόνες προς τήρηση:",
+signatureTitle: "Υπογραφή *",
+errSignature: "Υπογράψτε το έγγραφο",
+clearSigBtn: "Καθαρισμός Υπογραφής",
+signatureNote: "Με την υπογραφή, αποδέχεστε τους εσωτερικούς κανόνες και συναινείτε στην επεξεργασία των προσωπικών σας δεδομένων.",
+acceptText: "Χρησιμοποιώντας αυτήν την εφαρμογή, συμφωνείτε ότι οι πληροφορίες που παρέχονται κατά την πρώτη σας εγγραφή θα υποβάλλονται σε επεξεργασία σύμφωνα με τη μαροκινή νομοθεσία για την προστασία δεδομένων προσωπικού χαρακτήρα. Αυτά τα δεδομένα χρησιμοποιούνται αποκλειστικά για την αρχική διαδικασία και δεν διατηρούνται. Επιπλέον, δεσμεύεστε να τηρείτε όλους τους εσωτερικούς κανόνες του διαμερίσματος και να επικυρώνετε την αποδοχή σας με την υπογραφή σας.",
+errAccept: "Αποδεχτείτε τους όρους",
+registerBtn: "Εγγραφή και Επικύρωση",
+noteImportant: "Σημαντική σημείωση:",
+n
